@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/memoCoordinatorLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical"
+    tools:context=".MemoMainFragment">
+
+    <ImageButton
+        android:id="@+id/checkBoxImgBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        app:layout_anchor="@id/bulletListImgBtn"
+        app:layout_anchorGravity="start"
+        android:background="@drawable/memo_img_btn"
+        android:contentDescription="@string/contents_checkbox_btn_description"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        app:srcCompat="@drawable/ic_check_box_black_24dp" />
+
+    <ImageButton
+        android:id="@+id/bulletListImgBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        app:layout_anchor="@id/clearAllImgBtn"
+        app:layout_anchorGravity="start"
+        android:layout_marginEnd="30dp"
+        android:background="@drawable/memo_img_btn"
+        android:contentDescription="@string/contents_bullet_btn_description"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        app:srcCompat="@drawable/ic_format_list_bulleted_black_24dp" />
+
+    <ImageButton
+        android:id="@+id/clearAllImgBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginEnd="80dp"
+        android:background="@drawable/memo_img_btn"
+        android:contentDescription="@string/contents_clear_btn_description"
+        android:paddingStart="12dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        android:src="@drawable/ic_clear_black_24dp"
+        app:layout_anchor="@id/saveImgBtn"
+        app:layout_anchorGravity="start" />
+
+
+    <ImageButton
+        android:id="@+id/saveImgBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:background="@drawable/memo_img_btn"
+        android:contentDescription="@string/contents_save_btn_description"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:src="@drawable/ic_add_circle_outline_black_32dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/memoContentsContainerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        app:layout_anchor="@id/bulletListImgBtn"
+        app:layout_anchorGravity="bottom"
+        android:layout_marginTop="50dp">
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

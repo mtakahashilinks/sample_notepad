@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Sample Notepad</string>
+    <string name="input_new_memo">新規メモの入力</string>
+    <string name="title">タイトル</string>
+    <string name="contents_checkbox_btn_description">チェックボックスの追加と削除</string>
+    <string name="contents_bullet_btn_description">ビュレットの追加と削除</string>
+    <string name="contents_clear_btn_description">入力内容の全削除</string>
+    <string name="contents_save_btn_description">メモの保存</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="memo_date">yyyy/MM/dd</string>
+    <string name="time_24_hour_clock">*24時間表記</string>
+    <string name="save">保存</string>
+    <string name="titleHelper">*半角30文字以内</string>
+    <string name="category">カテゴリー</string>
+    <string name="categoryHelper">*半角20文字以内</string>
+    <string name="contents">内容</string>
+    <string name="date">日付</string>
+    <string name="time">時間</string>
+    <string name="counter_for_edit_text">%4d/1000</string>
+
+
 </resources>
