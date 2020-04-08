@@ -36,38 +36,38 @@ internal fun showDatePickerDialog(fragmentManager: FragmentManager) {
     newFragment.show(fragmentManager, "datePicker")
 }
 
-internal fun MemoRow.setCheckBox(fragment: Fragment, viewModel: MainViewModel) {
+internal fun MemoRow.setCheckBox(fragment: Fragment, viewModel: MemoMainViewModel) {
     val targetMemoRowInfo =
         viewModel.getMemoContents().contentsList[viewModel.getMemoRowIndexInList(MemoRowId(this.id))]
     val checkBoxId = targetMemoRowInfo.checkBoxId.value
 
     when {
         targetMemoRowInfo.bulletId.value is Some<Int> -> {
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, DELETE_BULLET, this, Text(""))
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, ADD_CHECKBOX, this, Text(""))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, DeleteBullet(fragment, this))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, AddCheckBox(fragment, this))
         }
 
         checkBoxId is None ->
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, ADD_CHECKBOX, this, Text(""))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, AddCheckBox(fragment, this))
         checkBoxId is Some<Int> ->
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, DELETE_CHECKBOX, this, Text(""))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, DeleteCheckBox(fragment, this))
     }
 }
 
-internal fun MemoRow.setBullet(fragment: Fragment, viewModel: MainViewModel) {
+internal fun MemoRow.setBullet(fragment: Fragment, viewModel: MemoMainViewModel) {
     val targetMemoRowInfo =
         viewModel.getMemoContents().contentsList[viewModel.getMemoRowIndexInList(MemoRowId(this.id))]
     val bulletId = targetMemoRowInfo.bulletId.value
 
     when {
         targetMemoRowInfo.checkBoxId.value is Some<Int> -> {
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, DELETE_CHECKBOX, this, Text(""))
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, ADD_BULLET, this, Text(""))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, DeleteCheckBox(fragment, this))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, AddBullet(fragment, this))
         }
         bulletId is None ->
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, ADD_BULLET, this, Text(""))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, AddBullet(fragment, this))
         bulletId is Some<Int> ->
-            MainViewModel.Queue4MemoContents.execute(fragment, viewModel, DELETE_BULLET, this, Text(""))
+            MemoMainViewModel.Queue4MemoContents.execute(viewModel, DeleteBullet(fragment, this))
     }
 }
 

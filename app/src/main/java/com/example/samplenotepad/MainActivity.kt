@@ -8,8 +8,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: MainViewModel =
-        ViewModelProvider.NewInstanceFactory().create(MainViewModel::class.java)
+    private val viewModelMemo: MemoMainViewModel =
+        ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
 
     private val fragmentManager = supportFragmentManager
 

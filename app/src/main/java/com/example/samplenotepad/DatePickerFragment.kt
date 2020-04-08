@@ -10,14 +10,14 @@ import androidx.lifecycle.ViewModelProvider
 
 class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
-    private lateinit var myViewModel: MainViewModel
+    private lateinit var myViewModelMemo: MemoMainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (activity != null) {
-            myViewModel = activity.run{
-                ViewModelProvider.NewInstanceFactory().create(MainViewModel::class.java)
+            myViewModelMemo = activity.run{
+                ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
             }
         }
     }
@@ -33,6 +33,6 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        myViewModel.setMemoDate("$year/${month + 1}/$dayOfMonth")
+        myViewModelMemo.setMemoDate("$year/${month + 1}/$dayOfMonth")
     }
 }

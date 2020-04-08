@@ -21,18 +21,7 @@ import arrow.core.Some
 import arrow.core.k
 
 
-const val COMPLETE = 0
-const val CREATE_FIRST_MEMO_ROW = 1
-const val CREATE_NEXT_MEMO_ROW = 2
-const val DELETE_MEMO_ROW = 3
-const val ADD_CHECKBOX = 4
-const val DELETE_CHECKBOX = 5
-const val ADD_BULLET = 6
-const val DELETE_BULLET = 7
-const val CLEAR_ALL = 8
-
-
-class MainViewModel : ViewModel() {
+class MemoMainViewModel : ViewModel() {
 
     //ここからMainMemoFragment用のPropertyとMethod
 
@@ -99,75 +88,70 @@ class MainViewModel : ViewModel() {
 
 
     object Queue4MemoContents {
-        private val queue = mutableListOf<Triple<Int, MemoRow, Text>>()
+        private val queue = mutableListOf<ExecuteTypeForMemoContentsQueue>()
         //trueの時のみmemoContentsの変更処理を許可するトランザクション処理のためのフラグ
-        private val flag4MemoContents = AtomicBooleanW(true)
+        private val flagForQueue = AtomicBooleanW(true)
 
-
-        private fun push(functionId: Int, memoRow: MemoRow, text: Text) {
-            val value = Triple(functionId, memoRow, text)
-            queue.add(value)
-        }
-
+        private fun push(executeId: ExecuteTypeForMemoContentsQueue) = queue.add(executeId)
         private fun pop() = queue.drop(1)
 
-        internal fun execute(fragment: Fragment, viewModel: MainViewModel,
-                             functionId: Int, memoRow:MemoRow, text: Text) {
-            when (flag4MemoContents.compareAndSet(expect = true, update = false)) {
+        internal fun execute(viewModel: MemoMainViewModel, executeId: ExecuteTypeForMemoContentsQueue) {
+            Log.d("場所:Queue4MemoContents#excute", "executeに入った")
+
+            when (flagForQueue.compareAndSet(expect = true, update = false)) {
                 true -> {
-                    Log.d("場所:Queue4MemoContents#excute", "flag4MemoContentsがtrueの場合")
-                    when (functionId) {
-                        CREATE_FIRST_MEMO_ROW -> viewModel.createFirstMemoRow(fragment, viewModel, text)
-                        CREATE_NEXT_MEMO_ROW -> viewModel.createNextMemoRow(fragment, viewModel, text)
-                        DELETE_MEMO_ROW -> viewModel.deleteMemoRow(fragment, viewModel, memoRow)
-                        ADD_CHECKBOX -> viewModel.addCheckBox(fragment, viewModel, memoRow)
-                        DELETE_CHECKBOX -> viewModel.deleteCheckBox(fragment, viewModel, memoRow)
-                        ADD_BULLET -> viewModel.addBullet(fragment, viewModel, memoRow)
-                        DELETE_BULLET -> viewModel.deleteBullet(fragment, viewModel, memoRow)
-                        CLEAR_ALL -> viewModel.clearAllInMemoContents(fragment, viewModel, memoRow)
-                        COMPLETE -> return
+                    Log.d("場所:Queue4MemoContents#excute", "flagForQueueがtrueの場合")
+                    when (executeId) {
+                        is CreateFirstMemoRow -> viewModel.createFirstMemoRow(executeId)
+                        is CreateNextMemoRow -> viewModel.createNextMemoRow(executeId)
+                        is DeleteMemoRow -> viewModel.deleteMemoRow(executeId)
+                        is AddCheckBox -> viewModel.addCheckBox(executeId)
+                        is DeleteCheckBox -> viewModel.deleteCheckBox(executeId)
+                        is AddBullet -> viewModel.addBullet(executeId)
+                        is DeleteBullet -> viewModel.deleteBullet(executeId)
+                        is ClearAll -> viewModel.clearAllInMemoContents()
+                        is Complete -> return
                     }
                 }
                 false -> {
-                    Log.d("場所:Queue4MemoContents#excute", "flag4MemoContentsがfalseの場合")
+                    Log.d("場所:Queue4MemoContents#excute", "flagForQueueがfalseの場合")
                     when {
-                        functionId == COMPLETE && queue.isNotEmpty() -> {
+                        executeId is Complete && queue.isNotEmpty() -> {
                             Log.d("場所:Queue4MemoContents#excute",
-                                "flag4MemoContentsがfalseで実行中だった処理が終了した場合")
-                            val value = queue[0]
+                                "flagForQueueがfalseで実行中だった処理が終了した場合")
+                            val mExecuteId = queue[0]
 
                             pop()
-                            flag4MemoContents.value = true
-                            when (value.first) {
-                                CREATE_FIRST_MEMO_ROW ->
-                                    viewModel.createFirstMemoRow(fragment, viewModel, value.third)
-                                CREATE_NEXT_MEMO_ROW ->
-                                    viewModel.createNextMemoRow(fragment, viewModel, value.third)
-                                DELETE_MEMO_ROW -> viewModel.deleteMemoRow(fragment, viewModel, value.second)
-                                ADD_CHECKBOX -> viewModel.addCheckBox(fragment, viewModel, value.second)
-                                DELETE_CHECKBOX -> viewModel.deleteCheckBox(fragment, viewModel, value.second)
-                                ADD_BULLET -> viewModel.addBullet(fragment, viewModel, value.second)
-                                DELETE_BULLET -> viewModel.deleteBullet(fragment, viewModel, value.second)
-                                CLEAR_ALL -> viewModel.clearAllInMemoContents(fragment, viewModel, memoRow)
+                            flagForQueue.value = true
+
+                            when (mExecuteId) {
+                                is CreateFirstMemoRow -> viewModel.createFirstMemoRow(mExecuteId)
+                                is CreateNextMemoRow -> viewModel.createNextMemoRow(mExecuteId)
+                                is DeleteMemoRow -> viewModel.deleteMemoRow(mExecuteId)
+                                is AddCheckBox -> viewModel.addCheckBox(mExecuteId)
+                                is DeleteCheckBox -> viewModel.deleteCheckBox(mExecuteId)
+                                is AddBullet -> viewModel.addBullet(mExecuteId)
+                                is DeleteBullet -> viewModel.deleteBullet(mExecuteId)
+                                is ClearAll -> viewModel.clearAllInMemoContents()
                             }
 
                         }
-                        functionId == COMPLETE && queue.isEmpty() -> {
+                        executeId is Complete && queue.isEmpty() -> {
                             Log.d("場所:Queue4MemoContents#excute",
-                                "flag4MemoContentsがfalseで実行中だった処理が終了し、且つQueueが空の場合")
-                            flag4MemoContents.value = true
+                                "flagForQueueがfalseで実行中だった処理が終了し、且つQueueが空の場合")
+                            flagForQueue.value = true
                         }
-                        functionId == CREATE_FIRST_MEMO_ROW -> {
-                            Log.d("場所:Queue4MemoContents#excute", "flag4MemoContentsがfalseでqueueされる場合")
-                            push(functionId, memoRow, text)
+                        executeId is CreateFirstMemoRow -> {
+                            Log.d("場所:Queue4MemoContents#excute", "flagForQueueがfalseでqueueされる場合")
+                            push(executeId)
                         }
-                        functionId == CREATE_NEXT_MEMO_ROW -> push(functionId, memoRow, text)
-                        functionId == DELETE_MEMO_ROW -> push(functionId, memoRow, text)
-                        functionId == ADD_CHECKBOX -> push(functionId, memoRow, text)
-                        functionId == DELETE_CHECKBOX -> push(functionId, memoRow, text)
-                        functionId == ADD_BULLET -> push(functionId, memoRow, text)
-                        functionId == DELETE_BULLET -> push(functionId, memoRow, text)
-                        functionId == CLEAR_ALL -> push(functionId, memoRow, text)
+                        executeId is CreateNextMemoRow -> push(executeId)
+                        executeId is DeleteMemoRow -> push(executeId)
+                        executeId is AddCheckBox -> push(executeId)
+                        executeId is DeleteCheckBox -> push(executeId)
+                        executeId is AddBullet -> push(executeId)
+                        executeId is DeleteBullet -> push(executeId)
+                        executeId is ClearAll -> push(executeId)
                         else -> return
                     }
                 }
@@ -176,11 +160,13 @@ class MainViewModel : ViewModel() {
     }
 
     //メモコンテンツの最初の行をセットする
-    private fun createFirstMemoRow(fragment: Fragment, viewModel: MainViewModel, text: Text) {
-        viewModel.apply {
-            container = fragment.requireActivity().findViewById(R.id.memoContentsContainerLayout)
+    private fun createFirstMemoRow(executeId: CreateFirstMemoRow) {
+        Log.d("場所:createFirstMemoRow", "createFirstMemoRowに入った")
+        this.apply {
+            container = executeId.container
 
-            val newMemoRow = createNewMemoRow(fragment, viewModel).apply {
+            val text = executeId.text
+            val newMemoRow = createNewMemoRow(executeId.fragment).apply {
                 setConstraintForFirstMemoRow(container)
                 setTextAndCursorPosition(text, text.value.length)
             }
@@ -189,17 +175,19 @@ class MainViewModel : ViewModel() {
             addToMemoContents(0, MemoRowInfo(MemoRowId(newMemoRow.id), text))
             Log.d("場所:createFirstMemoRow", "memoContents=${getMemoContents()}")
 
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, newMemoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
-    private fun createNextMemoRow(fragment: Fragment, viewModel: MainViewModel, text: Text) {
-        viewModel.apply {
+    private fun createNextMemoRow(executeId: CreateNextMemoRow) {
+        Log.d("場所:createNextMemoRow", "createNextMemoRowに入った")
+        Log.d("場所:createNextMemoRow", "text=${executeId.text}")
+        this.apply {
             val targetMemoRowId = container.findFocus().id
             val targetMemoRowIndexInList = getMemoRowIndexInList(MemoRowId(targetMemoRowId))
             val maxIndexOfList = getMemoContents().contentsList.size -1
-            val newMemoRow = createNewMemoRow(fragment, viewModel).apply {
-                setBackSpaceKeyAction(fragment, viewModel)
+            val newMemoRow = createNewMemoRow(executeId.fragment).apply {
+                setBackSpaceKeyAction(this@MemoMainViewModel, executeId)
             }
 
             Log.d("場所:createNextMemoRow", "targetMemoRowId=$targetMemoRowId")
@@ -229,21 +217,23 @@ class MainViewModel : ViewModel() {
                     }
                 }
 
-                setTextAndCursorPosition(text)
+                setTextAndCursorPosition(executeId.text)
                 addToMemoContents(targetMemoRowIndexInList + 1, MemoRowInfo(MemoRowId(newMemoRow.id)))
             }
 
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, newMemoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
-    private fun deleteMemoRow(fragment: Fragment, viewModel:MainViewModel, memoRow:MemoRow) {
-        viewModel.apply {
+    private fun deleteMemoRow(executeId: DeleteMemoRow) {
+        Log.d("場所:deleteMemoRow", "deleteMemoRowに入った")
+        this.apply {
+            val memoRow = executeId.memoRow
             val targetMemoRowIndexInList = getMemoRowIndexInList(MemoRowId(memoRow.id))
             val maxIndexOfList = getMemoContents().contentsList.size - 1
             val formerMemoRowId =
                 getMemoContents().contentsList[targetMemoRowIndexInList - 1].memoRowId.value
-            val formerMemoRow = fragment.requireActivity().findViewById<EditText>(formerMemoRowId)
+            val formerMemoRow = executeId.fragment.requireActivity().findViewById<EditText>(formerMemoRowId)
             val textOfFormerMemoRow = formerMemoRow.text.toString()
             val textOfTargetMemoRow = memoRow.text.toString()
 
@@ -274,13 +264,13 @@ class MainViewModel : ViewModel() {
                 }
             }
 
-            memoRow.removeMemoRowFromLayout(fragment, container, formerMemoRow)
+            memoRow.removeMemoRowFromLayout(executeId.fragment, container, formerMemoRow)
             deleteFromMemoContents(MemoRowId(memoRow.id))
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, memoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
-    private fun MemoRow.setEnterKeyAction(fragment: Fragment, viewModel: MainViewModel) {
+    private fun MemoRow.setEnterKeyAction(fragment: Fragment) {
         this.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 Log.d("場所:beforeTextChanged", "s=$s start=$start  count=$count after=$after")
@@ -290,8 +280,8 @@ class MainViewModel : ViewModel() {
                 Log.d("場所:onTextChanged", "s=$s start=$start before=$before count=$count")
 
                 //フラグをfalseに更新する処理。trueにはsetBackSpaceKeyAction()の中で更新している
-                viewModel.ifAtFirstInText.compareAndSet(expect = true, update = false)
-                Log.d("場所:onTextChanged", "atFirstInText=${viewModel.ifAtFirstInText.value}")
+                ifAtFirstInText.compareAndSet(expect = true, update = false)
+                Log.d("場所:onTextChanged", "atFirstInText=${ifAtFirstInText.value}")
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -305,8 +295,9 @@ class MainViewModel : ViewModel() {
                                 s.toString().replace("\n" + textBringToNextRow, ""),
                                 TextView.BufferType.NORMAL
                             )
+
                             Queue4MemoContents.execute(
-                                fragment, viewModel, CREATE_NEXT_MEMO_ROW, this, Text(textBringToNextRow)
+                                this@MemoMainViewModel, CreateNextMemoRow(fragment, Text(textBringToNextRow))
                             )
                         }
                     }
@@ -316,7 +307,8 @@ class MainViewModel : ViewModel() {
         } )
     }
 
-    private fun MemoRow.setBackSpaceKeyAction(fragment: Fragment, viewModel: MainViewModel) {
+    private fun MemoRow.setBackSpaceKeyAction(viewModel: MemoMainViewModel,
+                                              executeId: CreateNextMemoRow) {
         setOnKeyListener { v, code, event ->
             when {
                 code == KeyEvent.KEYCODE_DEL && viewModel.ifAtFirstInText.value -> {
@@ -335,18 +327,15 @@ class MainViewModel : ViewModel() {
 
                         val targetMemoRowInfo =
                             viewModel.getMemoContents().contentsList[targetMemoRowIndexInList]
+                        val fragment = executeId.fragment
                         when {
                             targetMemoRowInfo.checkBoxId.value is Some ->
-                                Queue4MemoContents.execute(
-                                    fragment, viewModel, DELETE_CHECKBOX, targetMemoRow, Text("")
-                                )
+                                Queue4MemoContents.execute(viewModel, DeleteCheckBox(fragment, targetMemoRow))
                             targetMemoRowInfo.bulletId.value is Some ->
-                                Queue4MemoContents.execute(
-                                    fragment, viewModel, DELETE_BULLET, targetMemoRow, Text("")
-                                )
+                                Queue4MemoContents.execute(viewModel, DeleteBullet(fragment, targetMemoRow))
                         }
 
-                        Queue4MemoContents.execute(fragment, viewModel, DELETE_MEMO_ROW, this, Text(""))
+                        Queue4MemoContents.execute(viewModel, DeleteMemoRow(fragment, targetMemoRow))
                     }
                 }
 
@@ -361,7 +350,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun createNewMemoRow(fragment: Fragment, viewModel: MainViewModel): MemoRow {
+    private fun createNewMemoRow(fragment:Fragment): MemoRow {
         return EditText(fragment.context, null, 0, R.style.MemoEditTextStyle).apply {
             layoutParams = ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT,
@@ -369,14 +358,14 @@ class MainViewModel : ViewModel() {
             )
             id = View.generateViewId()
 
-            setEnterKeyAction(fragment, viewModel)
+            setEnterKeyAction(fragment)
 
             setOnFocusChangeListener { v, hasFocus ->
                 Log.d("場所:setOnFocusChangeListener", "id=${v.id}")
 
                 when {
                     v is MemoRow && !hasFocus -> {
-                        viewModel.apply {
+                        this@MemoMainViewModel.apply {
                             val index = getMemoRowIndexInList(MemoRowId(v.id))
                             Log.d("場所:setOnFocusChangeListener", "index=$index")
                             val copiedMemoRowInfo =
@@ -391,11 +380,12 @@ class MainViewModel : ViewModel() {
     }
 
 
-    private fun addCheckBox(fragment: Fragment, viewModel: MainViewModel, memoRow: MemoRow) {
+    private fun addCheckBox(executeId: AddCheckBox) {
         Log.d("場所:addCheckBox", "checkBox追加処理に入った")
-        viewModel.apply {
+        this.apply {
+            val memoRow = executeId.memoRow
             val container = memoRow.parent
-            val newCheckBox = CheckBox(fragment.context).apply {
+            val newCheckBox = CheckBox(executeId.fragment.context).apply {
                 layoutParams = ConstraintLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
@@ -426,9 +416,8 @@ class MainViewModel : ViewModel() {
                     Log.d(
                         "場所:OnCheckedChangeListener",
                         """targetMemoRowId=${this.id}、
-                    checkBoxState=${getMemoContents().contentsList[viewModel.getMemoRowIndexInList(
-                            MemoRowId(memoRow.id)
-                        )].checkBoxState.value}
+                    checkBoxState=${getMemoContents().contentsList[getMemoRowIndexInList(
+                            MemoRowId(memoRow.id))].checkBoxState.value}
                     textColor=${memoRow.textColors}"""
                     )
                 }
@@ -445,17 +434,18 @@ class MainViewModel : ViewModel() {
             )
             modifyMemoRowInfo(memoRow, copiedMemoRowInfo)
 
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, memoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
-    private fun deleteCheckBox(fragment: Fragment, viewModel: MainViewModel, memoRow: MemoRow) {
+    private fun deleteCheckBox(executeId: DeleteCheckBox) {
         Log.d("場所:deleteCheckBox", "checkBox削除処理に入った")
-        viewModel.apply {
+        this.apply {
+            val fragment = executeId.fragment
+            val memoRow = executeId.memoRow
             val container = memoRow.parent
-            val checkBoxId = viewModel.getMemoContents().contentsList[
-                    viewModel.getMemoRowIndexInList(MemoRowId(memoRow.id))
-            ].checkBoxId
+            val checkBoxId =
+                getMemoContents().contentsList[getMemoRowIndexInList(MemoRowId(memoRow.id))].checkBoxId
 
             memoRow.apply {
                 if (container is ConstraintLayout) {
@@ -470,16 +460,17 @@ class MainViewModel : ViewModel() {
             )
             modifyMemoRowInfo(memoRow, copiedMemoRowInfo)
 
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, memoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
 
-    private fun addBullet(fragment: Fragment, viewModel: MainViewModel, memoRow: MemoRow) {
+    private fun addBullet(executeId: AddBullet) {
         Log.d("場所:addBullet", "bullet追加処理に入った")
-        viewModel.apply {
+        this.apply {
+            val memoRow = executeId.memoRow
             val container = memoRow.parent
-            val newBullet = TextView(fragment.context).apply {
+            val newBullet = TextView(executeId.fragment.context).apply {
                 layoutParams = ConstraintLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.WRAP_CONTENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
@@ -500,22 +491,20 @@ class MainViewModel : ViewModel() {
                 getMemoContents().contentsList[index].copy(bulletId = BulletId(Some(newBullet.id)))
             modifyMemoRowInfo(memoRow, copiedMemoRowInfo)
 
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, memoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
-    private fun deleteBullet(fragment: Fragment, viewModel: MainViewModel, memoRow:MemoRow) {
-        viewModel.apply {
-            val container = memoRow.parent
-            val bulletId = viewModel.getMemoContents().contentsList[
-                    viewModel.getMemoRowIndexInList(MemoRowId(memoRow.id))
-            ].bulletId
+    private fun deleteBullet(executeId: DeleteBullet) {
+        Log.d("場所:deleteBullet", "bulletの削除処理に入った")
+        this.apply {
+            val memoRow = executeId.memoRow
+            val bulletId =
+                getMemoContents().contentsList[getMemoRowIndexInList(MemoRowId(memoRow.id))].bulletId
 
             memoRow.apply {
-                if (container is ConstraintLayout) {
-                    setConstraintForDeleteOptView(container)
-                    removeOptViewFromLayout(fragment, container, bulletId)
-                }
+                setConstraintForDeleteOptView(container)
+                removeOptViewFromLayout(executeId.fragment, container, bulletId)
             }
 
             val index = getMemoRowIndexInList(MemoRowId(memoRow.id))
@@ -523,15 +512,16 @@ class MainViewModel : ViewModel() {
                 getMemoContents().contentsList[index].copy(bulletId = BulletId(None))
             modifyMemoRowInfo(memoRow, copiedMemoRowInfo)
 
-            Queue4MemoContents.execute(fragment, viewModel, COMPLETE, memoRow, Text(""))
+            Queue4MemoContents.execute(this, Complete())
         }
     }
 
-    private fun clearAllInMemoContents(fragment: Fragment, viewModel: MainViewModel, memoRow: MemoRow) {
+    private fun clearAllInMemoContents() {
+        Log.d("場所:clearAllInMemoContents", "ClearAll処理に入った")
         memoContents = MemoContents(listOf<MemoRowInfo>().k())
-        viewModel.ifAtFirstInText.value = true
+        ifAtFirstInText.value = true
 
-        Queue4MemoContents.execute(fragment, viewModel, COMPLETE, memoRow, Text(""))
+        Queue4MemoContents.execute(this, Complete())
     }
 
 

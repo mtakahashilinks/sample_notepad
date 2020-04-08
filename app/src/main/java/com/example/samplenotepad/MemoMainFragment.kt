@@ -14,13 +14,13 @@ import kotlinx.android.synthetic.main.fragment_memo_main.*
 
 class MemoMainFragment : Fragment() {
 
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModelMemo: MemoMainViewModel
     private lateinit var memoContainer: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = requireActivity().run {
-            ViewModelProvider.NewInstanceFactory().create(MainViewModel::class.java)
+        viewModelMemo = requireActivity().run {
+            ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
         }
     }
 
@@ -36,10 +36,10 @@ class MemoMainFragment : Fragment() {
         memoContainer = memoContentsContainerLayout
 
         // memoContentsリストが空の場合、最初のEditTextをセットする
-        when (viewModel.getMemoContents().contentsList.isEmpty()) {
+        when (viewModelMemo.getMemoContents().contentsList.isEmpty()) {
             true ->
-                MainViewModel.Queue4MemoContents.execute(
-                    this, viewModel, CREATE_FIRST_MEMO_ROW, EditText(this.context), Text("")
+                MemoMainViewModel.Queue4MemoContents.execute(
+                    viewModelMemo, CreateFirstMemoRow(this, memoContainer, Text(""))
                 )
             false -> return
         }
@@ -48,25 +48,21 @@ class MemoMainFragment : Fragment() {
         checkBoxImgBtn.setOnClickListener {
             val targetEditText = memoContentsContainerLayout.findFocus()
             Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetEditTextId=${targetEditText.id}")
-            if (targetEditText is EditText) targetEditText.setCheckBox(this, viewModel)
+            if (targetEditText is EditText) targetEditText.setCheckBox(this, viewModelMemo)
         }
 
         bulletListImgBtn.setOnClickListener {
             val targetEditText = memoContentsContainerLayout.findFocus()
             Log.d("場所:bulletListImgBtn.setOnClickListener", "targetEditTextId=${targetEditText.id}")
-            if (targetEditText is EditText) targetEditText.setBullet(this, viewModel)
+            if (targetEditText is EditText) targetEditText.setBullet(this, viewModelMemo)
         }
 
         clearAllImgBtn.setOnClickListener {
             memoContainer.apply {
                 removeAllViews()
-                MainViewModel.Queue4MemoContents.execute(
-                    this@MemoMainFragment, viewModel, CLEAR_ALL,
-                    EditText(this@MemoMainFragment.context), Text("")
-                )
-                MainViewModel.Queue4MemoContents.execute(
-                    this@MemoMainFragment, viewModel, CREATE_FIRST_MEMO_ROW,
-                    EditText(this@MemoMainFragment.context), Text("")
+                MemoMainViewModel.Queue4MemoContents.execute(viewModelMemo, ClearAll())
+                MemoMainViewModel.Queue4MemoContents.execute(
+                    viewModelMemo, CreateFirstMemoRow(this@MemoMainFragment, memoContainer , Text(""))
                 )
             }
         }
