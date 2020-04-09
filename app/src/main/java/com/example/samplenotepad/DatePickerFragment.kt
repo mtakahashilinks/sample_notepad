@@ -33,6 +33,6 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-        myViewModelMemo.setMemoDate("$year/${month + 1}/$dayOfMonth")
+      //  myViewModelMemo.setMemoDate("$year/${month + 1}/$dayOfMonth")
     }
 }

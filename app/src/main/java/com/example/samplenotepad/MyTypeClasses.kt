@@ -8,38 +8,39 @@ import arrow.core.*
 
 typealias MemoRow = EditText
 
-sealed class ExecuteTypeForMemoContentsQueue
+sealed class ExecuteTypeForMemoContents
 data class CreateFirstMemoRow(val fragment: Fragment,
                               val container: ConstraintLayout,
                               val text: Text
-) : ExecuteTypeForMemoContentsQueue() { companion object }
+) : ExecuteTypeForMemoContents() { companion object }
 data class CreateNextMemoRow(val fragment: Fragment,
                              val text: Text
-) : ExecuteTypeForMemoContentsQueue() { companion object }
+) : ExecuteTypeForMemoContents() { companion object }
 data class DeleteMemoRow(val fragment: Fragment,
                          val memoRow: MemoRow
-) : ExecuteTypeForMemoContentsQueue() { companion object }
+) : ExecuteTypeForMemoContents() { companion object }
 data class AddCheckBox(val fragment: Fragment,
                        val memoRow: MemoRow
-) : ExecuteTypeForMemoContentsQueue() { companion object }
+) : ExecuteTypeForMemoContents() { companion object }
 data class DeleteCheckBox(val fragment: Fragment,
                           val memoRow: MemoRow
-) : ExecuteTypeForMemoContentsQueue() { companion object }
+) : ExecuteTypeForMemoContents() { companion object }
 data class AddBullet(val fragment: Fragment,
-                     val memoRow: MemoRow) : ExecuteTypeForMemoContentsQueue() { companion object }
+                     val memoRow: MemoRow
+) : ExecuteTypeForMemoContents() { companion object }
 data class DeleteBullet(val fragment: Fragment,
-                        val memoRow: MemoRow) : ExecuteTypeForMemoContentsQueue() { companion object }
-class ClearAll : ExecuteTypeForMemoContentsQueue() { companion object }
-class Complete : ExecuteTypeForMemoContentsQueue() { companion object }
+                        val memoRow: MemoRow
+) : ExecuteTypeForMemoContents() { companion object }
+class ClearAll : ExecuteTypeForMemoContents() { companion object }
+class Complete : ExecuteTypeForMemoContents() { companion object }
 
 
-sealed class MemoRowInfoProp
-data class MemoRowId(val value: Int) : MemoRowInfoProp() { companion object }
-data class Text(val value: String) : MemoRowInfoProp() { companion object }
-data class CheckBoxId(val value: Option<Int>) : MemoRowInfoProp() { companion object }
-data class CheckBoxState(val value: Boolean) : MemoRowInfoProp() { companion object }
-data class BulletId(val value: Option<Int>) : MemoRowInfoProp() { companion object }
-
+sealed class TypeForMemoRowInfo
+data class MemoRowId(val value: Int) : TypeForMemoRowInfo() { companion object }
+data class Text(val value: String) : TypeForMemoRowInfo() { companion object }
+data class CheckBoxId(val value: Option<Int>) : TypeForMemoRowInfo() { companion object }
+data class CheckBoxState(val value: Boolean) : TypeForMemoRowInfo() { companion object }
+data class BulletId(val value: Option<Int>) : TypeForMemoRowInfo() { companion object }
 
 //メモの中の各Viewの情報
 data class MemoRowInfo(
@@ -54,6 +55,7 @@ data class MemoContents(
     val contentsList: ListK<MemoRowInfo>
 ) { companion object }
 
+
 //各メモの情報
 data class MemoInfo(
     val memoId: Int,
@@ -62,7 +64,7 @@ data class MemoInfo(
     val memoCategory: String,
     val contents: MemoContents,
     val isRegisteredReminder: Boolean
-)
+) { companion object }
 
 //1つの登録されたリマインダーの情報
 data class ReminderInfo(
@@ -70,4 +72,4 @@ data class ReminderInfo(
     val alarmTimeInAdvance: Option<Long> = None,
     val alarmTimeActual: Long,
     val isSnoozed: Boolean
-)
+) { companion object }
