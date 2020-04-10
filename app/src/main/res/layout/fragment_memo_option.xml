@@ -11,11 +11,10 @@
         android:id="@+id/memoTitleLabelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_marginTop="16dp"
+        android:text="@string/title"
         app:layout_constraintStart_toStartOf="@+id/memoTitleEditText"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="タイトル" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/memoTitleHelperTextView"
@@ -23,17 +22,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         app:layout_constraintBottom_toTopOf="@+id/memoTitleEditText"
-        app:layout_constraintStart_toEndOf="@+id/memoTitleLabelTextView"
-        tools:text="※15文字以内" />
+        app:layout_constraintStart_toEndOf="@+id/memoTitleLabelTextView" />
 
     <TextView
         android:id="@+id/memoTitleCounterTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
+        android:text="@string/counter_for_edit_text"
         app:layout_constraintBottom_toTopOf="@+id/memoTitleEditText"
-        app:layout_constraintEnd_toEndOf="@+id/memoTitleEditText"
-        tools:text="10/15" />
+        app:layout_constraintEnd_toEndOf="@+id/memoTitleEditText" />
 
     <EditText
         android:id="@+id/memoTitleEditText"
@@ -43,7 +41,7 @@
         android:layout_marginEnd="32dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:maxEms="30"
+        android:maxLength="15"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,11 +51,10 @@
 
     <TextView
         android:id="@+id/memoCategoryLabelTextView"
-        android:layout_width="88dp"
-        android:layout_height="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="カテゴリー"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:text="@string/category"
         app:layout_constraintStart_toStartOf="@+id/memoCategoryEditText"
         app:layout_constraintTop_toBottomOf="@+id/memoTitleEditText" />
 
@@ -65,16 +62,18 @@
         android:id="@+id/categoryHelperTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
+        android:text="@string/category_helper"
         app:layout_constraintBottom_toTopOf="@+id/memoCategoryEditText"
         app:layout_constraintStart_toEndOf="@+id/memoCategoryLabelTextView"
-        tools:text="※15文字以内" />
+        tools:text="@string/category_helper" />
 
     <TextView
         android:id="@+id/categoryCounterTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
+        android:text="@string/counter_for_edit_text"
         app:layout_constraintBottom_toTopOf="@+id/memoCategoryEditText"
         app:layout_constraintEnd_toEndOf="@+id/memoCategoryEditText"
         tools:text="13/15" />
@@ -87,7 +86,7 @@
         android:layout_marginEnd="32dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:maxEms="30"
+        android:maxLength="15"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/memoCategoryLabelTextView"

@@ -1,5 +1,6 @@
 package com.example.samplenotepad
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import arrow.core.internal.AtomicBooleanW
 import android.graphics.Color
@@ -9,6 +10,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
@@ -27,6 +29,7 @@ class MemoMainViewModel : ViewModel() {
     // executeMemoOperationは、知らせを受けたらキューに入っている処理を順に開始させる。
     object MemoContentsOperation {
         private lateinit var container: ConstraintLayout
+        private lateinit var fragment: Fragment //viewPagerのバグのためのとりあえずのプロパティ
         private val queue = mutableListOf<ExecuteTypeForMemoContents>()
         //trueの時のみmemoContentsの変更処理を許可するトランザクション処理のためのフラグ
         private val flagForQueue = AtomicBooleanW(true)
@@ -100,6 +103,14 @@ class MemoMainViewModel : ViewModel() {
         }
 
 
+        //viewPagerのバグのためのとりあえずのメッソッド
+        internal fun setFocusAndSoftWareKeyboard() {
+            container.getChildAt(0).requestFocus()
+            val inputManager =
+                fragment.context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputManager.restartInput(container.focusedChild)
+        }
+
         internal fun getMemoContents(): MemoContents = memoContents
 
         internal fun getMemoRowIndexInList(targetMemoRowId: MemoRowId): Int =
@@ -137,6 +148,7 @@ class MemoMainViewModel : ViewModel() {
             Log.d("場所:createFirstMemoRow", "createFirstMemoRowに入った")
             viewModel.apply {
                 container = executeId.container
+                fragment = executeId.fragment //viewPagerのバグのためにとりあえず追加
 
                 val text = executeId.text
                 val newMemoRow = createNewMemoRow(executeId.fragment, viewModel).apply {

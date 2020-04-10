@@ -87,9 +87,10 @@ internal fun ConstraintLayout.setConstraintForDeleteMemoRow(targetMemoRow: MemoR
 internal fun ConstraintLayout.removeMemoRowFromLayout(fragment: Fragment,
                                                       targetMemoRow: MemoRow,
                                                       formerMemoRow: MemoRow) {
-    val inputManager = fragment.context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
+    val inputManager =
+        fragment.context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     inputManager.restartInput(formerMemoRow)
+
     this.removeView(targetMemoRow)
 }
 

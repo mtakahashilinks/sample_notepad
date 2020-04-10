@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 class MemoOptionFragment : Fragment() {
 
     private lateinit var optionViewModel: MemoOptionViewModel
+//    private lateinit var mainViewModel: MemoMainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,12 +19,16 @@ class MemoOptionFragment : Fragment() {
         optionViewModel = requireActivity().run {
             ViewModelProvider.NewInstanceFactory().create(MemoOptionViewModel::class.java)
         }
+ //       mainViewModel = requireActivity().run {
+ //           ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
+ //       }
+
     }
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_memo_main, container, false)
+        return inflater.inflate(R.layout.fragment_memo_option, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -34,6 +39,6 @@ class MemoOptionFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         //ツールバーのタイトルをセット
-        activity?.title = getString(R.string.input_new_memo)
+        activity?.title = getString(R.string.optional_setting)
     }
 }

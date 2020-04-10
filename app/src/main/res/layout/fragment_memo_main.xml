@@ -6,7 +6,10 @@
     android:id="@+id/memoCoordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="8dp"
+    android:paddingStart="8dp"
+    android:paddingTop="0dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="8dp"
     android:orientation="vertical"
     tools:context=".MemoMainFragment">
 
@@ -82,7 +85,7 @@
         android:layout_gravity="top"
         app:layout_anchor="@id/saveImgBtn"
         app:layout_anchorGravity="bottom"
-        android:layout_marginTop="50dp">
+        android:layout_marginTop="45dp">
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

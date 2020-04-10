@@ -36,8 +36,16 @@
 
     </com.google.android.material.tabs.TabLayout>
 
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/memoPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/memoTabLayout"/>
 
-    <FrameLayout
+<!--    <FrameLayout
         android:id="@+id/mainFrameLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -45,5 +53,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/memoTabLayout"/>
-
+-->
 </androidx.constraintlayout.widget.ConstraintLayout>
