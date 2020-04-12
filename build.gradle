@@ -11,6 +11,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.6.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.1.0"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -20,7 +21,10 @@ allprojects {
     repositories {
         google()
         jcenter()
-        
+
+        mavenCentral()
+        maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
+        maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' } // for SNAPSHOT builds
     }
 }
 
