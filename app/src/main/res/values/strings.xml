@@ -6,11 +6,12 @@
     <string name="contents_bullet_btn_description">ビュレットの追加と削除</string>
     <string name="contents_clear_btn_description">入力内容の全削除</string>
     <string name="contents_save_btn_description">メモの保存</string>
-    <string name="title_helper">*半角30文字以内</string>
-    <string name="category_helper">*半角30文字以内</string>
+    <string name="title_helper">*入力してください</string>
+    <string name="category_helper">*入力してください</string>
     <string name="title">タイトル</string>
     <string name="category">カテゴリー</string>
     <string name="counter_for_edit_text">%4d/30</string>
+    <string name="register_reminder">リマインダー登録</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

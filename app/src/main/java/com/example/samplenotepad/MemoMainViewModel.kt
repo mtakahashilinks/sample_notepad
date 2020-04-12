@@ -1,9 +1,12 @@
 package com.example.samplenotepad
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import arrow.core.internal.AtomicBooleanW
 import android.graphics.Color
+import android.provider.CalendarContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -20,6 +23,7 @@ import androidx.fragment.app.Fragment
 import arrow.core.None
 import arrow.core.Some
 import arrow.core.k
+import org.xmlpull.v1.XmlPullParserFactory
 
 
 class MemoMainViewModel : ViewModel() {
