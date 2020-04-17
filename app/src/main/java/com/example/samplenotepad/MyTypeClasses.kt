@@ -2,37 +2,34 @@ package com.example.samplenotepad
 
 import android.widget.EditText
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
 import arrow.core.*
+import arrow.core.internal.AtomicRefW
+import kotlinx.coroutines.CompletableDeferred
 
 
 typealias MemoRow = EditText
 
-sealed class ExecuteTypeForMemoContents
-data class CreateFirstMemoRow(val fragment: Fragment,
+
+sealed class CursorPositionFlagMsg
+class ChangeFlag(val flag: Boolean) : CursorPositionFlagMsg() { companion object }
+class GetFlag(val response: CompletableDeferred<Boolean>) : CursorPositionFlagMsg() { companion object }
+
+
+sealed class ExecuteTypeMsg
+data class CreateFirstMemoRow(val fragment: MemoMainFragment,
                               val container: ConstraintLayout,
-                              val text: Text
-) : ExecuteTypeForMemoContents() { companion object }
-data class CreateNextMemoRow(val fragment: Fragment,
-                             val text: Text
-) : ExecuteTypeForMemoContents() { companion object }
-data class DeleteMemoRow(val fragment: Fragment,
-                         val memoRow: MemoRow
-) : ExecuteTypeForMemoContents() { companion object }
-data class AddCheckBox(val fragment: Fragment,
-                       val memoRow: MemoRow
-) : ExecuteTypeForMemoContents() { companion object }
-data class DeleteCheckBox(val fragment: Fragment,
-                          val memoRow: MemoRow
-) : ExecuteTypeForMemoContents() { companion object }
-data class AddBullet(val fragment: Fragment,
-                     val memoRow: MemoRow
-) : ExecuteTypeForMemoContents() { companion object }
-data class DeleteBullet(val fragment: Fragment,
-                        val memoRow: MemoRow
-) : ExecuteTypeForMemoContents() { companion object }
-class ClearAll : ExecuteTypeForMemoContents() { companion object }
-class Complete : ExecuteTypeForMemoContents() { companion object }
+                              val text: Text) : ExecuteTypeMsg() { companion object }
+data class CreateNextMemoRow(val text: Text) : ExecuteTypeMsg() { companion object }
+data class DeleteMemoRow(val memoRow: MemoRow) : ExecuteTypeMsg() { companion object }
+data class AddCheckBox(val memoRow: MemoRow) : ExecuteTypeMsg() { companion object }
+data class DeleteCheckBox(val memoRow: MemoRow) : ExecuteTypeMsg() { companion object }
+data class AddBullet(val memoRow: MemoRow) : ExecuteTypeMsg() { companion object }
+data class DeleteBullet(val memoRow: MemoRow) : ExecuteTypeMsg() { companion object }
+class ClearAll : ExecuteTypeMsg() { companion object }
+class GetMemoContents(val response: CompletableDeferred<AtomicRefW<MemoContents>>) : ExecuteTypeMsg() {
+    companion object
+}
+
 
 
 sealed class TypeForMemoRowInfo

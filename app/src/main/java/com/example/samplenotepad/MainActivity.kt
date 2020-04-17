@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         memoPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 when (position) {
-                    0 -> MemoMainViewModel.MemoContentsOperation.setFocusAndSoftWareKeyboard()
+                    0 -> MemoMainViewModel.ForFirstFocusInMainFragment.setFocusAndSoftWareKeyboard()
                     else -> super.onPageSelected(position)
                 }
             }
