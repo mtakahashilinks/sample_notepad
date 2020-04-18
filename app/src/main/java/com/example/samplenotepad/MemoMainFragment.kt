@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import arrow.core.None
+import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.clearAll
+import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.initMemoContentsOperation
+import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.operationBullet
+import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.operationCheckBox
 import kotlinx.android.synthetic.main.fragment_memo_main.*
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
 class MemoMainFragment : Fragment() {
@@ -42,38 +42,25 @@ class MemoMainFragment : Fragment() {
         //viewPagerのバグのためのとりあえずのメソッド
         MemoMainViewModel.ForFirstFocusInMainFragment.setFragmentAndContainer(this, memoContainer)
 
-        // memoContentsリストが空の場合、最初のMemoRowをセットする
-        lifecycleScope.launch {
-            when (viewModel.getMemoContentsAsync().await().value.contentsList.isEmpty()) {
-                true ->
-                    viewModel.entranceForMemoContentsAction(CreateFirstMemoRow(this@MemoMainFragment, memoContainer, Text("")))
-//                false -> return@launch
-            }
-        }
+        initMemoContentsOperation(this, viewModel, memoContainer, None)
 
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
-//        checkBoxImgBtn.setOnClickListener {
-//            val targetMemoRow = memoContentsContainerLayout.findFocus()
-//            Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-//            if (targetMemoRow is MemoRow) targetMemoRow.operationCheckBox(this, viewModel)
-//        }
-//
-//        bulletListImgBtn.setOnClickListener {
-//            val targetMemoRow = memoContentsContainerLayout.findFocus()
-//            Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-//            if (targetMemoRow is MemoRow) targetMemoRow.operationBullet(this, viewModel)
-//        }
-//
-//        clearAllImgBtn.setOnClickListener {
-//            memoContainer.apply {
-//                removeAllViews()
-//                MemoContentsOperation.executeMemoOperation(viewModel, ClearAll())
-//                MemoContentsOperation.executeMemoOperation(
-//                    viewModel, CreateFirstMemoRow(this@MemoMainFragment, memoContainer , Text(""))
-//                )
-//            }
-//        }
+        checkBoxImgBtn.setOnClickListener {
+            val targetMemoRow = memoContentsContainerLayout.findFocus()
+            Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
+            if (targetMemoRow is MemoRow) targetMemoRow.operationCheckBox()
+        }
+
+        bulletListImgBtn.setOnClickListener {
+            val targetMemoRow = memoContentsContainerLayout.findFocus()
+            Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
+            if (targetMemoRow is MemoRow) targetMemoRow.operationBullet()
+        }
+
+        clearAllImgBtn.setOnClickListener {
+            clearAll()
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

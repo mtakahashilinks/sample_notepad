@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import arrow.core.internal.AtomicRefW
+import arrow.core.k
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
@@ -65,3 +67,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
