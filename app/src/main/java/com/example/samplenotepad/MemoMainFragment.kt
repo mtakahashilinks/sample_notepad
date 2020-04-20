@@ -11,8 +11,8 @@ import androidx.lifecycle.ViewModelProvider
 import arrow.core.None
 import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.clearAll
 import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.initMemoContentsOperation
-import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.operationBullet
 import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.operationCheckBox
+import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.dotOperation
 import kotlinx.android.synthetic.main.fragment_memo_main.*
 
 
@@ -55,7 +55,7 @@ class MemoMainFragment : Fragment() {
         bulletListImgBtn.setOnClickListener {
             val targetMemoRow = memoContentsContainerLayout.findFocus()
             Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-            if (targetMemoRow is MemoRow) targetMemoRow.operationBullet()
+            if (targetMemoRow is MemoRow) targetMemoRow.dotOperation()
         }
 
         clearAllImgBtn.setOnClickListener {

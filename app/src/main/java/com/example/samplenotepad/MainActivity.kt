@@ -6,10 +6,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import arrow.core.extensions.listk.semigroupK.combineK
 import arrow.core.internal.AtomicRefW
 import arrow.core.k
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
 import kotlin.Exception
 
 
@@ -68,3 +72,20 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+fun main() = runBlocking {
+    val a = flow<Int> {
+        emit(1)
+        emit(2)
+    }
+
+    val b = flow<Int> {
+        emit(3)
+        emit(4)
+    }
+
+    fun mMerge(vararg flows: Flow<Int>): Flow<Int> =
+    flowOf(*flows).flattenMerge()
+
+
+    mMerge(b, a).collect { println(it) }
+}
