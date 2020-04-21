@@ -23,6 +23,7 @@ class MemoMainFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         viewModel = requireActivity().run {
             ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
         }
@@ -36,7 +37,6 @@ class MemoMainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         memoContainer = memoContentsContainerLayout
 
         //viewPagerのバグのためのとりあえずのメソッド
@@ -58,9 +58,7 @@ class MemoMainFragment : Fragment() {
             if (targetMemoRow is MemoRow) targetMemoRow.dotOperation()
         }
 
-        clearAllImgBtn.setOnClickListener {
-            clearAll()
-        }
+        clearAllImgBtn.setOnClickListener { clearAll() }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

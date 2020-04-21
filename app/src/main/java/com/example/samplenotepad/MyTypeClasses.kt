@@ -7,15 +7,16 @@ import arrow.core.*
 typealias MemoRow = EditText
 
 sealed class ExecuteTypeForMemoContents
+data class UpdateTextOfMemoRowInfo(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
 data class CreateFirstMemoRow(val text: Text) : ExecuteTypeForMemoContents() { companion object }
 data class CreateNextMemoRow(val text: Text) : ExecuteTypeForMemoContents() { companion object }
 data class DeleteMemoRow(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
 data class AddCheckBox(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
 data class DeleteCheckBox(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
+data class ChangeCheckBoxState(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
 data class AddDot(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
 data class DeleteDot(val memoRow: MemoRow) : ExecuteTypeForMemoContents() { companion object }
 class ClearAll : ExecuteTypeForMemoContents() { companion object }
-class Complete : ExecuteTypeForMemoContents() { companion object }
 
 
 sealed class TypeForMemoRowInfo

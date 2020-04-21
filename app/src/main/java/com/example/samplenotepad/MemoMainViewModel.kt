@@ -16,9 +16,15 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
+import androidx.lifecycle.viewModelScope
 import arrow.core.*
 import arrow.core.extensions.listk.semigroupK.combineK
 import arrow.core.internal.AtomicRefW
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 
 class MemoMainViewModel : ViewModel() {
@@ -42,108 +48,61 @@ class MemoMainViewModel : ViewModel() {
     }
 
 
-    //executeMemoOperationが呼ばれた時、実行中の処理がなければそのまま実行。 他の処理が実行中なら処理をキューに入れる。
-    //実行中の処理は処理の完了をexecuteMemoOperationに知らせる。
-    // executeMemoOperationは、知らせを受けたらキューに入っている処理を順に開始させる。
     object MemoContentsOperation {
         private lateinit var memoContainer: ConstraintLayout
         private lateinit var mainFragment: MemoMainFragment
         private lateinit var mainViewModel: MemoMainViewModel
 
-        private val queue = mutableListOf<ExecuteTypeForMemoContents>()
-        //trueの時のみmemoContentsの変更処理を許可するトランザクション処理のためのフラグ
-        private val flagForQueue = AtomicBooleanW(true)
-
         private val memoContents = AtomicRefW(MemoContents(listOf<MemoRowInfo>().k()))
+        private val ifAtFirstInText = AtomicBooleanW(false) //DelKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
 
-        //backSpaceKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
-        private val ifAtFirstInText = AtomicBooleanW(false)
 
-        private fun push(executeId: ExecuteTypeForMemoContents) {
-            queue.add(executeId)
-            Log.d("場所:MemoContentsOperation#push", "queue=$queue")
+        //memoContentsの変更処理は全てここを通す事で、非同期でも衝突せずに順番に処理される
+        private fun CoroutineScope.executeMemoOperationActor() = actor<ExecuteTypeForMemoContents> {
+            Log.d("場所:executeMemoOperationActor", "executeMemoOperationActorに入った")
 
+            val execution = mainViewModel.viewModelScope.launch {
+                channel.receiveAsFlow()
+                    .buffer(Channel.RENDEZVOUS)
+                    .collect { executeMemoOperation(it) }
+            }
+            execution.join()
         }
-        private fun pop() = queue.drop(1)
 
         private fun executeMemoOperation(executeId: ExecuteTypeForMemoContents) {
-            Log.d("場所:MemoContentsOperation#excute", "executeに入った executeId=$executeId")
-
-            when (flagForQueue.compareAndSet(expect = true, update = false)) {
-                true -> {
-                    Log.d("場所:MemoContentsOperation#excute", "flagForQueueがtrueの場合")
-                    when (executeId) {
-                        is CreateFirstMemoRow -> createFirstMemoRow(executeId)
-                        is CreateNextMemoRow -> createNextMemoRow(executeId)
-                        is DeleteMemoRow -> deleteMemoRow(executeId)
-                        is AddCheckBox -> addCheckBox(executeId)
-                        is DeleteCheckBox -> deleteCheckBox(executeId)
-                        is AddDot -> addDot(executeId)
-                        is DeleteDot -> deleteDot(executeId)
-                        is ClearAll -> clearAllInMemoContents()
-                        is Complete -> return
-                    }
-                }
-                false -> {
-                    Log.d("場所:MemoContentsOperation#excute", "flagForQueueがfalseの場合")
-                    when {
-                        executeId is Complete && queue.isNotEmpty() -> {
-                            Log.d("場所:MemoContentsOperation#excute",
-                                "実行中の処理が終了。且つQueueが空でない場合")
-                            val mExecuteId = queue[0]
-
-                            pop()
-                            flagForQueue.value = true
-
-                            when (mExecuteId) {
-                                is CreateFirstMemoRow -> createFirstMemoRow(mExecuteId)
-                                is CreateNextMemoRow -> createNextMemoRow(mExecuteId)
-                                is DeleteMemoRow -> deleteMemoRow(mExecuteId)
-                                is AddCheckBox -> addCheckBox(mExecuteId)
-                                is DeleteCheckBox -> deleteCheckBox(mExecuteId)
-                                is AddDot -> addDot(mExecuteId)
-                                is DeleteDot -> deleteDot(mExecuteId)
-                                is ClearAll -> clearAllInMemoContents()
-                            }
-                        }
-                        executeId is Complete && queue.isEmpty() -> {
-                            Log.d("場所:MemoContentsOperation#excute",
-                                "実行中の処理が終了。且つQueueが空の場合")
-                            flagForQueue.value = true
-                        }
-                        executeId is CreateFirstMemoRow -> push(executeId)
-                        executeId is CreateNextMemoRow -> push(executeId)
-                        executeId is DeleteMemoRow -> push(executeId)
-                        executeId is AddCheckBox -> push(executeId)
-                        executeId is DeleteCheckBox -> push(executeId)
-                        executeId is AddDot -> push(executeId)
-                        executeId is DeleteDot -> push(executeId)
-                        executeId is ClearAll -> push(executeId)
-                        else -> return
-                    }
-                }
+            Log.d("場所:executeMemoOperation", "executeMemoOperationに入った executeId=$executeId")
+            when (executeId) {
+                is UpdateTextOfMemoRowInfo -> updateTextOfMemoRowInfo(executeId)
+                is CreateFirstMemoRow -> createFirstMemoRow(executeId)
+                is CreateNextMemoRow -> createNextMemoRow(executeId)
+                is DeleteMemoRow -> deleteMemoRow(executeId)
+                is AddCheckBox -> addCheckBox(executeId)
+                is DeleteCheckBox -> deleteCheckBox(executeId)
+                is ChangeCheckBoxState -> changeCheckBoxState(executeId)
+                is AddDot -> addDot(executeId)
+                is DeleteDot -> deleteDot(executeId)
+                is ClearAll -> clearAllInMemoContents()
             }
+            Log.d("場所:executeMemoOperation", "executeMemoOperationが終わった executeId=$executeId")
         }
 
 
         internal fun initMemoContentsOperation(fragment: MemoMainFragment,
                                                viewModel: MemoMainViewModel,
                                                container: ConstraintLayout,
-                                               mMemoContents: Option<MemoContents>
-        ) {
-            mainFragment = fragment
-            mainViewModel = viewModel
-            memoContainer = container
+                                               mMemoContents: Option<MemoContents>) {
+                mainFragment = fragment
+                mainViewModel = viewModel
+                memoContainer = container
 
-            when (mMemoContents){
-                is Some ->  memoContents.getAndSet(mMemoContents.t)
-                is None -> {
-                    memoContents.getAndSet(MemoContents(listOf<MemoRowInfo>().k()))
-                    executeMemoOperation(CreateFirstMemoRow(Text("")))
+                when (mMemoContents){
+                    is Some ->  memoContents.getAndSet(mMemoContents.t)
+                    is None -> {
+                        memoContents.getAndSet(MemoContents(listOf<MemoRowInfo>().k()))
+                        createFirstMemoRow(CreateFirstMemoRow(Text("")))
+                    }
                 }
             }
-        }
-
 
         private fun MemoRow.setTextAndCursorPosition(text: Text, selection: Int = 0) {
             Log.d("場所:setTextAndCursorPosition", "setTextAndCursorPositionに入った")
@@ -155,13 +114,33 @@ class MemoMainViewModel : ViewModel() {
         }
 
 
+        private fun updateTextOfMemoRowInfo(executeId: UpdateTextOfMemoRowInfo) {
+            memoContents.updateAndGet { mMemoContents ->
+                val mList = mMemoContents.contentsList
+                val indexOfMemoRow = mList.indexOfFirst { it.memoRowId.value == executeId.memoRow.id }
+
+                Log.d(
+                    "場所:updateTextOfMemoContents",
+                    "変更前:size=${mList.size} MemoContents=${mList}"
+                )
+
+                MemoContents(mList.flatMap {
+                    if (it.memoRowId.value == executeId.memoRow.id)
+                        listOf(mList[indexOfMemoRow].copy(text = Text(executeId.memoRow.text.toString()))).k()
+                    else listOf(it).k()
+                })
+            }
+            Log.d("場所:updateTextOfMemoContents",
+                "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
+        }
+
         //メモコンテンツの最初の行をセットする
         private fun createFirstMemoRow(executeId: CreateFirstMemoRow) {
             Log.d("場所:createFirstMemoRow", "createFirstMemoRowに入った")
             memoContents.updateAndGet { mMemoContents ->
                 val mList = mMemoContents.contentsList
                 val text = executeId.text
-                val newMemoRow = createNewMemoRowView().apply {
+                val newMemoRow = createNewMemoRowView(executeId).apply {
                     setTextAndCursorPosition(text, text.value.length)
                 }
 
@@ -174,13 +153,11 @@ class MemoMainViewModel : ViewModel() {
             }
             Log.d("場所:createFirstMemoRow",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
-
-            executeMemoOperation(Complete())
         }
 
         private fun createNextMemoRow(executeId: CreateNextMemoRow) {
             Log.d("場所:createNextMemoRow", "createNextMemoRowに入った")
-            val newMemoRow = createNewMemoRowView().apply { setBackSpaceKeyAction() }
+            val newMemoRow = createNewMemoRowView(executeId)
 
             memoContents.updateAndGet { mMemoContents ->
                 val mList = mMemoContents.contentsList
@@ -214,12 +191,12 @@ class MemoMainViewModel : ViewModel() {
 
                 Log.d("場所:createNextMemoRow", "変更前:size=${mList.size} MemoContents=${mList}")
 
-                val modifiedMemoContents = when {
+                when {
                     indexOfTargetMemoRow + 1 < (mList.size - 1) -> {
                         Log.d("場所:createNextMemoRow", "indexがリストサイズより小さい場合")
-
                         val beforeList = mList.take(indexOfTargetMemoRow + 1).k()
                         val afterList = mList.drop(indexOfTargetMemoRow + 1).k()
+
                         MemoContents(
                             beforeList.combineK(
                                 listOf(MemoRowInfo(MemoRowId(newMemoRow.id))).k()
@@ -228,20 +205,14 @@ class MemoMainViewModel : ViewModel() {
                     }
                     else -> {
                         Log.d("場所:createNextMemoRow", "indexがリストの最後尾の場合")
-
                         MemoContents(mList.combineK(listOf(MemoRowInfo(MemoRowId(newMemoRow.id))).k()))
                     }
                 }
-                Log.d("場所:createNextMemoRow", "変更前:size=${mList.size} MemoContents=${mList}")
-
-                modifiedMemoContents
             }
             Log.d("場所:createNextMemoRow",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
 
             newMemoRow.setTextAndCursorPosition(executeId.text)
-
-            executeMemoOperation(Complete())
         }
 
         private fun deleteMemoRow(executeId: DeleteMemoRow) {
@@ -283,8 +254,6 @@ class MemoMainViewModel : ViewModel() {
             }
             Log.d("場所:deleteMemoRow",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
-
-            executeMemoOperation(Complete())
         }
 
         private fun MemoRow.setEnterKeyAction() {
@@ -303,12 +272,18 @@ class MemoMainViewModel : ViewModel() {
                         s !== null && """\n""".toRegex().containsMatchIn(s.toString()) -> {
                             Log.d("場所:afterTextChanged", "改行処理に入った")
                             val textBringToNextRow = s.toString().substringAfter("\n")
+
                             this@setEnterKeyAction.setText(
                                 s.toString().replace("\n" + textBringToNextRow, ""),
                                 TextView.BufferType.NORMAL
                             )
 
-                            executeMemoOperation(CreateNextMemoRow(Text(textBringToNextRow)))
+                            mainViewModel.viewModelScope.launch {
+                                executeMemoOperationActor().apply {
+                                    send(CreateNextMemoRow(Text(textBringToNextRow)))
+                                    close()
+                                }
+                            }
                         }
                         else -> return
                     }
@@ -316,35 +291,43 @@ class MemoMainViewModel : ViewModel() {
             } )
         }
 
-        private fun MemoRow.setBackSpaceKeyAction() {
+        private fun MemoRow.setBackSpaceKeyAction(executeId: ExecuteTypeForMemoContents) {
             this.setOnKeyListener { v, code, event ->
-                //まず文章の先頭でないのにFlagがtrueになっている場合にfalseに変更する
-                if (v is MemoRow && v.selectionEnd != 0)
-                    ifAtFirstInText.compareAndSet(expect = true, update = false)
+                if (executeId is CreateNextMemoRow) {
+                    //まず文章の先頭でないのにFlagがtrueになっている場合にfalseに変更する
+                    if (v is MemoRow && v.selectionEnd != 0)
+                        ifAtFirstInText.compareAndSet(expect = true, update = false)
 
-                when {
-                    code == KeyEvent.KEYCODE_DEL && ifAtFirstInText.value -> {
-                        val mList = memoContents.value.contentsList
-                        val memoRowInfo = mList[mList.indexOfFirst { it.memoRowId.value == v.id }]
+                    when {
+                        code == KeyEvent.KEYCODE_DEL && ifAtFirstInText.value -> {
+                            val mList = memoContents.value.contentsList
+                            val memoRowInfo = mList[mList.indexOfFirst { it.memoRowId.value == v.id }]
 
-                        Log.d("場所:setOnKeyListener", "Delキーイベントに入った")
-                        Log.d("場所:setOnKeyListener", "削除するMemoRowのId=${(v as MemoRow).id}")
-                        Log.d("場所:setOnKeyListener", "selectionEnd=${v.selectionEnd}")
-                        Log.d("場所:setOnKeyListener", "size=${mList.size} MemoContents=${mList}")
+                            Log.d("場所:setOnKeyListener", "Delキーイベントに入った")
+                            Log.d("場所:setOnKeyListener", "削除するMemoRowのId=${(v as MemoRow).id}")
+                            Log.d("場所:setOnKeyListener", "selectionEnd=${v.selectionEnd}")
+                            Log.d("場所:setOnKeyListener", "size=${mList.size} MemoContents=${mList}")
 
+                            when {
+                                memoRowInfo.checkBoxId.value is Some ->
+                                    executeMemoOperation(DeleteCheckBox(v))
+                                memoRowInfo.dotId.value is Some ->
+                                    executeMemoOperation(DeleteDot(v))
+                            }
 
-                        when {
-                            memoRowInfo.checkBoxId.value is Some -> executeMemoOperation(DeleteCheckBox(v))
-                            memoRowInfo.dotId.value is Some -> executeMemoOperation(DeleteDot(v))
+                            mainViewModel.viewModelScope.launch {
+                                executeMemoOperationActor().apply {
+                                    send(DeleteMemoRow(v))
+                                    close()
+                                }
+                            }
                         }
 
-                        executeMemoOperation(DeleteMemoRow(v))
-                    }
-
-                    //Delキー処理の後にフラグをtrueに変更することで、削除処理のタイミングを適正にしている
-                    v is MemoRow && v.selectionEnd == 0 -> {
-                        ifAtFirstInText.compareAndSet(expect = false, update = true)
-                        Log.d("場所:setOnKeyListener#Frag変更処理", "atFirstInText=${ifAtFirstInText.value}")
+                        //Delキー処理の後にフラグをtrueに変更することで、削除処理のタイミングを適正にしている
+                        v is MemoRow && v.selectionEnd == 0 -> {
+                            ifAtFirstInText.compareAndSet(expect = false, update = true)
+                            Log.d("場所:setOnKeyListener#Frag変更処理", "atFirstInText=${ifAtFirstInText.value}")
+                        }
                     }
                 }
                 false
@@ -357,21 +340,13 @@ class MemoMainViewModel : ViewModel() {
                 when {
                     v is MemoRow && v.isClickable && !hasFocus -> {
                         Log.d("場所:setOnFocusChangeListener", "FocusChange(Lost)が呼ばれた")
-                        memoContents.updateAndGet { mMemoContents ->
-                            val mList = mMemoContents.contentsList
-                            val indexOfMemoRow = mList.indexOfFirst { it.memoRowId.value == v.id }
 
-                            Log.d("場所:setOnFocusChangeListener",
-                                "変更前:size=${mList.size} MemoContents=${mList}")
-
-                            MemoContents(mList.flatMap {
-                                if (it.memoRowId.value == v.id)
-                                    listOf(mList[indexOfMemoRow].copy(text = Text(v.text.toString()))).k()
-                                else listOf(it).k()
-                            })
+                        mainViewModel.viewModelScope.launch {
+                            executeMemoOperationActor().apply {
+                                send(UpdateTextOfMemoRowInfo(v))
+                                close()
+                            }
                         }
-                        Log.d("場所:setOnFocusChangeListener",
-                            "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
                     }
                     v is MemoRow && hasFocus -> {
                         Log.d("場所:setOnFocusChangeListener", "FocusChange(Get)が呼ばれた")
@@ -387,16 +362,16 @@ class MemoMainViewModel : ViewModel() {
             }
         }
 
-        private fun createNewMemoRowView(): MemoRow {
+        private fun createNewMemoRowView(executeId: ExecuteTypeForMemoContents): MemoRow {
             return EditText(mainFragment.context, null, 0, R.style.MemoEditTextStyle).apply {
                 layoutParams = ConstraintLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.MATCH_PARENT,
                     ConstraintLayout.LayoutParams.WRAP_CONTENT
                 )
                 id = View.generateViewId()
-
-                setEnterKeyAction()
                 setFocusChangeAction()
+                setBackSpaceKeyAction(executeId)
+                setEnterKeyAction()
             }
         }
 
@@ -407,14 +382,24 @@ class MemoMainViewModel : ViewModel() {
             val memoRowInfo = mList[mList.indexOfFirst { it.memoRowId.value == this.id }]
             val checkBoxId = memoRowInfo.checkBoxId.value
 
-            when {
-                memoRowInfo.dotId.value is Some<Int> -> {
-                    executeMemoOperation(DeleteDot(this))
-                    executeMemoOperation(AddCheckBox(this))
+            mainViewModel.viewModelScope.launch {
+                when {
+                    memoRowInfo.dotId.value is Some<Int> -> {
+                        executeMemoOperationActor().apply {
+                            send(DeleteDot(this@operationCheckBox))
+                            send(AddCheckBox(this@operationCheckBox))
+                            close()
+                        }
+                    }
+                    checkBoxId is None -> executeMemoOperationActor().apply {
+                        send(AddCheckBox(this@operationCheckBox))
+                        close()
+                    }
+                    checkBoxId is Some<Int> -> executeMemoOperationActor().apply {
+                        send(DeleteCheckBox(this@operationCheckBox))
+                        close()
+                    }
                 }
-
-                checkBoxId is None -> executeMemoOperation(AddCheckBox(this))
-                checkBoxId is Some<Int> -> executeMemoOperation(DeleteCheckBox(this))
             }
         }
 
@@ -442,8 +427,6 @@ class MemoMainViewModel : ViewModel() {
             }
             Log.d("場所:addCheckBox",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
-
-            executeMemoOperation(Complete())
         }
 
         private fun deleteCheckBox(executeId: DeleteCheckBox) {
@@ -472,8 +455,6 @@ class MemoMainViewModel : ViewModel() {
             }
             Log.d("場所:deleteCheckBox",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
-
-            executeMemoOperation(Complete())
         }
 
         private fun createNewCheckBoxView(executeId: AddCheckBox): CheckBox {
@@ -493,41 +474,54 @@ class MemoMainViewModel : ViewModel() {
 
         private fun CheckBox.setCheckedChangeAction(executeId: AddCheckBox) {
             this.setOnCheckedChangeListener { buttonView, isChecked ->
-                memoContents.updateAndGet { mMemoContents ->
-                    val mList = mMemoContents.contentsList
-                    val memoRow = executeId.memoRow
-                    val indexOfMemoRow = mList.indexOfFirst { it.memoRowId.value == memoRow.id }
-                    Log.d("場所:setOnCheckedChangeListener",
-                        "変更前:size=${mList.size} MemoContents=${mList}")
+                val memoRow = executeId.memoRow
 
+                mainViewModel.viewModelScope.launch {
                     when (isChecked) {
                         true -> {
                             memoRow.setTextColor(
                                 resources.getColor(R.color.colorGray, mainFragment.activity?.theme)
                             )
 
-                            MemoContents(mList.flatMap {
-                                if (it.memoRowId.value == executeId.memoRow.id)
-                                    listOf(mList[indexOfMemoRow].copy(checkBoxState = CheckBoxState(true))).k()
-                                else listOf(it).k()
-                            })
+                            executeMemoOperationActor().apply {
+                                send(ChangeCheckBoxState(memoRow))
+                                close()
+                            }
                         }
                         false -> {
                             memoRow.setTextColor(
                                 resources.getColor(R.color.colorBlack, mainFragment.activity?.theme)
                             )
 
-                            MemoContents(mList.flatMap {
-                                if (it.memoRowId.value == executeId.memoRow.id)
-                                    listOf(mList[indexOfMemoRow].copy(checkBoxState = CheckBoxState(false))).k()
-                                else listOf(it).k()
-                            })
+                            executeMemoOperationActor().apply {
+                                send(ChangeCheckBoxState(memoRow))
+                                close()
+                            }
                         }
                     }
                 }
                 Log.d("場所:setOnCheckedChangeListener",
                     "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
             }
+        }
+
+        private fun changeCheckBoxState(executeId: ChangeCheckBoxState) {
+            memoContents.updateAndGet { mMemoContents ->
+                val mList = mMemoContents.contentsList
+                val memoRow = executeId.memoRow
+                val indexOfMemoRow = mList.indexOfFirst { it.memoRowId.value == memoRow.id }
+                Log.d("場所:changeCheckBoxState", "変更前:size=${mList.size} MemoContents=${mList}")
+
+                MemoContents(mList.flatMap {
+                    if (it.memoRowId.value == executeId.memoRow.id)
+                        listOf(mList[indexOfMemoRow].copy(
+                            checkBoxState = CheckBoxState(!it.checkBoxState.value))
+                        ).k()
+                    else listOf(it).k()
+                })
+            }
+            Log.d("場所:changeCheckBoxState",
+                "変更前:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
         }
 
 
@@ -537,13 +531,24 @@ class MemoMainViewModel : ViewModel() {
             val memoRowInfo = mList[mList.indexOfFirst { it.memoRowId.value == this.id }]
             val dotId = memoRowInfo.dotId.value
 
-            when {
-                memoRowInfo.checkBoxId.value is Some<Int> -> {
-                    executeMemoOperation(DeleteCheckBox(this))
-                    executeMemoOperation(AddDot(this))
+            mainViewModel.viewModelScope.launch {
+                when {
+                    memoRowInfo.checkBoxId.value is Some<Int> -> {
+                        executeMemoOperationActor().apply {
+                            send(DeleteCheckBox(this@dotOperation))
+                            send(AddDot(this@dotOperation))
+                            close()
+                        }
+                    }
+                    dotId is None -> executeMemoOperationActor().apply {
+                        send(AddDot(this@dotOperation))
+                        close()
+                    }
+                    dotId is Some<Int> -> executeMemoOperationActor().apply {
+                        send(DeleteDot(this@dotOperation))
+                        close()
+                    }
                 }
-                dotId is None -> executeMemoOperation(AddDot(this))
-                dotId is Some<Int> -> executeMemoOperation(DeleteDot(this))
             }
         }
 
@@ -576,8 +581,6 @@ class MemoMainViewModel : ViewModel() {
             }
             Log.d("場所:addDot",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
-
-            executeMemoOperation(Complete())
         }
 
         private fun deleteDot(executeId: DeleteDot) {
@@ -601,14 +604,17 @@ class MemoMainViewModel : ViewModel() {
             }
             Log.d("場所:deleteDot",
                 "変更後:size=${memoContents.value.contentsList.size} MemoContents=${memoContents.value.contentsList}")
-
-            executeMemoOperation(Complete())
         }
 
 
         internal fun clearAll() {
-            executeMemoOperation(ClearAll())
-            executeMemoOperation(CreateFirstMemoRow(Text("")))
+            mainViewModel.viewModelScope.launch {
+                executeMemoOperationActor().apply {
+                    send(ClearAll())
+                    send(CreateFirstMemoRow(Text("")))
+                    close()
+                }
+            }
         }
 
         private fun clearAllInMemoContents() {
@@ -618,8 +624,6 @@ class MemoMainViewModel : ViewModel() {
             memoContents.getAndSet(MemoContents(listOf<MemoRowInfo>().k()))
             Log.d("場所:clearAllInMemoContents", "memoContents=${memoContents.value.contentsList}")
             ifAtFirstInText.compareAndSet(expect = false, update = true)
-
-            executeMemoOperation(Complete())
         }
     }
 
