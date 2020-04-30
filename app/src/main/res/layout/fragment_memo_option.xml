@@ -2,97 +2,80 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/memoOptionViewGroup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/memoTitleLabelTextView"
+        android:id="@+id/titleLabelView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:labelFor="@+id/memoTitleEditText"
+        android:labelFor="@+id/titleTextView"
         android:text="@string/title"
-        app:layout_constraintStart_toStartOf="@+id/memoTitleEditText"
+        app:layout_constraintStart_toStartOf="@+id/titleTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/memoTitleHelperTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:textColor="@color/design_default_color_error"
-        app:layout_constraintBottom_toTopOf="@+id/memoTitleEditText"
-        app:layout_constraintStart_toEndOf="@+id/memoTitleLabelTextView"
-        tools:text="@string/title_helper" />
-
-    <TextView
-        android:id="@+id/memoTitleCounterTextView"
+        android:id="@+id/titleCounterView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:text="@string/counter_for_edit_text"
-        app:layout_constraintBottom_toTopOf="@+id/memoTitleEditText"
-        app:layout_constraintEnd_toEndOf="@+id/memoTitleEditText" />
+        app:layout_constraintBottom_toTopOf="@+id/titleTextView"
+        app:layout_constraintEnd_toEndOf="@+id/titleTextView"
+        tools:text="18/30" />
 
     <EditText
-        android:id="@+id/memoTitleEditText"
+        android:id="@+id/titleTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:ems="10"
         android:inputType="text"
+        android:maxEms="10"
         android:maxLength="15"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/memoTitleLabelTextView"
+        app:layout_constraintTop_toBottomOf="@+id/titleLabelView"
         tools:text="ああああああああああいいいいい" />
 
-
     <TextView
-        android:id="@+id/memoCategoryLabelTextView"
+        android:id="@+id/categoryLabelView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:labelFor="@+id/memoCategoryEditText"
+        android:labelFor="@+id/categoryTextView"
         android:text="@string/category"
-        app:layout_constraintStart_toStartOf="@+id/memoCategoryEditText"
-        app:layout_constraintTop_toBottomOf="@+id/memoTitleEditText" />
+        app:layout_constraintStart_toStartOf="@+id/categoryTextView"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 
     <TextView
-        android:id="@+id/categoryHelperTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:textColor="@color/design_default_color_error"
-        app:layout_constraintBottom_toTopOf="@+id/memoCategoryEditText"
-        app:layout_constraintStart_toEndOf="@+id/memoCategoryLabelTextView"
-        tools:text="@string/category_helper" />
-
-    <TextView
-        android:id="@+id/categoryCounterTextView"
+        android:id="@+id/categoryCounterView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
         android:text="@string/counter_for_edit_text"
-        app:layout_constraintBottom_toTopOf="@+id/memoCategoryEditText"
-        app:layout_constraintEnd_toEndOf="@+id/memoCategoryEditText"
+        app:layout_constraintBottom_toTopOf="@+id/categoryTextView"
+        app:layout_constraintEnd_toEndOf="@+id/categoryTextView"
         tools:text="13/15" />
 
     <EditText
-        android:id="@+id/memoCategoryEditText"
+        android:id="@+id/categoryTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:ems="10"
         android:inputType="text"
+        android:maxEms="10"
         android:maxLength="15"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/memoCategoryLabelTextView"
+        app:layout_constraintTop_toBottomOf="@+id/categoryLabelView"
         tools:text="あああああああ" />
 
     <ImageButton
@@ -100,10 +83,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorTransparent"
-        app:layout_constraintBottom_toBottomOf="@+id/memoCategoryEditText"
-        app:layout_constraintEnd_toEndOf="@+id/memoCategoryEditText"
-        app:layout_constraintTop_toTopOf="@+id/memoCategoryEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/categoryTextView"
+        app:layout_constraintEnd_toEndOf="@+id/categoryTextView"
+        app:layout_constraintTop_toTopOf="@+id/categoryTextView"
         app:srcCompat="@drawable/ic_arrow_drop_down_black_32dp" />
+
 
     <Switch
         android:id="@+id/reminderOnOffSwitchView"
@@ -117,7 +101,104 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/memoCategoryEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/categoryTextView" />
+
+    <TextView
+        android:id="@+id/reminderDateLabelView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="11dp"
+        android:enabled="false"
+        android:labelFor="@id/reminderDateView"
+        android:text="@string/reminder_set_date_label"
+        app:layout_constraintEnd_toEndOf="@+id/reminderDateView"
+        app:layout_constraintStart_toStartOf="@+id/reminderDateView"
+        app:layout_constraintTop_toBottomOf="@+id/reminderOnOffSwitchView" />
+
+    <Button
+        android:id="@+id/reminderDateView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@color/colorLightGray"
+        android:elevation="8dp"
+        android:enabled="false"
+        android:minHeight="0dp"
+        android:padding="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/reminderOnOffSwitchView"
+        app:layout_constraintTop_toBottomOf="@+id/reminderDateLabelView"
+        tools:text="2020/12/17" />
+
+    <TextView
+        android:id="@+id/reminderTimeLabelView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:labelFor="@id/reminderTimeView"
+        android:text="@string/reminder_set_time_label"
+        app:layout_constraintBottom_toTopOf="@+id/reminderTimeView"
+        app:layout_constraintEnd_toEndOf="@+id/reminderTimeView"
+        app:layout_constraintStart_toStartOf="@+id/reminderTimeView" />
+
+    <Button
+        android:id="@+id/reminderTimeView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@color/colorLightGray"
+        android:elevation="8dp"
+        android:enabled="false"
+        android:minHeight="0dp"
+        android:padding="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/reminderDateView"
+        app:layout_constraintStart_toEndOf="@+id/reminderDateView"
+        app:layout_constraintTop_toTopOf="@+id/reminderDateView"
+        tools:text="10 : 45" />
+
+
+    <TextView
+        android:id="@+id/preAlarmLabelView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:enabled="false"
+        android:labelFor="@id/preAlarmSpinnerView"
+        android:text="@string/reminder_pre_alarm_label"
+        app:layout_constraintStart_toStartOf="@+id/preAlarmSpinnerView"
+        app:layout_constraintTop_toBottomOf="@+id/reminderDateView" />
+
+    <Spinner
+        android:id="@+id/preAlarmSpinnerView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/reminder_pre_alarm_spinner"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/reminderDateView"
+        app:layout_constraintTop_toBottomOf="@+id/preAlarmLabelView" />
+
+
+    <TextView
+        android:id="@+id/postAlarmLabelView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:enabled="false"
+        android:labelFor="@id/postAlarmSpinnerView"
+        android:text="@string/reminder_post_alarm_label"
+        app:layout_constraintStart_toStartOf="@+id/postAlarmSpinnerView"
+        app:layout_constraintTop_toBottomOf="@+id/preAlarmSpinnerView" />
+
+    <Spinner
+        android:id="@+id/postAlarmSpinnerView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/reminder_post_alarm_spinner"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/preAlarmSpinnerView"
+        app:layout_constraintTop_toBottomOf="@+id/postAlarmLabelView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

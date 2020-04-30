@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import arrow.core.None
 import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.clearAll
 import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.initMemoContentsOperation
@@ -18,15 +17,12 @@ import kotlinx.android.synthetic.main.fragment_memo_main.*
 
 class MemoMainFragment : Fragment() {
 
-    private lateinit var viewModel: MemoMainViewModel
+    private lateinit var mainViewModel: MemoMainViewModel
+    private lateinit var optionViewModel: MemoOptionViewModel
     private lateinit var memoContainer: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = requireActivity().run {
-            ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -42,7 +38,7 @@ class MemoMainFragment : Fragment() {
         //viewPagerのバグのためのとりあえずのメソッド
         MemoMainViewModel.ForFirstFocusInMainFragment.setFragmentAndContainer(this, memoContainer)
 
-        initMemoContentsOperation(this, viewModel, memoContainer, None)
+        initMemoContentsOperation(this, mainViewModel, memoContainer, None)
 
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
@@ -63,8 +59,17 @@ class MemoMainFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         //ツールバーのタイトルをセット
         activity?.title = getString(R.string.input_new_memo)
+    }
+
+    internal fun setViewModel(mainVM: MemoMainViewModel, optionVM: MemoOptionViewModel) {
+        mainViewModel = mainVM
+        optionViewModel = optionVM
     }
 }

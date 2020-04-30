@@ -12,15 +12,27 @@
     <string name="category">カテゴリー</string>
     <string name="counter_for_edit_text">%4d/30</string>
     <string name="register_reminder">リマインダー登録</string>
+    <string name="reminder_set_date_label">日付</string>
+    <string name="reminder_set_time_label">時間</string>
+    <string name="reminder_pre_alarm_label">PRE アラーム</string>
+    <string name="reminder_post_alarm_label">POST アラーム</string>
 
+    <string-array name="reminder_pre_alarm_spinner">
+        <item>なし</item>
+        <item>5分前</item>
+        <item>10分前</item>
+        <item>30分前</item>
+        <item>1時間前</item>
+        <item>24時間前</item>
+    </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="memo_date">yyyy/MM/dd</string>
-    <string name="time_24_hour_clock">*24時間表記</string>
-    <string name="save">保存</string>
-    <string name="contents">内容</string>
-    <string name="date">日付</string>
-    <string name="time">時間</string>
-
+    <string-array name="reminder_post_alarm_spinner">
+        <item>なし</item>
+        <item>5分後</item>
+        <item>10分後</item>
+        <item>30分後</item>
+        <item>1時間後</item>
+        <item>24時間後</item>
+    </string-array>
 
 </resources>

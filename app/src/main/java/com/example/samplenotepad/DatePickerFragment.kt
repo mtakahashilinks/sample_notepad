@@ -6,21 +6,9 @@ import android.icu.util.Calendar
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
 
-class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
-
-    private lateinit var myViewModelMemo: MemoMainViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        if (activity != null) {
-            myViewModelMemo = activity.run{
-                ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
-            }
-        }
-    }
+class DatePickerFragment(private val onDatePicked: (Int, Int, Int) -> Unit)
+    : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val calendar = Calendar.getInstance()
@@ -29,10 +17,9 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
         return DatePickerDialog(requireContext(), this, year, month, day)
-
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
-      //  myViewModelMemo.setMemoDate("$year/${month + 1}/$dayOfMonth")
+        onDatePicked(year, month, dayOfMonth)
     }
 }

@@ -39,14 +39,15 @@ android {
 dependencies {
     def lifecycle_version = '2.2.0'
     def room_version = '2.2.5'
-    def arrow_version = '0.10.4'
+    def arrow_version = '0.10.5'
     def coroutines_version = '1.3.5'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     //lifecycle
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
@@ -71,10 +72,6 @@ dependencies {
     implementation "io.arrow-kt:arrow-recursion-data:$arrow_version"
     implementation "io.arrow-kt:arrow-aql:$arrow_version"
     implementation "io.arrow-kt:arrow-generic:$arrow_version"
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     //coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
