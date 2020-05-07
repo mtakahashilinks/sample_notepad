@@ -30,8 +30,9 @@ import kotlinx.coroutines.runBlocking
 
 class MemoMainViewModel : ViewModel() {
 
-    private var currentMemoInfoId: Int = 0
+    private var currentMemoContentsId: Int = 0
     private lateinit var firstMemoRow: MemoRow  //optionFragmentのtitleをセットするため
+    private lateinit var formatList: ListK<String>
 
     private fun setFirstMemoRow(memoRow:MemoRow) {
         Log.d("setFirstMemoRow", "呼ばれた　memoRowId=${memoRow.id}")
@@ -64,12 +65,12 @@ class MemoMainViewModel : ViewModel() {
         private lateinit var mainFragment: MemoMainFragment
         private lateinit var mainViewModel: MemoMainViewModel
 
-        private val memoContents = AtomicRefW(MemoInfo(contents = listOf<MemoRowInfo>().k()))
+        private val memoContents = AtomicRefW(MemoContents(contents = listOf<MemoRowInfo>().k()))
         private val ifAtFirstInText = AtomicBooleanW(false) //DelKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
 
 
         //memoContentsの変更処理は全てここを通す事で、非同期でも衝突せずに順番に処理される
-        private fun CoroutineScope.executeMemoOperationActor() = actor<TypeForExecuteMemoInfo> {
+        private fun CoroutineScope.executeMemoOperationActor() = actor<TypeForExecuteMemoContents> {
             Log.d("場所:executeMemoOperationActor", "executeMemoOperationActorに入った")
 
             val execution = mainViewModel.viewModelScope.launch {
@@ -80,7 +81,7 @@ class MemoMainViewModel : ViewModel() {
             execution.join()
         }
 
-        private fun executeMemoOperation(executeId: TypeForExecuteMemoInfo) {
+        private fun executeMemoOperation(executeId: TypeForExecuteMemoContents) {
             Log.d("場所:executeMemoOperation", "executeMemoOperationに入った executeId=$executeId")
             when (executeId) {
                 is UpdateTextOfMemoRowInfo -> updateTextOfMemoRowInfo(executeId)
@@ -101,16 +102,16 @@ class MemoMainViewModel : ViewModel() {
         internal fun initMemoContentsOperation(fragment: MemoMainFragment,
                                                viewModel: MemoMainViewModel,
                                                container: ConstraintLayout,
-                                               mMemoInfo: Option<MemoInfo>) = runBlocking {
+                                               mMemoContents: Option<MemoContents>) = runBlocking {
             mainFragment = fragment
             mainViewModel = viewModel
             memoContainer = container
 
             mainViewModel.viewModelScope.launch {
-                when (mMemoInfo){
-                    is Some ->  memoContents.getAndSet(mMemoInfo.t)
+                when (mMemoContents){
+                    is Some ->  memoContents.getAndSet(mMemoContents.t)
                     is None -> {
-                        memoContents.getAndSet(MemoInfo(contents = listOf<MemoRowInfo>().k()))
+                        memoContents.getAndSet(MemoContents(contents = listOf<MemoRowInfo>().k()))
                         executeMemoOperationActor().apply{
                             send(CreateFirstMemoRow(Text("")))
                             close()
@@ -140,7 +141,7 @@ class MemoMainViewModel : ViewModel() {
                     "変更前:size=${mList.size} MemoContents=${mList}"
                 )
 
-                MemoInfo(contents = mList.flatMap {
+                MemoContents(contents = mList.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
                         listOf(mList[indexOfMemoRow].copy(text = Text(executeId.memoRow.text.toString()))).k()
                     else listOf(it).k()
@@ -164,12 +165,12 @@ class MemoMainViewModel : ViewModel() {
 
                 mainViewModel.setFirstMemoRow(newMemoRow)
 
-                memoContainer.setConstraintForFirstMemoRow(newMemoRow)
+                memoContainer.setConstraintForFirstMemoRow(newMemoRow, mainFragment)
 
                 Log.d("場所:createFirstMemoRow", "newMemoRowId=${newMemoRow.id}")
                 Log.d("場所:createFirstMemoRow", "変更前:size=${mList.size} MemoContents=${mList}")
 
-                MemoInfo(contents = listOf(MemoRowInfo(MemoRowId(newMemoRow.id), text)).k())
+                MemoContents(contents = listOf(MemoRowInfo(MemoRowId(newMemoRow.id), text)).k())
             }
             Log.d("場所:createFirstMemoRow",
                 "変更後:size=${memoContents.value.contents.size} MemoContents=${memoContents.value.contents}")
@@ -212,12 +213,12 @@ class MemoMainViewModel : ViewModel() {
                 Log.d("場所:createNextMemoRow", "変更前:size=${mList.size} MemoContents=${mList}")
 
                 when {
-                    indexOfTargetMemoRow + 1 < (mList.size - 1) -> {
+                    indexOfTargetMemoRow < maxIndexOfList -> {
                         Log.d("場所:createNextMemoRow", "indexがリストサイズより小さい場合")
                         val beforeList = mList.take(indexOfTargetMemoRow + 1).k()
                         val afterList = mList.drop(indexOfTargetMemoRow + 1).k()
 
-                        MemoInfo(contents =
+                        MemoContents(contents =
                             beforeList.combineK(
                                 listOf(MemoRowInfo(MemoRowId(newMemoRow.id))).k()
                             ).combineK(afterList)
@@ -225,7 +226,7 @@ class MemoMainViewModel : ViewModel() {
                     }
                     else -> {
                         Log.d("場所:createNextMemoRow", "indexがリストの最後尾の場合")
-                        MemoInfo(
+                        MemoContents(
                             contents = mList.combineK(listOf(MemoRowInfo(MemoRowId(newMemoRow.id))).k())
                         )
                     }
@@ -273,7 +274,7 @@ class MemoMainViewModel : ViewModel() {
                         Text(textOfFormerMemoRow + targetMemoRow.text.toString()), textOfFormerMemoRow.length
                     )
 
-                MemoInfo(contents = mList.filter { it.memoRowId.value != targetMemoRow.id }.k())
+                MemoContents(contents = mList.filter { it.memoRowId.value != targetMemoRow.id }.k())
             }
             Log.d("場所:deleteMemoRow",
                 "変更後:size=${memoContents.value.contents.size} MemoContents=${memoContents.value.contents}")
@@ -314,20 +315,17 @@ class MemoMainViewModel : ViewModel() {
             } )
         }
 
-        private fun MemoRow.setBackSpaceKeyAction(executeId: TypeForExecuteMemoInfo) {
+        private fun MemoRow.setBackSpaceKeyAction(executeId: TypeForExecuteMemoContents) {
             this.setOnKeyListener { v, code, event ->
-                if (executeId is CreateNextMemoRow) {
-                    //まず文章の先頭でないのにFlagがtrueになっている場合にfalseに変更する
-                    if (v is MemoRow && v.selectionEnd != 0)
-                        ifAtFirstInText.compareAndSet(expect = true, update = false)
-
+                if (event.action == KeyEvent.ACTION_UP && executeId is CreateNextMemoRow && v is MemoRow) {
                     when {
+                        //delete処理
                         code == KeyEvent.KEYCODE_DEL && ifAtFirstInText.value -> {
                             val mList = memoContents.value.contents
                             val memoRowInfo = mList[mList.indexOfFirst { it.memoRowId.value == v.id }]
 
                             Log.d("場所:setOnKeyListener", "Delキーイベントに入った")
-                            Log.d("場所:setOnKeyListener", "削除するMemoRowのId=${(v as MemoRow).id}")
+                            Log.d("場所:setOnKeyListener", "削除するMemoRowのId=${v.id}")
                             Log.d("場所:setOnKeyListener", "selectionEnd=${v.selectionEnd}")
                             Log.d("場所:setOnKeyListener", "size=${mList.size} MemoContents=${mList}")
 
@@ -344,13 +342,11 @@ class MemoMainViewModel : ViewModel() {
                                     close()
                                 }
                             }
+                            Log.d("場所:setOnKeyListener", "ifAtFirstInText=${ifAtFirstInText.value}")
                         }
-
-                        //Delキー処理の後にフラグをtrueに変更することで、削除処理のタイミングを適正にしている
-                        v is MemoRow && v.selectionEnd == 0 -> {
-                            ifAtFirstInText.compareAndSet(expect = false, update = true)
-                            Log.d("場所:setOnKeyListener#Frag変更処理", "atFirstInText=${ifAtFirstInText.value}")
-                        }
+                        //このタイミングでフラグをtrueに変更しないと、カーソルが文頭に移動した瞬間に削除処理に入ってしまう
+                        // (カーソルが文頭に移動た後にDELキーを押した時点で削除処理に入ってほしい)
+                        v.selectionEnd == 0 -> ifAtFirstInText.compareAndSet(expect = false, update = true)
                     }
                 }
                 false
@@ -376,16 +372,24 @@ class MemoMainViewModel : ViewModel() {
                         val mList = memoContents.value.contents
                         Log.d("場所:setOnFocusChangeListener",
                             "FocusViewの位置=${mList.indexOfFirst { it.memoRowId.value == v.id } + 1}/${mList.size}")
+                        Log.d("場所:setOnFocusChangeListener", "FocusViewのId=${v.id}")
+
                         when (v.selectionEnd) {
-                            0 -> ifAtFirstInText.compareAndSet(expect = false, update = true)
-                            else -> ifAtFirstInText.compareAndSet(expect = true, update = false)
+                            0 -> {
+                                ifAtFirstInText.compareAndSet(expect = false, update = true)
+                                Log.d("場所:setOnFocusChangeListener#0", "ifAtFirstInText=${ifAtFirstInText.value}")
+                            }
+                            else -> {
+                                ifAtFirstInText.compareAndSet(expect = true, update = false)
+                                Log.d("場所:setOnFocusChangeListener#else", "ifAtFirstInText=${ifAtFirstInText.value}")
+                            }
                         }
                     }
                 }
             }
         }
 
-        private fun createNewMemoRowView(executeId: TypeForExecuteMemoInfo): MemoRow {
+        private fun createNewMemoRowView(executeId: TypeForExecuteMemoContents): MemoRow {
             return EditText(mainFragment.context, null, 0, R.style.MemoEditTextStyle).apply {
                 layoutParams = ConstraintLayout.LayoutParams(
                     ConstraintLayout.LayoutParams.MATCH_PARENT,
@@ -439,7 +443,7 @@ class MemoMainViewModel : ViewModel() {
 
                 Log.d("場所:addCheckBox", "変更前:size=${mList.size} MemoContents=${mList}")
 
-                MemoInfo(contents = mList.flatMap {
+                MemoContents(contents = mList.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
                         listOf(mList[indexOfMemoRow].copy(
                             checkBoxId = CheckBoxId(Some(newCheckBox.id)),
@@ -467,7 +471,7 @@ class MemoMainViewModel : ViewModel() {
 
                 Log.d("場所:deleteCheckBox", "変更前:size=${mList.size} MemoContents=${mList}")
 
-                MemoInfo(contents = mList.flatMap {
+                MemoContents(contents = mList.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
                         listOf(mList[indexOfMemoRow].copy(
                             checkBoxId = CheckBoxId(None),
@@ -535,7 +539,7 @@ class MemoMainViewModel : ViewModel() {
                 val indexOfMemoRow = mList.indexOfFirst { it.memoRowId.value == memoRow.id }
                 Log.d("場所:changeCheckBoxState", "変更前:size=${mList.size} MemoContents=${mList}")
 
-                MemoInfo(contents = mList.flatMap {
+                MemoContents(contents = mList.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
                         listOf(mList[indexOfMemoRow].copy(
                             checkBoxState = CheckBoxState(!it.checkBoxState.value))
@@ -596,7 +600,7 @@ class MemoMainViewModel : ViewModel() {
 
                 memoContainer.setConstraintForBulletsView(memoRow, newDot, 60, 20)
 
-                MemoInfo(contents = mList.flatMap {
+                MemoContents(contents = mList.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
                         listOf(mList[indexOfMemoRow].copy(dotId = DotId(Some(newDot.id)))).k()
                     else listOf(it).k()
@@ -620,7 +624,7 @@ class MemoMainViewModel : ViewModel() {
                     removeBulletsViewFromLayout(mainFragment, memoRow, dotId)
                 }
 
-                MemoInfo(contents = mList.flatMap {
+                MemoContents(contents = mList.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
                         listOf(mList[indexOfMemoRow].copy(dotId = DotId(None))).k() else listOf(it).k()
                 })
@@ -644,9 +648,8 @@ class MemoMainViewModel : ViewModel() {
             Log.d("場所:clearAllInMemoContents", "ClearAll処理に入った")
 
             memoContainer.removeAllViews()
-            memoContents.getAndSet(MemoInfo(contents = listOf<MemoRowInfo>().k()))
+            memoContents.getAndSet(MemoContents(contents = listOf<MemoRowInfo>().k()))
             Log.d("場所:clearAllInMemoContents", "memoContents=${memoContents.value.contents}")
-            ifAtFirstInText.compareAndSet(expect = false, update = true)
         }
     }
 

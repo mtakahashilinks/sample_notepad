@@ -103,102 +103,101 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/categoryTextView" />
 
-    <TextView
-        android:id="@+id/reminderDateLabelView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="11dp"
-        android:enabled="false"
-        android:labelFor="@id/reminderDateView"
-        android:text="@string/reminder_set_date_label"
-        app:layout_constraintEnd_toEndOf="@+id/reminderDateView"
-        app:layout_constraintStart_toStartOf="@+id/reminderDateView"
-        app:layout_constraintTop_toBottomOf="@+id/reminderOnOffSwitchView" />
+        <TextView
+            android:id="@+id/reminderDateLabelView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="11dp"
+            android:enabled="false"
+            android:labelFor="@id/reminderDateView"
+            android:text="@string/reminder_set_date_label"
+            app:layout_constraintEnd_toEndOf="@+id/reminderDateView"
+            app:layout_constraintStart_toStartOf="@+id/reminderDateView"
+            app:layout_constraintTop_toBottomOf="@+id/reminderOnOffSwitchView" />
 
-    <Button
-        android:id="@+id/reminderDateView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:background="@color/colorLightGray"
-        android:elevation="8dp"
-        android:enabled="false"
-        android:minHeight="0dp"
-        android:padding="8dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintStart_toStartOf="@+id/reminderOnOffSwitchView"
-        app:layout_constraintTop_toBottomOf="@+id/reminderDateLabelView"
-        tools:text="2020/12/17" />
+        <Button
+            android:id="@+id/reminderDateView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:background="@color/colorLightGray"
+            android:elevation="8dp"
+            android:enabled="false"
+            android:minHeight="0dp"
+            android:padding="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintStart_toStartOf="@+id/reminderOnOffSwitchView"
+            app:layout_constraintTop_toBottomOf="@+id/reminderDateLabelView"
+            tools:text="2020/12/17" />
 
-    <TextView
-        android:id="@+id/reminderTimeLabelView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:labelFor="@id/reminderTimeView"
-        android:text="@string/reminder_set_time_label"
-        app:layout_constraintBottom_toTopOf="@+id/reminderTimeView"
-        app:layout_constraintEnd_toEndOf="@+id/reminderTimeView"
-        app:layout_constraintStart_toStartOf="@+id/reminderTimeView" />
+        <TextView
+            android:id="@+id/reminderTimeLabelView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:labelFor="@id/reminderTimeView"
+            android:text="@string/reminder_set_time_label"
+            app:layout_constraintBottom_toTopOf="@+id/reminderTimeView"
+            app:layout_constraintEnd_toEndOf="@+id/reminderTimeView"
+            app:layout_constraintStart_toStartOf="@+id/reminderTimeView" />
 
-    <Button
-        android:id="@+id/reminderTimeView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:background="@color/colorLightGray"
-        android:elevation="8dp"
-        android:enabled="false"
-        android:minHeight="0dp"
-        android:padding="8dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintBottom_toBottomOf="@+id/reminderDateView"
-        app:layout_constraintStart_toEndOf="@+id/reminderDateView"
-        app:layout_constraintTop_toTopOf="@+id/reminderDateView"
-        tools:text="10 : 45" />
-
-
-    <TextView
-        android:id="@+id/preAlarmLabelView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:enabled="false"
-        android:labelFor="@id/preAlarmSpinnerView"
-        android:text="@string/reminder_pre_alarm_label"
-        app:layout_constraintStart_toStartOf="@+id/preAlarmSpinnerView"
-        app:layout_constraintTop_toBottomOf="@+id/reminderDateView" />
-
-    <Spinner
-        android:id="@+id/preAlarmSpinnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:entries="@array/reminder_pre_alarm_spinner"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="@+id/reminderDateView"
-        app:layout_constraintTop_toBottomOf="@+id/preAlarmLabelView" />
+        <Button
+            android:id="@+id/reminderTimeView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:background="@color/colorLightGray"
+            android:elevation="8dp"
+            android:enabled="false"
+            android:minHeight="0dp"
+            android:padding="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintBottom_toBottomOf="@+id/reminderDateView"
+            app:layout_constraintStart_toEndOf="@+id/reminderDateView"
+            app:layout_constraintTop_toTopOf="@+id/reminderDateView"
+            tools:text="10 : 45" />
 
 
-    <TextView
-        android:id="@+id/postAlarmLabelView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:enabled="false"
-        android:labelFor="@id/postAlarmSpinnerView"
-        android:text="@string/reminder_post_alarm_label"
-        app:layout_constraintStart_toStartOf="@+id/postAlarmSpinnerView"
-        app:layout_constraintTop_toBottomOf="@+id/preAlarmSpinnerView" />
+        <TextView
+            android:id="@+id/preAlarmLabelView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:enabled="false"
+            android:labelFor="@id/preAlarmSpinnerView"
+            android:text="@string/reminder_pre_alarm_label"
+            app:layout_constraintStart_toStartOf="@+id/preAlarmSpinnerView"
+            app:layout_constraintTop_toBottomOf="@+id/reminderDateView" />
 
-    <Spinner
-        android:id="@+id/postAlarmSpinnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:entries="@array/reminder_post_alarm_spinner"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="@+id/preAlarmSpinnerView"
-        app:layout_constraintTop_toBottomOf="@+id/postAlarmLabelView" />
+        <Spinner
+            android:id="@+id/preAlarmSpinnerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/reminder_pre_alarm_spinner"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@+id/reminderDateView"
+            app:layout_constraintTop_toBottomOf="@+id/preAlarmLabelView" />
 
+
+        <TextView
+            android:id="@+id/postAlarmLabelView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:enabled="false"
+            android:labelFor="@id/postAlarmSpinnerView"
+            android:text="@string/reminder_post_alarm_label"
+            app:layout_constraintStart_toStartOf="@+id/postAlarmSpinnerView"
+            app:layout_constraintTop_toBottomOf="@+id/preAlarmSpinnerView" />
+
+        <Spinner
+            android:id="@+id/postAlarmSpinnerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/reminder_post_alarm_spinner"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="@+id/preAlarmSpinnerView"
+            app:layout_constraintTop_toBottomOf="@+id/postAlarmLabelView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

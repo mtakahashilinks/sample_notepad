@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import arrow.core.None
@@ -42,6 +43,10 @@ class MemoMainFragment : Fragment() {
 
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
+        menuImgBtn.setOnClickListener {
+            showMenuPopup(menuImgBtn, context)
+        }
+
         checkBoxImgBtn.setOnClickListener {
             val targetMemoRow = memoContentsContainerLayout.findFocus()
             Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
@@ -67,6 +72,7 @@ class MemoMainFragment : Fragment() {
         //ツールバーのタイトルをセット
         activity?.title = getString(R.string.input_new_memo)
     }
+
 
     internal fun setViewModel(mainVM: MemoMainViewModel, optionVM: MemoOptionViewModel) {
         mainViewModel = mainVM

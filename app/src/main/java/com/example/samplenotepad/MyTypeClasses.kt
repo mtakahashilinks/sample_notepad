@@ -6,17 +6,17 @@ import arrow.core.*
 
 typealias MemoRow = EditText
 
-sealed class TypeForExecuteMemoInfo
-data class UpdateTextOfMemoRowInfo(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-data class CreateFirstMemoRow(val text: Text) : TypeForExecuteMemoInfo() { companion object }
-data class CreateNextMemoRow(val text: Text) : TypeForExecuteMemoInfo() { companion object }
-data class DeleteMemoRow(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-data class AddCheckBox(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-data class DeleteCheckBox(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-data class ChangeCheckBoxState(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-data class AddDot(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-data class DeleteDot(val memoRow: MemoRow) : TypeForExecuteMemoInfo() { companion object }
-class ClearAll : TypeForExecuteMemoInfo() { companion object }
+sealed class TypeForExecuteMemoContents
+data class UpdateTextOfMemoRowInfo(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+data class CreateFirstMemoRow(val text: Text) : TypeForExecuteMemoContents() { companion object }
+data class CreateNextMemoRow(val text: Text) : TypeForExecuteMemoContents() { companion object }
+data class DeleteMemoRow(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+data class AddCheckBox(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+data class DeleteCheckBox(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+data class ChangeCheckBoxState(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+data class AddDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+data class DeleteDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
+class ClearAll : TypeForExecuteMemoContents() { companion object }
 
 
 sealed class TypeForMemoRowInfo
@@ -36,18 +36,11 @@ data class MemoRowInfo(
     val dotId: DotId = DotId(None)
 ) { companion object }
 
-//各メモの情報(データベースに保存する)
-data class MemoInfo(
-    val id: Option<Int> = None,
-    val createdDateTime: Option<Long> = None,
-    val title: Option<String> = None,
-    val category: Option<String> = None,
-    val memoText: String ="", //データベースでメモ内容の文字列で検索する時に使う
-    val contents: ListK<MemoRowInfo>,
-    val reminderInfo: Option<ReminderInfo> = None
+data class MemoContents(
+    val contents: ListK<MemoRowInfo>
 ) { companion object }
 
-//メモに登録されたリマインダーの情報
+//登録されたリマインダーの情報
 data class ReminderInfo(
     val targetDate: Long,
     val targetTime: Long,
