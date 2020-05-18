@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import arrow.core.Some
@@ -162,6 +161,13 @@ internal fun ConstraintLayout.removeMemoRowFromLayout(fragment: MemoMainFragment
 
 internal fun ConstraintLayout.setConstraintForBulletsView(targetMemoRow: MemoRow, newBulletsView: View,
                                                           MemoRowMargin: Int, bulletsViewMargin: Int = 0) {
+    Log.d("場所:setConstraintForBulletsView", "Constraintのセットに入った")
+    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
+    val bulletParam = newBulletsView.layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForBulletsView", "before set")
+    Log.d("場所:setConstraintForBulletsView",
+        "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+
     this.addView(newBulletsView)
 
     constraintSet.apply {
@@ -175,9 +181,21 @@ internal fun ConstraintLayout.setConstraintForBulletsView(targetMemoRow: MemoRow
         connect(targetMemoRow.id, ConstraintSet.START, newBulletsView.id, ConstraintSet.END, MemoRowMargin)
         applyTo(this@setConstraintForBulletsView)
     }
+
+    Log.d("場所:setConstraintForBulletsView", "after set")
+    Log.d("場所:setConstraintForBulletsView",
+        "targetMemoRow: start=${targetParam.startToEnd} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForBulletsView",
+        "bulletView: start=${bulletParam.startToStart} top=${bulletParam.topToTop} end=${bulletParam.endToStart} bottom=${bulletParam.bottomToBottom}" )
 }
 
 internal fun ConstraintLayout.setConstraintForDeleteBulletsView(targetMemoRow: MemoRow) {
+    Log.d("場所:setConstraintForDeleteBulletsView", "Constraintのセットに入った")
+    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForDeleteBulletsView", "before set")
+    Log.d("場所:setConstraintForDeleteBulletsView",
+        "targetMemoRow: start=${targetParam.startToEnd} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+
     constraintSet.apply {
         clone(this@setConstraintForDeleteBulletsView)
         clear(targetMemoRow.id, ConstraintSet.START)
@@ -185,11 +203,21 @@ internal fun ConstraintLayout.setConstraintForDeleteBulletsView(targetMemoRow: M
             this@setConstraintForDeleteBulletsView.id, ConstraintSet.START, 0)
         applyTo(this@setConstraintForDeleteBulletsView)
     }
+
+    Log.d("場所:setConstraintForDeleteBulletsView", "after set")
+    Log.d("場所:setConstraintForDeleteBulletsView",
+        "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 }
 
 internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoMainFragment,
                                                           targetMemoRow: MemoRow,
                                                           bulletsViewId: TypeForMemoRowInfo) {
+    Log.d("場所:removeBulletsViewFromLayout", "リムーブ処理に入った")
+    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:removeBulletsViewFromLayout", "before remove view")
+    Log.d("場所:removeBulletsViewFromLayout",
+        "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+
     when {
         bulletsViewId is CheckBoxId && bulletsViewId.value is Some ->
             this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value.t))
@@ -197,21 +225,8 @@ internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoMainFrag
             this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value.t))
     }
     targetMemoRow.setTextColor(resources.getColor(R.color.colorBlack, fragment.activity?.theme))
-}
 
-internal fun showMenuPopup(view: View, context: Context?) {
-    PopupMenu(context, view).apply {
-        setOnMenuItemClickListener {item ->
-            when (item.itemId) {
-                R.id.addFormat -> {
-                    true
-                }
-            }
-            false
-        }
-
-        menuInflater.inflate(R.menu.memo_format_menu, this.menu)
-
-        show()
-    }
+    Log.d("場所:removeBulletsViewFromLayout", "after remove view")
+    Log.d("場所:removeBulletsViewFromLayout",
+        "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 }

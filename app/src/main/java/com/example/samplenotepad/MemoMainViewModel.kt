@@ -20,26 +20,24 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.*
 import arrow.core.extensions.listk.semigroupK.combineK
 import arrow.core.internal.AtomicRefW
-import kotlinx.coroutines.CoroutineScope
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.fragment_memo_main.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.stringify
 
 
 class MemoMainViewModel : ViewModel() {
 
-    private var currentMemoContentsId: Int = 0
-    private lateinit var firstMemoRow: MemoRow  //optionFragmentのtitleをセットするため
-    private lateinit var formatList: ListK<String>
-
-    private fun setFirstMemoRow(memoRow:MemoRow) {
-        Log.d("setFirstMemoRow", "呼ばれた　memoRowId=${memoRow.id}")
-        firstMemoRow = memoRow
+    companion object {
+        private var memoInfo: MemoInfo? = null
+        private lateinit var formatList: ListK<String>
+        private lateinit var categoryList: Set<String>
     }
 
-    internal fun getFirstMemoRowText() = firstMemoRow.text
 
     //viewPagerのバグのためのとりあえずのobject
     object ForFirstFocusInMainFragment {
@@ -94,6 +92,7 @@ class MemoMainViewModel : ViewModel() {
                 is AddDot -> addDot(executeId)
                 is DeleteDot -> deleteDot(executeId)
                 is ClearAll -> clearAllInMemoContents()
+                is SaveMemoInfo -> saveMemoInfo(executeId)
             }
             Log.d("場所:executeMemoOperation", "executeMemoOperationが終わった executeId=$executeId")
         }
@@ -120,6 +119,56 @@ class MemoMainViewModel : ViewModel() {
                 }
             }.join()
         }
+
+        //Database挿入時のシリアライズ処理
+        private fun serializeMemoContents(memoContents: MemoContents): String {
+            fun convertFromOption(value: Option<Int>): Int? {
+                return when (value) {
+                    is Some -> value.t
+                    is None -> null
+                }
+            }
+
+            val stBuilder = StringBuilder()
+
+            memoContents.contents.map { stBuilder.append(
+                ":${it.memoRowId.value},${it.text.value},${convertFromOption(it.checkBoxId.value)}," +
+                        "${it.checkBoxState.value},${convertFromOption(it.dotId.value)}"
+            ) }
+
+            return stBuilder.drop(1).toString()
+        }
+
+        //Databaseから取得する時のデシリアライズ処理
+        private fun deserializeMemoContents(value: String): MemoContents {
+            fun convertToOption(value: String): Option<Int> {
+                return when (value) {
+                    "null" -> None
+                    else -> Some(value.toInt())
+                }
+            }
+
+            tailrec fun stringToMemoContents(mList: MutableList<MemoRowInfo>,
+                                             stList: List<List<String>>): MemoContents {
+                return when {
+                    stList.isEmpty() -> MemoContents(mList.k())
+                    else -> stringToMemoContents(
+                        mList.apply{
+                            add(MemoRowInfo(
+                                MemoRowId(stList[0][0].toInt()),
+                                Text(stList[0][1]),
+                                CheckBoxId(convertToOption(stList[0][2])),
+                                CheckBoxState(stList[0][3].toBoolean()),
+                                DotId(convertToOption(stList[0][4]))
+                            ))
+                        }, stList.drop(1)
+                    )
+                }
+            }
+
+            return stringToMemoContents(mutableListOf(), value.split(":").map { it.split(",") })
+        }
+
 
         private fun MemoRow.setTextAndCursorPosition(text: Text, selection: Int = 0) {
             Log.d("場所:setTextAndCursorPosition", "setTextAndCursorPositionに入った")
@@ -162,8 +211,6 @@ class MemoMainViewModel : ViewModel() {
                 val newMemoRow = createNewMemoRowView(executeId).apply {
                     setTextAndCursorPosition(text, text.value.length)
                 }
-
-                mainViewModel.setFirstMemoRow(newMemoRow)
 
                 memoContainer.setConstraintForFirstMemoRow(newMemoRow, mainFragment)
 
@@ -650,6 +697,76 @@ class MemoMainViewModel : ViewModel() {
             memoContainer.removeAllViews()
             memoContents.getAndSet(MemoContents(contents = listOf<MemoRowInfo>().k()))
             Log.d("場所:clearAllInMemoContents", "memoContents=${memoContents.value.contents}")
+        }
+
+        internal fun saveOperation(executeId: SaveMemoInfo) = runBlocking {
+            Log.d("saveOperation", "save処理に入った")
+
+            //フォーカスがあるMemoRowのMemoInfoのTextプロパティを更新
+            val focusView = memoContainer.findFocus()
+
+            launch {
+                executeMemoOperationActor().apply {
+                    if (focusView is MemoRow)
+                        send(UpdateTextOfMemoRowInfo(focusView))
+
+                    saveMemoInfo(executeId)
+                    close()
+                }
+            }
+        }
+
+        private fun saveMemoInfo(executeId: SaveMemoInfo) = runBlocking {
+            Log.d("saveMemoInfo", "saveMemoInfoに入った")
+
+            tailrec fun createContentsText(contentsList: List<MemoRowInfo>,
+                                           builder: StringBuilder = StringBuilder("")): String {
+                return when {
+                    contentsList.isEmpty() -> builder.toString()
+                    else ->
+                        createContentsText(contentsList.drop(1), builder.append(contentsList[0].text.value))
+                }
+            }
+
+            val memoContents = memoContents.value
+            val stringMemoContents = async(Dispatchers.Default) { serializeMemoContents(memoContents) }
+            val contentsText = async(Dispatchers.Default) { createContentsText(memoContents.contents) }
+            val memoInfoId = memoInfo?.rowid
+            val memoInfoDao = executeId.database.memoInfoDao()
+
+            val mMemoInfo = MemoInfo(
+                memoInfoId ?: 0,
+                System.currentTimeMillis(),
+                executeId.optionValues.title,
+                executeId.optionValues.category,
+                stringMemoContents.await(),
+                contentsText.await(),
+                executeId.optionValues.targetDate.getOrElse { null },
+                executeId.optionValues.targetTime.getOrElse { null },
+                executeId.optionValues.preAlarm.getOrElse { null },
+                executeId.optionValues.postAlarm.getOrElse { null }
+            )
+
+            memoInfo = mMemoInfo
+
+            GlobalScope.launch(Dispatchers.IO) {
+                when (memoInfoId) {
+                    null -> {
+                        val rowId = memoInfoDao.insertMemoInfo(mMemoInfo)
+                        Log.d("場所:saveMemoInfo", "indexOfInsert=$rowId")
+                    }
+                    else -> memoInfoDao.updateMemoInfo(mMemoInfo)
+                }
+            }.join()
+
+            //隠れないようにソウトウェアキーボードを非表示にしてからSnackbarを表示
+            (mainFragment.context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(memoContainer.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+
+            Snackbar.make(mainFragment.saveImgBtn, R.string.save_snackbar, Snackbar.LENGTH_LONG).apply {
+                view.alpha = 0.5f
+                show()
+            }
         }
     }
 

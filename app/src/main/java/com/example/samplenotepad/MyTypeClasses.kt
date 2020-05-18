@@ -17,6 +17,10 @@ data class ChangeCheckBoxState(val memoRow: MemoRow) : TypeForExecuteMemoContent
 data class AddDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
 data class DeleteDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
 class ClearAll : TypeForExecuteMemoContents() { companion object }
+data class SaveMemoInfo(
+    val optionValues: ValuesOfOptionSetting,
+    val database: AppDatabase
+) : TypeForExecuteMemoContents() { companion object }
 
 
 sealed class TypeForMemoRowInfo
@@ -25,7 +29,6 @@ data class Text(val value: String) : TypeForMemoRowInfo() { companion object }
 data class CheckBoxId(val value: Option<Int>) : TypeForMemoRowInfo() { companion object }
 data class CheckBoxState(val value: Boolean) : TypeForMemoRowInfo() { companion object }
 data class DotId(val value: Option<Int>) : TypeForMemoRowInfo() { companion object }
-
 
 //メモの中の各行(View)の情報
 data class MemoRowInfo(
@@ -40,10 +43,20 @@ data class MemoContents(
     val contents: ListK<MemoRowInfo>
 ) { companion object }
 
+
+data class ValuesOfOptionSetting(
+    val title: String,
+    val category: String,
+    val targetDate: Option<Int>,
+    val targetTime: Option<Int>,
+    val preAlarm: Option<Int>,
+    val postAlarm: Option<Int>
+) { companion object }
+
 //登録されたリマインダーの情報
 data class ReminderInfo(
-    val targetDate: Long,
-    val targetTime: Long,
-    val preAlarmTime: Int,
-    val postAlarmTime: Int
+    val targetDate: Int?,
+    val targetTime: Int?,
+    val preAlarmTime: Int?,
+    val postAlarmTime: Int?
 ) { companion object }

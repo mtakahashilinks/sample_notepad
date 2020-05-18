@@ -5,17 +5,56 @@ import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
-import arrow.core.ListK
-import arrow.core.k
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
+import kotlinx.android.synthetic.main.fragment_memo_option.*
 import java.util.*
 
 
 class MemoOptionViewModel : ViewModel() {
 
-    internal val categoryList: ListK<String> = listOf("その他").k()
+    companion object {
+        private lateinit var optionFragment: MemoOptionFragment
 
+        internal fun getOptionValuesForSave(): ValuesOfOptionSetting {
+            fun convertDateTime(value: String): Some<Int> =
+                Some(Regex("""\d+""").findAll(value).toString().toInt())
 
-    internal fun initOptionViewModel() {}
+            fun getReminderParams(result: Option<Int>): Option<Int> =
+                if (optionFragment.reminderOnOffSwitchView.isChecked) result else None
+
+            return when (this::optionFragment.isInitialized) {
+                true -> {
+                    val title = when (optionFragment.titleTextView.text.isEmpty()) {
+                        true -> "無題"
+                        false -> optionFragment.titleTextView.text.toString()
+                    }
+                    val category = when (optionFragment.categoryTextView.text.isEmpty()) {
+                        true -> "その他"
+                        false -> optionFragment.categoryTextView.text.toString()
+                    }
+                    val targetDate =
+                        getReminderParams(convertDateTime(optionFragment.reminderDateView.text.toString()))
+                    val targetTime =
+                        getReminderParams(convertDateTime(optionFragment.reminderTimeView.text.toString()))
+                    val preAlarm =
+                        getReminderParams(Some(optionFragment.preAlarmSpinnerView.selectedItemPosition))
+                    val postAlarm =
+                        getReminderParams(Some(optionFragment.postAlarmSpinnerView.selectedItemPosition))
+
+                    ValuesOfOptionSetting(title, category, targetDate, targetTime, preAlarm, postAlarm)
+                }
+                false -> {
+                    ValuesOfOptionSetting("無題", "その他", None, None, None, None)
+                }
+            }
+        }
+    }
+
+    internal fun initOptionViewModel(fragment: MemoOptionFragment) {
+        optionFragment = fragment
+    }
 
 
     //Textの文字数カウンターのセット

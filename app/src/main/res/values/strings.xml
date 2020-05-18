@@ -18,6 +18,7 @@
     <string name="reminder_pre_alarm_label">PRE アラーム</string>
     <string name="reminder_post_alarm_label">POST アラーム</string>
     <string name="add_format">フォーマットに追加</string>
+    <string name="save_snackbar">保存しました</string>
 
     <string-array name="reminder_pre_alarm_spinner">
         <item>なし</item>

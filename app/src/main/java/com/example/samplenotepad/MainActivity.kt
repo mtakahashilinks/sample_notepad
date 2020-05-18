@@ -14,6 +14,20 @@ import kotlin.Exception
 
 class MainActivity : AppCompatActivity() {
 
+    private inner class MemoPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
+        override fun getItemCount(): Int = 2
+
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> MemoMainFragment().apply { setValues(mainViewModel, optionViewModel, appDatabase) }
+                1 -> MemoOptionFragment().apply { setValues(mainViewModel, optionViewModel) }
+                else -> throw Exception("total number of fragments is different from getItemCount() ")
+            }
+        }
+    }
+
+    private lateinit var appDatabase: AppDatabase
+
     private val mainViewModel: MemoMainViewModel =
         ViewModelProvider.NewInstanceFactory().create(MemoMainViewModel::class.java)
     private val optionViewModel: MemoOptionViewModel =
@@ -24,6 +38,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(mainToolbar)
+
+        appDatabase = AppDatabase.getDatabase(this)
 
         memoPager.adapter = MemoPagerAdapter(this)
 
@@ -47,23 +63,15 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+    }
+
     override fun onBackPressed() {
         when (memoPager.currentItem) {
             0 -> super.onBackPressed()
             else -> memoPager.currentItem = memoPager.currentItem - 1
-        }
-    }
-
-
-    private inner class MemoPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
-        override fun getItemCount(): Int = 2
-
-        override fun createFragment(position: Int): Fragment {
-            return when (position) {
-                0 -> MemoMainFragment().apply { setViewModel(mainViewModel, optionViewModel) }
-                1 -> MemoOptionFragment().apply { setViewModel(mainViewModel, optionViewModel) }
-                else -> throw Exception("total number of fragments is different from getItemCount() ")
-            }
         }
     }
 }

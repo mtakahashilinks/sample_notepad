@@ -7,13 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.ListPopupWindow
+import arrow.core.Some
 import kotlinx.android.synthetic.main.fragment_memo_option.*
 
 
 class MemoOptionFragment : Fragment() {
 
-    private lateinit var optionViewModel: MemoOptionViewModel
-    private lateinit var mainViewModel: MemoMainViewModel
+    companion object {
+        private lateinit var optionViewModel: MemoOptionViewModel
+        private lateinit var mainViewModel: MemoMainViewModel
+        private lateinit var database: AppDatabase
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +32,8 @@ class MemoOptionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        optionViewModel.initOptionViewModel(this)
+
         optionViewModel.apply {
             setCounterText(titleTextView, titleCounterView, 15) //TitleのViewに文字数カウンターをセット
             setCounterText(categoryTextView, categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
@@ -35,7 +41,7 @@ class MemoOptionFragment : Fragment() {
         }
 
         //カテゴリーのTextを初期化
-        if (categoryTextView.text.isEmpty()) categoryTextView.setText(optionViewModel.categoryList[0])
+        if (categoryTextView.text.isEmpty()) categoryTextView.setText("その他")
 
         //カテゴリー選択リストの処理
         categoryDropDownImgBtn.setOnClickListener {
@@ -113,7 +119,7 @@ class MemoOptionFragment : Fragment() {
     }
 
 
-    internal fun setViewModel(mainVM: MemoMainViewModel, optionVM: MemoOptionViewModel) {
+    internal fun setValues(mainVM: MemoMainViewModel, optionVM: MemoOptionViewModel) {
         mainViewModel = mainVM
         optionViewModel = optionVM
     }
