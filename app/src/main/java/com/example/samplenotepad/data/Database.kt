@@ -1,7 +1,9 @@
-package com.example.samplenotepad
+package com.example.samplenotepad.data
 
 import android.content.Context
 import androidx.room.*
+import com.example.samplenotepad.entities.MemoInfo
+
 
 @Database(entities = [MemoInfo::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
@@ -12,7 +14,8 @@ abstract class AppDatabase : RoomDatabase() {
         private var dbInstance: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            val instance = dbInstance
+            val instance =
+                dbInstance
 
             return when (instance == null) {
                 true -> {
@@ -32,22 +35,6 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-
-
-//各メモの情報(データベースに保存する)
-@Entity(tableName = "memoInfoTable")
-data class MemoInfo(
-    @PrimaryKey(autoGenerate = true) val rowid: Long,
-    val createdDateTime: Long,
-    val title: String,
-    val category: String,
-    val contents: String, //MemoContentsをシリアライズしたもの
-    val contentsText: String, //中身の検索用(MemoContentsの全てのTextを繋げてシリアライズしたもの)
-    val reminderDate: Int?,
-    val reminderTime: Int?,
-    val preAlarmTime: Int?,
-    val postAlarmTime: Int?
-) { companion object }
 
 
 @Dao

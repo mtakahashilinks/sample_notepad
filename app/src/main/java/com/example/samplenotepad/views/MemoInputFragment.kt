@@ -1,4 +1,4 @@
-package com.example.samplenotepad
+package com.example.samplenotepad.views
 
 import android.os.Bundle
 import android.util.Log
@@ -9,23 +9,30 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import arrow.core.None
-import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.clearAll
-import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.initMemoContentsOperation
-import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.operationCheckBox
-import com.example.samplenotepad.MemoMainViewModel.MemoContentsOperation.dotOperation
-import com.example.samplenotepad.MemoOptionViewModel.Companion.getOptionValuesForSave
+import com.example.samplenotepad.*
+import com.example.samplenotepad.viewModels.MemoOptionViewModel.Companion.getOptionValuesForSave
+import com.example.samplenotepad.data.AppDatabase
+import com.example.samplenotepad.entities.MemoRow
+import com.example.samplenotepad.entities.SaveMemoInfo
+import com.example.samplenotepad.usecases.*
+import com.example.samplenotepad.usecases.clearAll
+import com.example.samplenotepad.usecases.initMemoContentsOperation
+import com.example.samplenotepad.usecases.operationCheckBox
+import com.example.samplenotepad.usecases.saveOperation
+import com.example.samplenotepad.viewModels.MemoInputViewModel
+import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import kotlinx.android.synthetic.main.fragment_memo_main.*
 import kotlinx.coroutines.launch
 
 
-class MemoMainFragment : Fragment() {
+class MemoInputFragment : Fragment() {
 
     companion object {
-        private lateinit var mainViewModel: MemoMainViewModel
+        private lateinit var inputViewModel: MemoInputViewModel
         private lateinit var optionViewModel: MemoOptionViewModel
         private lateinit var memoContainer: ConstraintLayout
-        private lateinit var appDatabase: AppDatabase
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,19 +46,15 @@ class MemoMainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         memoContainer = memoContentsContainerLayout
 
-        //viewPagerのバグのためのとりあえずのメソッド
-        MemoMainViewModel.ForFirstFocusInMainFragment.setFragmentAndContainer(this, memoContainer)
-
-        initMemoContentsOperation(this, mainViewModel, memoContainer, None)
-        val dbDao = AppDatabase.getDatabase(requireContext()).memoInfoDao()
-
+        inputViewModel.initMainViewModel(this)
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
         menuImgBtn.setOnClickListener {
             lifecycleScope.launch {
-                val dao = appDatabase.memoInfoDao()
+                val dao = AppDatabase.getDatabase(this@MemoInputFragment.requireContext()).memoInfoDao()
                 val b = dao.getMemoInfo(1)
           //      dao.deleteMemoInfo(b)
          //       val c = dao.getMemoInfo(1)
@@ -75,14 +78,22 @@ class MemoMainFragment : Fragment() {
         clearAllImgBtn.setOnClickListener { clearAll() }
 
         saveImgBtn.setOnClickListener {
-            MemoMainViewModel.MemoContentsOperation.saveOperation(
-                SaveMemoInfo(getOptionValuesForSave(), appDatabase)
+            saveOperation(
+                SaveMemoInfo(
+                    getOptionValuesForSave()
+                )
             )
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        initMemoContentsOperation(
+            this,
+            inputViewModel,
+            memoContainer,
+            None
+        )
     }
 
     override fun onResume() {
@@ -93,9 +104,8 @@ class MemoMainFragment : Fragment() {
     }
 
 
-    internal fun setValues(mainVM: MemoMainViewModel, optionVM: MemoOptionViewModel, db: AppDatabase) {
-        mainViewModel = mainVM
+    internal fun setValues(inputVM: MemoInputViewModel, optionVM: MemoOptionViewModel) {
+        inputViewModel = inputVM
         optionViewModel = optionVM
-        appDatabase = db
     }
 }

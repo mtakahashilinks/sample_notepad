@@ -1,13 +1,16 @@
-package com.example.samplenotepad
+package com.example.samplenotepad.viewModels
 
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
+import com.example.samplenotepad.entities.ValuesOfOptionSetting
+import com.example.samplenotepad.views.MemoOptionFragment
 import kotlinx.android.synthetic.main.fragment_memo_option.*
 import java.util.*
 
@@ -18,8 +21,12 @@ class MemoOptionViewModel : ViewModel() {
         private lateinit var optionFragment: MemoOptionFragment
 
         internal fun getOptionValuesForSave(): ValuesOfOptionSetting {
-            fun convertDateTime(value: String): Some<Int> =
-                Some(Regex("""\d+""").findAll(value).toString().toInt())
+            fun convertDateTime(value: String): Some<Int> {
+                val matchedResults = Regex("""\d+""").findAll(value)
+                val result = matchedResults.map { it.value }.joinToString("")
+
+                return Some(result.toInt())
+            }
 
             fun getReminderParams(result: Option<Int>): Option<Int> =
                 if (optionFragment.reminderOnOffSwitchView.isChecked) result else None
@@ -52,10 +59,18 @@ class MemoOptionViewModel : ViewModel() {
         }
     }
 
-    internal fun initOptionViewModel(fragment: MemoOptionFragment) {
-        optionFragment = fragment
+    internal fun initOptionViewModel(oFragment: MemoOptionFragment) {
+        optionFragment = oFragment
     }
 
+    internal fun initReminderDateTime(dateView: TextView, timeView: TextView) {
+        val calendar = Calendar.getInstance()
+
+        dateView.text =
+            android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
+        timeView.text =
+            android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
+    }
 
     //Textの文字数カウンターのセット
     internal fun setCounterText(targetView: EditText, counterView: TextView, maxCharNumber: Int) {
@@ -70,16 +85,6 @@ class MemoOptionViewModel : ViewModel() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         } )
-    }
-
-
-    internal fun initReminderDateTime(dateView: TextView, timeView: TextView) {
-        val calendar = Calendar.getInstance()
-
-        dateView.text =
-            android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
-        timeView.text =
-            android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
     }
 
 

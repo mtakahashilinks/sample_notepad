@@ -1,10 +1,11 @@
-package com.example.samplenotepad
+package com.example.samplenotepad.entities
 
 import android.widget.EditText
 import arrow.core.*
 
 
 typealias MemoRow = EditText
+typealias MemoContents = ListK<MemoRowInfo>
 
 sealed class TypeForExecuteMemoContents
 data class UpdateTextOfMemoRowInfo(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
@@ -18,8 +19,7 @@ data class AddDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { compani
 data class DeleteDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
 class ClearAll : TypeForExecuteMemoContents() { companion object }
 data class SaveMemoInfo(
-    val optionValues: ValuesOfOptionSetting,
-    val database: AppDatabase
+    val optionValues: ValuesOfOptionSetting
 ) : TypeForExecuteMemoContents() { companion object }
 
 
@@ -33,14 +33,18 @@ data class DotId(val value: Option<Int>) : TypeForMemoRowInfo() { companion obje
 //メモの中の各行(View)の情報
 data class MemoRowInfo(
     val memoRowId: MemoRowId,
-    val text: Text = Text(""),
-    val checkBoxId: CheckBoxId = CheckBoxId(None),
-    val checkBoxState: CheckBoxState = CheckBoxState(false),
-    val dotId: DotId = DotId(None)
-) { companion object }
-
-data class MemoContents(
-    val contents: ListK<MemoRowInfo>
+    val text: Text = Text(
+        ""
+    ),
+    val checkBoxId: CheckBoxId = CheckBoxId(
+        None
+    ),
+    val checkBoxState: CheckBoxState = CheckBoxState(
+        false
+    ),
+    val dotId: DotId = DotId(
+        None
+    )
 ) { companion object }
 
 
@@ -51,12 +55,4 @@ data class ValuesOfOptionSetting(
     val targetTime: Option<Int>,
     val preAlarm: Option<Int>,
     val postAlarm: Option<Int>
-) { companion object }
-
-//登録されたリマインダーの情報
-data class ReminderInfo(
-    val targetDate: Int?,
-    val targetTime: Int?,
-    val preAlarmTime: Int?,
-    val postAlarmTime: Int?
 ) { companion object }

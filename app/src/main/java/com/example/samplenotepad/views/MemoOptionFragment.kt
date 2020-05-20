@@ -1,4 +1,4 @@
-package com.example.samplenotepad
+package com.example.samplenotepad.views
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,7 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.ListPopupWindow
-import arrow.core.Some
+import com.example.samplenotepad.*
+import com.example.samplenotepad.data.AppDatabase
+import com.example.samplenotepad.viewModels.MemoInputViewModel
+import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import kotlinx.android.synthetic.main.fragment_memo_option.*
 
 
@@ -15,7 +18,7 @@ class MemoOptionFragment : Fragment() {
 
     companion object {
         private lateinit var optionViewModel: MemoOptionViewModel
-        private lateinit var mainViewModel: MemoMainViewModel
+        private lateinit var inputViewModel: MemoInputViewModel
         private lateinit var database: AppDatabase
     }
 
@@ -46,8 +49,9 @@ class MemoOptionFragment : Fragment() {
         //カテゴリー選択リストの処理
         categoryDropDownImgBtn.setOnClickListener {
             ListPopupWindow(requireContext()).apply {
-                val data = arrayOf("その他", "仕事", "プライベート")
-                val adapter = ArrayAdapter(requireContext(), R.layout.memo_category_list_row, data)
+                val data = inputViewModel.categoryList.toTypedArray()
+                val adapter = ArrayAdapter(requireContext(),
+                    R.layout.memo_category_list_row, data)
 
                 anchorView = categoryTextView
                 setAdapter(adapter)
@@ -119,8 +123,8 @@ class MemoOptionFragment : Fragment() {
     }
 
 
-    internal fun setValues(mainVM: MemoMainViewModel, optionVM: MemoOptionViewModel) {
-        mainViewModel = mainVM
+    internal fun setValues(inputVM: MemoInputViewModel, optionVM: MemoOptionViewModel) {
+        inputViewModel = inputVM
         optionViewModel = optionVM
     }
 }

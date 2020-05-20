@@ -11,7 +11,7 @@
     android:paddingEnd="8dp"
     android:paddingBottom="8dp"
     android:orientation="vertical"
-    tools:context=".MemoMainFragment">
+    tools:context=".views.MemoInputFragment">
 
     <ImageButton
         android:id="@+id/menuImgBtn"
