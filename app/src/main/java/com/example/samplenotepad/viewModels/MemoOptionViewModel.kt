@@ -66,10 +66,8 @@ class MemoOptionViewModel : ViewModel() {
     internal fun initReminderDateTime(dateView: TextView, timeView: TextView) {
         val calendar = Calendar.getInstance()
 
-        dateView.text =
-            android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
-        timeView.text =
-            android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
+        dateView.text = android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
+        timeView.text = android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
     }
 
     //Textの文字数カウンターのセット

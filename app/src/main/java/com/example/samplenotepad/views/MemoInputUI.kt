@@ -54,6 +54,7 @@ internal fun ConstraintLayout.setConstraintForFirstMemoRow(targetMemoRow: MemoRo
             this@setConstraintForFirstMemoRow.id, ConstraintSet.END, 0)
         applyTo(this@setConstraintForFirstMemoRow)
     }
+
     val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
     Log.d("場所:setConstraintForFirstMemoRow",
         "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
@@ -252,6 +253,7 @@ internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoInputFra
         bulletsViewId is DotId && bulletsViewId.value is Some ->
             this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value.t))
     }
+
     targetMemoRow.setTextColor(resources.getColor(R.color.colorBlack, fragment.activity?.theme))
 
     Log.d("場所:removeBulletsViewFromLayout", "after remove view")

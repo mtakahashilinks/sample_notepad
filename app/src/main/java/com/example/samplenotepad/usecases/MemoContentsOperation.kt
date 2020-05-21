@@ -46,11 +46,7 @@ internal fun initMemoContentsOperation(fragment: MemoInputFragment, viewModel: M
         is None -> {
             inputViewModel.viewModelScope.launch {
                 inputViewModel.memoContents.getAndSet(listOf<MemoRowInfo>().k())
-                executeActor.send(
-                    CreateFirstMemoRow(
-                        Text("")
-                    )
-                )
+                executeActor.send(CreateFirstMemoRow(Text("")))
             }
         }
     }
@@ -69,23 +65,11 @@ internal fun MemoRow.operationCheckBox() {
     inputViewModel.viewModelScope.launch {
         when {
             memoRowInfo.dotId.value is Some<Int> -> {
-                executeActor.send(
-                    DeleteDot(
-                        this@operationCheckBox
-                    )
-                )
-                executeActor.send(
-                    AddCheckBox(
-                        this@operationCheckBox
-                    )
-                )
+                executeActor.send(DeleteDot(this@operationCheckBox))
+                executeActor.send(AddCheckBox(this@operationCheckBox))
             }
-            checkBoxId is None -> executeActor.send(
-                AddCheckBox(this@operationCheckBox)
-            )
-            checkBoxId is Some<Int> -> executeActor.send(
-                DeleteCheckBox(this@operationCheckBox)
-            )
+            checkBoxId is None -> executeActor.send(AddCheckBox(this@operationCheckBox))
+            checkBoxId is Some<Int> -> executeActor.send(DeleteCheckBox(this@operationCheckBox))
         }
     }
 }
@@ -99,23 +83,11 @@ internal fun MemoRow.dotOperation() {
     inputViewModel.viewModelScope.launch {
         when {
             memoRowInfo.checkBoxId.value is Some<Int> -> {
-                executeActor.send(
-                    DeleteCheckBox(
-                        this@dotOperation
-                    )
-                )
-                executeActor.send(
-                    AddDot(
-                        this@dotOperation
-                    )
-                )
+                executeActor.send(DeleteCheckBox(this@dotOperation))
+                executeActor.send(AddDot(this@dotOperation))
             }
-            dotId is None -> executeActor.send(
-                AddDot(this@dotOperation)
-            )
-            dotId is Some<Int> -> executeActor.send(
-                DeleteDot(this@dotOperation)
-            )
+            dotId is None -> executeActor.send(AddDot(this@dotOperation))
+            dotId is Some<Int> -> executeActor.send(DeleteDot(this@dotOperation))
         }
     }
 }
@@ -123,11 +95,7 @@ internal fun MemoRow.dotOperation() {
 internal fun clearAll() {
     inputViewModel.viewModelScope.launch {
         executeActor.send(ClearAll())
-        executeActor.send(
-            CreateFirstMemoRow(
-                Text("")
-            )
-        )
+        executeActor.send(CreateFirstMemoRow(Text("")))
     }
 }
 
@@ -139,16 +107,11 @@ internal fun saveOperation(executeId: SaveMemoInfo) = runBlocking {
 
         //フォーカスがあるMemoRowのMemoInfoのTextプロパティを更新
         if (focusView is MemoRow)
-            executeActor.send(
-                UpdateTextOfMemoRowInfo(
-                    focusView
-                )
-            )
+            executeActor.send(UpdateTextOfMemoRowInfo(focusView))
 
         setIsAppExistForIO(true)
-        saveMemoInfo(
-            inputFragment,
-            inputViewModel, executeId.optionValues)
+
+        saveMemoInfo(inputFragment, inputViewModel, executeId.optionValues)
     }.join()
 }
 
@@ -159,37 +122,17 @@ private fun CoroutineScope.executeMemoOperation() = actor<TypeForExecuteMemoCont
         for (msg in channel) {
             Log.d("場所:executeMemoOperation", "executeMemoOperationに入った executeId=$msg")
             when (msg) {
-                is UpdateTextOfMemoRowInfo -> updateTextOfMemoRowInfo(
-                    msg
-                )
-                is CreateFirstMemoRow -> createFirstMemoRow(
-                    msg
-                )
-                is CreateNextMemoRow -> createNextMemoRow(
-                    msg
-                )
-                is DeleteMemoRow -> deleteMemoRow(
-                    msg
-                )
-                is AddCheckBox -> addCheckBox(
-                    msg
-                )
-                is DeleteCheckBox -> deleteCheckBox(
-                    msg
-                )
-                is ChangeCheckBoxState -> changeCheckBoxState(
-                    msg
-                )
-                is AddDot -> addDot(
-                    msg
-                )
-                is DeleteDot -> deleteDot(
-                    msg
-                )
+                is UpdateTextOfMemoRowInfo -> updateTextOfMemoRowInfo(msg)
+                is CreateFirstMemoRow -> createFirstMemoRow(msg)
+                is CreateNextMemoRow -> createNextMemoRow(msg)
+                is DeleteMemoRow -> deleteMemoRow(msg)
+                is AddCheckBox -> addCheckBox(msg)
+                is DeleteCheckBox -> deleteCheckBox(msg)
+                is ChangeCheckBoxState -> changeCheckBoxState(msg)
+                is AddDot -> addDot(msg)
+                is DeleteDot -> deleteDot(msg)
                 is ClearAll -> clearAllInMemoContents()
-                is SaveMemoInfo -> saveOperation(
-                    msg
-                )
+                is SaveMemoInfo -> saveOperation(msg)
             }
 
             Log.d("場所:executeMemoOperation", "executeMemoOperationが終わった executeId=$msg")
@@ -222,11 +165,7 @@ private fun MemoRow.setEnterKeyAction() {
                     )
 
                     inputViewModel.viewModelScope.launch {
-                        executeActor.send(
-                            CreateNextMemoRow(
-                                Text(textBringToNextRow)
-                            )
-                        )
+                        executeActor.send(CreateNextMemoRow(Text(textBringToNextRow)))
                     }
                 }
                 else -> return
@@ -252,17 +191,11 @@ private fun MemoRow.setBackSpaceKeyAction(executeId: TypeForExecuteMemoContents)
 
                     inputViewModel.viewModelScope.launch {
                         when {
-                            memoRowInfo.checkBoxId.value is Some -> executeActor.send(
-                                DeleteCheckBox(v)
-                            )
-                            memoRowInfo.dotId.value is Some -> executeActor.send(
-                                DeleteDot(v)
-                            )
+                            memoRowInfo.checkBoxId.value is Some -> executeActor.send(DeleteCheckBox(v))
+                            memoRowInfo.dotId.value is Some -> executeActor.send(DeleteDot(v))
                         }
 
-                        executeActor.send(
-                            DeleteMemoRow(v)
-                        )
+                        executeActor.send(DeleteMemoRow(v))
                     }
 
                     Log.d("場所:setOnKeyListener", "ifAtFirstInText=${inputViewModel.ifAtFirstInText.value}")
@@ -285,11 +218,7 @@ private fun MemoRow.setFocusChangeAction() {
                 Log.d("場所:setOnFocusChangeListener", "FocusChange(Lost)が呼ばれた")
 
                 inputViewModel.viewModelScope.launch {
-                    executeActor.send(
-                        UpdateTextOfMemoRowInfo(
-                            v
-                        )
-                    )
+                    executeActor.send(UpdateTextOfMemoRowInfo(v))
                 }
             }
             v is MemoRow && hasFocus -> {
@@ -324,27 +253,18 @@ private fun createFirstMemoRow(executeId: CreateFirstMemoRow) {
 
     inputViewModel.memoContents.updateAndGet { memoContents ->
         val text = executeId.text
-        val newMemoRow = createNewMemoRowView(executeId)
-            .apply {
+        val newMemoRow = createNewMemoRowView(executeId).apply {
             setTextAndCursorPosition(text, text.value.length)
         }
 
         inputViewModel.viewModelScope.launch(Dispatchers.Main) {
-            memoContainer.setConstraintForFirstMemoRow(newMemoRow,
-                inputFragment
-            )
+            memoContainer.setConstraintForFirstMemoRow(newMemoRow, inputFragment)
         }
 
         Log.d("場所:createFirstMemoRow", "newMemoRowId=${newMemoRow.id}")
         Log.d("場所:createFirstMemoRow", "変更前:size=${memoContents.size} memoContents=${memoContents}")
 
-        listOf(
-            MemoRowInfo(
-                MemoRowId(
-                    newMemoRow.id
-                ), text
-            )
-        ).k()
+        listOf(MemoRowInfo(MemoRowId(newMemoRow.id), text)).k()
     }
     Log.d("場所:createFirstMemoRow",
         "変更後:size=${inputViewModel.memoContents.value.size} memoContents=${inputViewModel.memoContents.value}")
@@ -368,9 +288,7 @@ private fun createNextMemoRow(executeId: CreateNextMemoRow) {
         when {
             maxIndexOfList == indexOfTargetMemoRow -> {
                 Log.d("場所:createNextMemoRow", "下に他のViewがない場合")
-                memoContainer.setConstraintForNextMemoRowWithNoBelow(newMemoRow,
-                    MemoRowId(targetMemoRowId)
-                )
+                memoContainer.setConstraintForNextMemoRowWithNoBelow(newMemoRow, MemoRowId(targetMemoRowId))
             }
             maxIndexOfList > indexOfTargetMemoRow -> {
                 Log.d("場所:createNextMemoRow", "下に他のViewがある場合")
@@ -378,7 +296,8 @@ private fun createNextMemoRow(executeId: CreateNextMemoRow) {
 
                 memoContainer.setConstraintForNextMemoRowWithBelow(
                     newMemoRow,
-                    MemoRowId(targetMemoRowId), nextMemoRowId
+                    MemoRowId(targetMemoRowId),
+                    nextMemoRowId
                 )
             }
         }
@@ -392,20 +311,12 @@ private fun createNextMemoRow(executeId: CreateNextMemoRow) {
                 val suffixList = memoContents.drop(indexOfTargetMemoRow + 1).k()
 
                 prefixList
-                    .combineK(listOf(
-                        MemoRowInfo(
-                            MemoRowId(newMemoRow.id)
-                        )
-                    ).k())
+                    .combineK(listOf(MemoRowInfo(MemoRowId(newMemoRow.id))).k())
                     .combineK(suffixList)
             }
             else -> {
                 Log.d("場所:createNextMemoRow", "indexがリストの最後尾の場合")
-                memoContents.combineK(listOf(
-                    MemoRowInfo(
-                        MemoRowId(newMemoRow.id)
-                    )
-                ).k())
+                memoContents.combineK(listOf(MemoRowInfo(MemoRowId(newMemoRow.id))).k())
             }
         }
     }
@@ -443,12 +354,12 @@ private fun deleteMemoRow(executeId: DeleteMemoRow) {
 
             memoContainer.setConstraintForDeleteMemoRow(
                 targetMemoRow,
-                MemoRowId(formerMemoRowId), nextMemoRowId
+                MemoRowId(formerMemoRowId),
+                nextMemoRowId
             )
         }
 
-        memoContainer.removeMemoRowFromLayout(
-            inputFragment, targetMemoRow, formerMemoRow)
+        memoContainer.removeMemoRowFromLayout(inputFragment, targetMemoRow, formerMemoRow)
 
         formerMemoRow.setTextAndCursorPosition(
             Text(textOfFormerMemoRow + targetMemoRow.text.toString()), textOfFormerMemoRow.length
@@ -462,10 +373,7 @@ private fun deleteMemoRow(executeId: DeleteMemoRow) {
 
 
 private fun createNewMemoRowView(executeId: TypeForExecuteMemoContents): MemoRow {
-    return EditText(
-        inputFragment.context, null, 0,
-        R.style.MemoEditTextStyle
-    ).apply {
+    return EditText(inputFragment.context, null, 0, R.style.MemoEditTextStyle).apply {
         layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_PARENT,
             ConstraintLayout.LayoutParams.WRAP_CONTENT
@@ -487,20 +395,12 @@ private fun CheckBox.setCheckedChangeAction(executeId: AddCheckBox) {
                 true -> {
                     memoRow.setTextColor(resources.getColor(R.color.colorGray, inputFragment.activity?.theme))
 
-                    executeActor.send(
-                        ChangeCheckBoxState(
-                            memoRow
-                        )
-                    )
+                    executeActor.send(ChangeCheckBoxState(memoRow))
                 }
                 false -> {
                     memoRow.setTextColor(resources.getColor(R.color.colorBlack, inputFragment.activity?.theme))
 
-                    executeActor.send(
-                        ChangeCheckBoxState(
-                            memoRow
-                        )
-                    )
+                    executeActor.send(ChangeCheckBoxState(memoRow))
                 }
             }
         }
@@ -511,8 +411,7 @@ private fun CheckBox.setCheckedChangeAction(executeId: AddCheckBox) {
 
 private fun createNewCheckBoxView(executeId: AddCheckBox): CheckBox {
     return CheckBox(inputFragment.context).apply {
-        layoutParams =
-            ConstraintLayout.LayoutParams(
+        layoutParams = ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
             )
@@ -534,8 +433,7 @@ private fun changeCheckBoxState(executeId: ChangeCheckBoxState) {
             if (it.memoRowId.value == executeId.memoRow.id)
                 listOf(memoContents[indexOfMemoRow].copy(
                     checkBoxState = CheckBoxState(!it.checkBoxState.value)
-                )
-                ).k()
+                )).k()
             else listOf(it).k()
         }
     }
@@ -547,8 +445,7 @@ private fun addCheckBox(executeId: AddCheckBox) {
     Log.d("場所:addCheckBox", "checkBox追加処理に入った")
     inputViewModel.memoContents.updateAndGet { memoContents ->
         val memoRow = executeId.memoRow
-        val newCheckBox =
-            createNewCheckBoxView(executeId)
+        val newCheckBox = createNewCheckBoxView(executeId)
         val indexOfMemoRow = memoContents.indexOfFirst { it.memoRowId.value == memoRow.id }
 
         memoContainer.setConstraintForBulletsView(memoRow, newCheckBox, 80)
@@ -558,11 +455,7 @@ private fun addCheckBox(executeId: AddCheckBox) {
         memoContents.flatMap {
             if (it.memoRowId.value == executeId.memoRow.id)
                 listOf(memoContents[indexOfMemoRow].copy(
-                    checkBoxId = CheckBoxId(
-                        Some(
-                            newCheckBox.id
-                        )
-                    ),
+                    checkBoxId = CheckBoxId(Some(newCheckBox.id)),
                     checkBoxState = CheckBoxState(false)
                 )).k()
             else listOf(it).k()
@@ -622,10 +515,7 @@ private fun addDot(executeId: AddDot) {
 
         memoContents.flatMap {
             if (it.memoRowId.value == executeId.memoRow.id)
-                listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(
-                    Some(newDot.id)
-                )
-                )).k()
+                listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(Some(newDot.id)))).k()
             else listOf(it).k()
         }
     }
@@ -648,10 +538,7 @@ private fun deleteDot(executeId: DeleteDot) {
 
         memoContents.flatMap {
             if (it.memoRowId.value == executeId.memoRow.id)
-                listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(
-                    None
-                )
-                )).k()
+                listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(None))).k()
             else listOf(it).k()
         }
     }
@@ -669,9 +556,7 @@ private fun updateTextOfMemoRowInfo(executeId: UpdateTextOfMemoRowInfo) {
 
         memoContents.flatMap { mMemoRowInfo ->
             if (mMemoRowInfo.memoRowId.value == executeId.memoRow.id)
-                listOf(memoContents[indexOfMemoRow].copy(
-                    text = Text(executeId.memoRow.text.toString())
-                )).k()
+                listOf(memoContents[indexOfMemoRow].copy(text = Text(executeId.memoRow.text.toString()))).k()
             else listOf(mMemoRowInfo).k()
         }
     }

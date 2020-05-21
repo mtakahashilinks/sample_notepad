@@ -19,7 +19,6 @@ class MemoOptionFragment : Fragment() {
     companion object {
         private lateinit var optionViewModel: MemoOptionViewModel
         private lateinit var inputViewModel: MemoInputViewModel
-        private lateinit var database: AppDatabase
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,26 +72,8 @@ class MemoOptionFragment : Fragment() {
         //リマインダー登録スイッチのON・Off切り替えによる処理
         reminderOnOffSwitchView.setOnCheckedChangeListener { buttonView, isChecked ->
             when (isChecked) {
-                true -> {
-                    reminderDateLabelView.isEnabled = true
-                    reminderDateView.isEnabled = true
-                    reminderTimeLabelView.isEnabled = true
-                    reminderTimeView.isEnabled = true
-                    preAlarmLabelView.isEnabled = true
-                    preAlarmSpinnerView.visibility = View.VISIBLE
-                    postAlarmLabelView.isEnabled = true
-                    postAlarmSpinnerView.visibility = View.VISIBLE
-                }
-                false -> {
-                    reminderDateLabelView.isEnabled = false
-                    reminderDateView.isEnabled = false
-                    reminderTimeLabelView.isEnabled = false
-                    reminderTimeView.isEnabled = false
-                    preAlarmLabelView.isEnabled = false
-                    preAlarmSpinnerView.visibility = View.INVISIBLE
-                    postAlarmLabelView.isEnabled = false
-                    postAlarmSpinnerView.visibility = View.INVISIBLE
-                }
+                true -> changeStateForReminderSwitch(true, View.VISIBLE)
+                false -> changeStateForReminderSwitch(false, View.INVISIBLE)
             }
         }
 
@@ -122,6 +103,17 @@ class MemoOptionFragment : Fragment() {
         activity?.title = getString(R.string.optional_setting)
     }
 
+
+    private fun changeStateForReminderSwitch(enable: Boolean, visibility: Int) {
+        reminderDateLabelView.isEnabled = enable
+        reminderDateView.isEnabled = enable
+        reminderTimeLabelView.isEnabled = enable
+        reminderTimeView.isEnabled = enable
+        preAlarmLabelView.isEnabled = enable
+        preAlarmSpinnerView.visibility = visibility
+        postAlarmLabelView.isEnabled = enable
+        postAlarmSpinnerView.visibility = visibility
+    }
 
     internal fun setValues(inputVM: MemoInputViewModel, optionVM: MemoOptionViewModel) {
         inputViewModel = inputVM

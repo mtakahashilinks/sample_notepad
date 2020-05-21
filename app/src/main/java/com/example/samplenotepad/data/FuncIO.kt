@@ -53,19 +53,15 @@ internal fun deserializeMemoContents(value: String): MemoContents {
         return when {
             stList.isEmpty() -> mList.k()
             else -> stringToMemoContents(
-                mList.apply { add(
-                    MemoRowInfo(
+                mList.apply {
+                    add(MemoRowInfo(
                         MemoRowId(stList[0][0].toInt()),
                         Text(stList[0][1]),
-                        CheckBoxId(
-                            convertToOption(
-                                stList[0][2]
-                            )
-                        ),
+                        CheckBoxId(convertToOption(stList[0][2])),
                         CheckBoxState(stList[0][3].toBoolean()),
                         DotId(convertToOption(stList[0][4]))
-                    )
-                ) }
+                    ) )
+                }
                 , stList.drop(1)
             )
         }
@@ -90,21 +86,12 @@ internal fun CoroutineScope.saveMemoInfo(fragment: MemoInputFragment,
     }
 
     this.launch {
-        saveCategoryList(
-            fragment,
-            inputViewModel,
-            optionValues.category
-        )
+        saveCategoryList(fragment, inputViewModel, optionValues.category)
     }
 
     this.launch {
         val memoContents = inputViewModel.memoContents.value
-        val stringMemoContents =
-            async(Dispatchers.Default) {
-                serializeMemoContents(
-                    memoContents
-                )
-            }
+        val stringMemoContents = async(Dispatchers.Default) { serializeMemoContents(memoContents) }
         val contentsText = async(Dispatchers.Default) { createContentsText(memoContents.toList()) }
         val memoInfoId = inputViewModel.memoInfo.value?.rowid
         val appDatabase = AppDatabase.getDatabase(fragment.requireContext())

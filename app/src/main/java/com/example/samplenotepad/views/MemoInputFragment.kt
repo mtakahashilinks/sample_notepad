@@ -25,7 +25,7 @@ import kotlinx.android.synthetic.main.fragment_memo_main.*
 import kotlinx.coroutines.launch
 
 
-class MemoInputFragment : Fragment() {
+class MemoInputFragment() : Fragment() {
 
     companion object {
         private lateinit var inputViewModel: MemoInputViewModel
@@ -78,22 +78,13 @@ class MemoInputFragment : Fragment() {
         clearAllImgBtn.setOnClickListener { clearAll() }
 
         saveImgBtn.setOnClickListener {
-            saveOperation(
-                SaveMemoInfo(
-                    getOptionValuesForSave()
-                )
-            )
+            saveOperation(SaveMemoInfo(getOptionValuesForSave()))
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        initMemoContentsOperation(
-            this,
-            inputViewModel,
-            memoContainer,
-            None
-        )
+        initMemoContentsOperation(this, inputViewModel, memoContainer, None)
     }
 
     override fun onResume() {

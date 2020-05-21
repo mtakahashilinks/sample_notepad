@@ -32,9 +32,7 @@ class MemoInputViewModel : ViewModel() {
     }
 
     private fun loadAndSetCategoryList() = runBlocking {
-        withContext(viewModelScope.coroutineContext + Dispatchers.IO) {
-            loadCategoryList(inputFragment)
-        }
+        withContext(viewModelScope.coroutineContext + Dispatchers.IO) { loadCategoryList(inputFragment) }
     }
 
     override fun onCleared() {

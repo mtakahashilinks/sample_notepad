@@ -33,18 +33,10 @@ data class DotId(val value: Option<Int>) : TypeForMemoRowInfo() { companion obje
 //メモの中の各行(View)の情報
 data class MemoRowInfo(
     val memoRowId: MemoRowId,
-    val text: Text = Text(
-        ""
-    ),
-    val checkBoxId: CheckBoxId = CheckBoxId(
-        None
-    ),
-    val checkBoxState: CheckBoxState = CheckBoxState(
-        false
-    ),
-    val dotId: DotId = DotId(
-        None
-    )
+    val text: Text = Text(""),
+    val checkBoxId: CheckBoxId = CheckBoxId(None),
+    val checkBoxState: CheckBoxState = CheckBoxState(false),
+    val dotId: DotId = DotId(None)
 ) { companion object }
 
 
