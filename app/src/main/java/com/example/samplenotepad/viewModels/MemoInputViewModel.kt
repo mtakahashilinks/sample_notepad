@@ -11,10 +11,8 @@ import com.example.samplenotepad.usecases.closeMemoContentsOperation
 import com.example.samplenotepad.data.loadCategoryList
 import com.example.samplenotepad.entities.MemoInfo
 import com.example.samplenotepad.entities.MemoRowInfo
-import com.example.samplenotepad.views.MemoInputFragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import com.example.samplenotepad.views.main.MemoInputFragment
+import kotlinx.coroutines.*
 
 
 class MemoInputViewModel : ViewModel() {
@@ -22,18 +20,22 @@ class MemoInputViewModel : ViewModel() {
     internal val memoInfo: AtomicRefW<MemoInfo?> = AtomicRefW(null)
     internal val memoContents = AtomicRefW(listOf<MemoRowInfo>().k())
     internal val ifAtFirstInText = AtomicBooleanW(false) //DelKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
-    internal val categoryList: List<String> by lazy { loadAndSetCategoryList() }
+    internal val categoryList = AtomicRefW(listOf("その他"))
     private lateinit var formatList: ListK<String>
     private lateinit var inputFragment: MemoInputFragment
 
 
     internal fun initMainViewModel(fragment: MemoInputFragment) {
         inputFragment = fragment
+
+        loadAndSetCategoryList()
     }
 
-    private fun loadAndSetCategoryList() = runBlocking {
-        withContext(viewModelScope.coroutineContext + Dispatchers.IO) { loadCategoryList(inputFragment) }
-    }
+    private fun loadAndSetCategoryList() =
+        viewModelScope.launch(Dispatchers.IO) {
+            categoryList.updateAndGet { loadCategoryList(inputFragment) }
+        }
+
 
     override fun onCleared() {
         super.onCleared()

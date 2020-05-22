@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,7 +12,7 @@
     android:paddingEnd="8dp"
     android:paddingBottom="8dp"
     android:orientation="vertical"
-    tools:context=".views.MemoInputFragment">
+    tools:context=".views.main.MemoInputFragment">
 
     <ImageButton
         android:id="@+id/menuImgBtn"
@@ -95,15 +96,20 @@
         android:paddingBottom="6dp"
         android:src="@drawable/ic_add_circle_outline_black_32dp" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/memoContentsContainerLayout"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="top"
         app:layout_anchor="@id/saveImgBtn"
         app:layout_anchorGravity="bottom"
-        android:layout_marginTop="45dp">
+        android:layout_marginTop="45dp"
+        android:fillViewport="true">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/memoContentsContainerLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

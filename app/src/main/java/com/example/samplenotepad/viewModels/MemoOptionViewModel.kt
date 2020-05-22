@@ -2,7 +2,6 @@ package com.example.samplenotepad.viewModels
 
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
@@ -10,7 +9,7 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import com.example.samplenotepad.entities.ValuesOfOptionSetting
-import com.example.samplenotepad.views.MemoOptionFragment
+import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.android.synthetic.main.fragment_memo_option.*
 import java.util.*
 

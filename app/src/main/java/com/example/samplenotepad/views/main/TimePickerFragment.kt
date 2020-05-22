@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views
+package com.example.samplenotepad.views.main
 
 import android.app.Dialog
 import android.app.TimePickerDialog

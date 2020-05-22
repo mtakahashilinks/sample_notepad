@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views
+package com.example.samplenotepad.views.main
 
 import android.os.Bundle
 import android.util.Log
@@ -21,7 +21,7 @@ import com.example.samplenotepad.usecases.operationCheckBox
 import com.example.samplenotepad.usecases.saveOperation
 import com.example.samplenotepad.viewModels.MemoInputViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
-import kotlinx.android.synthetic.main.fragment_memo_main.*
+import kotlinx.android.synthetic.main.fragment_memo_input.*
 import kotlinx.coroutines.launch
 
 
@@ -41,7 +41,7 @@ class MemoInputFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_memo_main, container, false)
+        return inflater.inflate(R.layout.fragment_memo_input, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,7 +75,9 @@ class MemoInputFragment() : Fragment() {
             if (targetMemoRow is MemoRow) targetMemoRow.dotOperation()
         }
 
-        clearAllImgBtn.setOnClickListener { clearAll() }
+        clearAllImgBtn.setOnClickListener {
+            clearAll()
+        }
 
         saveImgBtn.setOnClickListener {
             saveOperation(SaveMemoInfo(getOptionValuesForSave()))
@@ -84,6 +86,7 @@ class MemoInputFragment() : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
         initMemoContentsOperation(this, inputViewModel, memoContainer, None)
     }
 

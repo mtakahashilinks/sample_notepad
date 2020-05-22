@@ -2,6 +2,7 @@
     <string name="app_name">Sample Notepad</string>
     <string name="input_new_memo">新規メモの入力</string>
     <string name="optional_setting">オプション設定</string>
+    <string name="appbar_menu_item1">メモリストへ</string>
     <string name="contents_menu_btn_description">メニュー</string>
     <string name="contents_checkbox_btn_description">チェックボックスの追加と削除</string>
     <string name="contents_bullet_btn_description">ビュレットの追加と削除</string>
@@ -17,6 +18,10 @@
     <string name="reminder_post_alarm_label">POST アラーム</string>
     <string name="add_format">フォーマットに追加</string>
     <string name="save_snackbar">保存しました</string>
+    <string name="dialog_main_to_search_title">メモ入力を終了します</string>
+    <string name="dialog_main_to_search_message">メモの内容を保存していない場合は「キャンセル」で戻ってください</string>
+    <string name="dialog_main_to_search_positive_button">OK</string>
+    <string name="dialog_main_to_search_negative_button">キャンセル</string>
 
     <string-array name="reminder_pre_alarm_spinner">
         <item>なし</item>
@@ -35,5 +40,7 @@
         <item>1時間後</item>
         <item>24時間後</item>
     </string-array>
+
+    <string name="category_list">カテゴリーリスト</string>
 
 </resources>

@@ -15,13 +15,12 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.*
 import com.example.samplenotepad.*
 import com.example.samplenotepad.data.saveMemoInfo
-import com.example.samplenotepad.data.setIsAppExistForIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoInputViewModel
-import com.example.samplenotepad.views.*
-import com.example.samplenotepad.views.setConstraintForFirstMemoRow
-import com.example.samplenotepad.views.setConstraintForNextMemoRowWithNoBelow
-import com.example.samplenotepad.views.setTextAndCursorPosition
+import com.example.samplenotepad.views.main.*
+import com.example.samplenotepad.views.main.setConstraintForFirstMemoRow
+import com.example.samplenotepad.views.main.setConstraintForNextMemoRowWithNoBelow
+import com.example.samplenotepad.views.main.setTextAndCursorPosition
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
@@ -99,20 +98,17 @@ internal fun clearAll() {
     }
 }
 
-internal fun saveOperation(executeId: SaveMemoInfo) = runBlocking {
+internal fun saveOperation(executeId: SaveMemoInfo) {
     Log.d("saveOperation", "save処理に入った")
 
-    GlobalScope.launch(Dispatchers.IO) {
-        val focusView = memoContainer.findFocus()
+    val focusView = memoContainer.findFocus()
 
-        //フォーカスがあるMemoRowのMemoInfoのTextプロパティを更新
-        if (focusView is MemoRow)
-            executeActor.send(UpdateTextOfMemoRowInfo(focusView))
+    //フォーカスがあるViewがMemoRowならMemoInfoのTextプロパティを更新
+    inputViewModel.viewModelScope.launch {
+        if (focusView is MemoRow) executeActor.send(UpdateTextOfMemoRowInfo(focusView))
+    }
 
-        setIsAppExistForIO(true)
-
-        saveMemoInfo(inputFragment, inputViewModel, executeId.optionValues)
-    }.join()
+    saveMemoInfo(inputFragment, inputViewModel, executeId.optionValues)
 }
 
 //近い将来、代替えのAPIに切り替わるらしいので要注意
@@ -258,7 +254,7 @@ private fun createFirstMemoRow(executeId: CreateFirstMemoRow) {
         }
 
         inputViewModel.viewModelScope.launch(Dispatchers.Main) {
-            memoContainer.setConstraintForFirstMemoRow(newMemoRow, inputFragment)
+            memoContainer.setConstraintForFirstMemoRow(newMemoRow)
         }
 
         Log.d("場所:createFirstMemoRow", "newMemoRowId=${newMemoRow.id}")

@@ -2,21 +2,16 @@ package com.example.samplenotepad.data
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import arrow.core.*
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoInputViewModel
-import com.example.samplenotepad.views.MemoInputFragment
-import com.example.samplenotepad.views.showSnackbarForSaved
+import com.example.samplenotepad.views.main.MemoInputFragment
+import com.example.samplenotepad.views.main.showSnackbarForSaved
 import kotlinx.coroutines.*
 
 
 const val CATEGORY_FILE = "category_list"
-
-private var isAppExist: Boolean = true //appが破棄されるとfalseに変更される
-
-internal fun setIsAppExistForIO(value: Boolean) {
-    isAppExist = value
-}
 
 
 //Database挿入時のシリアライズ処理
@@ -71,10 +66,9 @@ internal fun deserializeMemoContents(value: String): MemoContents {
 }
 
 
-internal fun CoroutineScope.saveMemoInfo(fragment: MemoInputFragment,
-                                         inputViewModel: MemoInputViewModel,
-                                         optionValues: ValuesOfOptionSetting
-) {
+internal fun saveMemoInfo(fragment: MemoInputFragment,
+                          inputViewModel: MemoInputViewModel,
+                          optionValues: ValuesOfOptionSetting) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")
 
     tailrec fun createContentsText(memoContents: List<MemoRowInfo>,
@@ -85,33 +79,30 @@ internal fun CoroutineScope.saveMemoInfo(fragment: MemoInputFragment,
         }
     }
 
-    this.launch {
-        saveCategoryList(fragment, inputViewModel, optionValues.category)
-    }
 
-    this.launch {
-        val memoContents = inputViewModel.memoContents.value
-        val stringMemoContents = async(Dispatchers.Default) { serializeMemoContents(memoContents) }
-        val contentsText = async(Dispatchers.Default) { createContentsText(memoContents.toList()) }
-        val memoInfoId = inputViewModel.memoInfo.value?.rowid
-        val appDatabase = AppDatabase.getDatabase(fragment.requireContext())
-        val memoInfoDao = appDatabase.memoInfoDao()
+    launch { saveCategoryList(fragment, inputViewModel, optionValues.category) }
 
-        val mMemoInfo = MemoInfo(
-            memoInfoId ?: 0,
-            System.currentTimeMillis(),
-            optionValues.title,
-            optionValues.category,
-            stringMemoContents.await(),
-            contentsText.await(),
-            optionValues.targetDate.getOrElse { null },
-            optionValues.targetTime.getOrElse { null },
-            optionValues.preAlarm.getOrElse { null },
-            optionValues.postAlarm.getOrElse { null }
-        )
+    val memoContents = inputViewModel.memoContents.value
+    val stringMemoContents = async(Dispatchers.Default) { serializeMemoContents(memoContents) }
+    val contentsText = async(Dispatchers.Default) { createContentsText(memoContents.toList()) }
+    val memoInfoId = inputViewModel.memoInfo.value?.rowid
+    val appDatabase = AppDatabase.getDatabase(fragment.requireContext())
+    val memoInfoDao = appDatabase.memoInfoDao()
 
-        inputViewModel.memoInfo.updateAndGet { mMemoInfo }
+    val mMemoInfo = MemoInfo(
+        memoInfoId ?: 0,
+        System.currentTimeMillis(),
+        optionValues.title,
+        optionValues.category,
+        stringMemoContents.await(),
+        contentsText.await(),
+        optionValues.targetDate.getOrElse { null },
+        optionValues.targetTime.getOrElse { null },
+        optionValues.preAlarm.getOrElse { null },
+        optionValues.postAlarm.getOrElse { null }
+    )
 
+    val databaseJob = launch(Dispatchers.IO) {
         when (memoInfoId) {
             null -> {
                 val rowId = memoInfoDao.insertMemoInfo(mMemoInfo)
@@ -119,21 +110,29 @@ internal fun CoroutineScope.saveMemoInfo(fragment: MemoInputFragment,
             }
             else -> memoInfoDao.updateMemoInfo(mMemoInfo)
         }
-
-
-        //mainViewModelが破棄されていたらdatabaseをcloseする。存在していたらsnackbarを表示
-        if (!isAppExist) appDatabase.close()
-
-        showSnackbarForSaved(fragment)
     }
+
+    inputViewModel.memoInfo.updateAndGet { mMemoInfo }
+
+    databaseJob.join()
+
+    showSnackbarForSaved(fragment)
 }
 
-private fun saveCategoryList(fragment: MemoInputFragment, viewModel: MemoInputViewModel, newCategory: String) {
-    val contentsForSave =
-        viewModel.categoryList.plus(listOf(newCategory)).distinct().joinToString(separator = ",")
+private fun saveCategoryList(fragment: MemoInputFragment,
+                             viewModel: MemoInputViewModel,
+                             newCategory: String) = runBlocking {
+    val updatedList = viewModel.categoryList.value.plus(listOf(newCategory)).distinct()
+    val contentsForSave = updatedList.joinToString(separator = ",")
 
-    fragment.requireContext().openFileOutput(CATEGORY_FILE, Context.MODE_PRIVATE).use {
-        it.write(contentsForSave.toByteArray())
+    launch(Dispatchers.IO) {
+        fragment.requireContext().openFileOutput(CATEGORY_FILE, Context.MODE_PRIVATE).use {
+            it.write(contentsForSave.toByteArray())
+        }
+    }
+
+    viewModel.viewModelScope.launch(Dispatchers.Main) {
+        viewModel.categoryList.updateAndGet { updatedList }
     }
 }
 

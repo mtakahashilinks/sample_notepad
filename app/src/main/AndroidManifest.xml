@@ -12,9 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="LockedOrientationActivity">
-
+        <activity android:name=".views.search.MemoSearchActivity"></activity>
         <activity
-            android:name=".views.MainActivity"
+            android:name=".views.main.MainActivity"
             android:screenOrientation="sensorPortrait"
             android:windowSoftInputMode="stateVisible|adjustResize">
             <intent-filter>

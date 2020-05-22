@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views
+package com.example.samplenotepad.views.main
 
 import android.content.Context
 import android.util.Log
@@ -10,11 +10,16 @@ import arrow.core.Some
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_memo_main.*
+import kotlinx.android.synthetic.main.fragment_memo_input.*
 
 
 private lateinit var constraintSet: ConstraintSet
-private lateinit var inputFragment: MemoInputFragment //Log用
+
+private fun View.restartSoftwareKeyBoard(context: Context?) {
+    val inputManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+    inputManager.restartInput(this)
+}
 
 internal fun MemoRow.setTextAndCursorPosition(text: Text, selection: Int = 0) {
     Log.d("場所:setTextAndCursorPosition", "setTextAndCursorPositionに入った")
@@ -35,12 +40,9 @@ internal fun showSnackbarForSaved(inputFragment: MemoInputFragment) {
 }
 
 
-internal fun ConstraintLayout.setConstraintForFirstMemoRow(targetMemoRow: MemoRow,
-                                                           fragment: MemoInputFragment
-) {
+internal fun ConstraintLayout.setConstraintForFirstMemoRow(targetMemoRow: MemoRow) {
     Log.d("場所:setConstraintForFirstMemoRow", "Constraintのセットに入った")
     constraintSet = ConstraintSet()
-    inputFragment = fragment //Log用
 
     this.addView(targetMemoRow)
 
@@ -65,7 +67,7 @@ internal fun ConstraintLayout.setConstraintForNextMemoRowWithNoBelow(newMemoRow:
 ) {
     Log.d("場所:setConstraintForNextMemoRowWithNoBelow", "Constraintのセットに入った")
     val targetParam = newMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val formerParam = inputFragment.requireActivity().findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
+    val formerParam = this.findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
     Log.d("場所:setConstraintForNextMemoRowWithNoBelow", "before set")
     Log.d("場所:setConstraintForNextMemoRowWithNoBelow",
         "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
@@ -98,8 +100,8 @@ internal fun ConstraintLayout.setConstraintForNextMemoRowWithBelow(newMemoRow: M
 ) {
     Log.d("場所:setConstraintForNextMemoRowWithBelow", "Constraintのセットに入った")
     val targetParam = newMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val formerParam = inputFragment.requireActivity().findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    val nextParam = inputFragment.requireActivity().findViewById<MemoRow>(nextMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
+    val formerParam = this.findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
+    val nextParam = this.findViewById<MemoRow>(nextMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
     Log.d("場所:setConstraintForNextMemoRowWithBelow", "before set")
     Log.d("場所:setConstraintForNextMemoRowWithBelow",
         "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
@@ -139,8 +141,8 @@ internal fun ConstraintLayout.setConstraintForDeleteMemoRow(targetMemoRow: MemoR
 ) {
     Log.d("場所:setConstraintForDeleteMemoRow", "Constraintのセットに入った")
     val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val formerParam = inputFragment.requireActivity().findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    val nextParam = inputFragment.requireActivity().findViewById<MemoRow>(nextMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
+    val formerParam = this.findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
+    val nextParam = this.findViewById<MemoRow>(nextMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
     Log.d("場所:setConstraintForDeleteMemoRow", "before set")
     Log.d("場所:setConstraintForDeleteMemoRow",
         "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
@@ -176,11 +178,9 @@ internal fun ConstraintLayout.removeMemoRowFromLayout(fragment: MemoInputFragmen
     Log.d("場所:removeMemoRowFromLayout",
         "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 
-    val inputManager =
-        fragment.context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputManager.restartInput(formerMemoRow)
-
     this.removeView(targetMemoRow)
+
+    formerMemoRow.restartSoftwareKeyBoard(fragment.context)
 
     Log.d("場所:removeMemoRowFromLayout", "after remove view")
     Log.d("場所:removeMemoRowFromLayout",

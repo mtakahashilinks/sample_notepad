@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views
+package com.example.samplenotepad.views.main
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.ListPopupWindow
 import com.example.samplenotepad.*
-import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.viewModels.MemoInputViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import kotlinx.android.synthetic.main.fragment_memo_option.*
@@ -48,15 +47,14 @@ class MemoOptionFragment : Fragment() {
         //カテゴリー選択リストの処理
         categoryDropDownImgBtn.setOnClickListener {
             ListPopupWindow(requireContext()).apply {
-                val data = inputViewModel.categoryList.toTypedArray()
-                val adapter = ArrayAdapter(requireContext(),
-                    R.layout.memo_category_list_row, data)
+                val data = inputViewModel.categoryList.value.toTypedArray()
+                val adapter = ArrayAdapter(requireContext(), R.layout.memo_category_list_row, data)
 
-                anchorView = categoryTextView
                 setAdapter(adapter)
+                anchorView = categoryTextView
                 isModal = true
                 width = ListPopupWindow.WRAP_CONTENT
-                height = ListPopupWindow.WRAP_CONTENT
+                height = 450
 
                 setOnItemClickListener { parent, view, position, id ->
                     val selectedItem = adapter.getItem(position)

@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views
+package com.example.samplenotepad.views.main
 
 import android.app.DatePickerDialog
 import android.app.Dialog
