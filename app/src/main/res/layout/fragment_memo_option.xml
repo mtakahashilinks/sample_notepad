@@ -12,9 +12,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:labelFor="@+id/titleTextView"
-        android:text="@string/title"
-        app:layout_constraintStart_toStartOf="@+id/titleTextView"
+        android:labelFor="@+id/titleBodyTextView"
+        android:text="@string/memo_title_label"
+        app:layout_constraintStart_toStartOf="@+id/titleBodyTextView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -22,13 +22,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:text="@string/counter_for_edit_text"
-        app:layout_constraintBottom_toTopOf="@+id/titleTextView"
-        app:layout_constraintEnd_toEndOf="@+id/titleTextView"
+        app:layout_constraintBottom_toTopOf="@+id/titleBodyTextView"
+        app:layout_constraintEnd_toEndOf="@+id/titleBodyTextView"
         tools:text="18/30" />
 
     <EditText
-        android:id="@+id/titleTextView"
+        android:id="@+id/titleBodyTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -49,16 +48,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:labelFor="@+id/categoryTextView"
-        android:text="@string/category"
+        android:text="@string/memo_category_label"
         app:layout_constraintStart_toStartOf="@+id/categoryTextView"
-        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/titleBodyTextView" />
 
     <TextView
         android:id="@+id/categoryCounterView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:text="@string/counter_for_edit_text"
         app:layout_constraintBottom_toTopOf="@+id/categoryTextView"
         app:layout_constraintEnd_toEndOf="@+id/categoryTextView"
         tools:text="13/15" />

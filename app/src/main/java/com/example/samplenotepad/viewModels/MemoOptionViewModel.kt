@@ -20,6 +20,7 @@ class MemoOptionViewModel : ViewModel() {
         private lateinit var optionFragment: MemoOptionFragment
 
         internal fun getOptionValuesForSave(): ValuesOfOptionSetting {
+            //例）"2020/03/05" -> 20200305
             fun convertDateTime(value: String): Some<Int> {
                 val matchedResults = Regex("""\d+""").findAll(value)
                 val result = matchedResults.map { it.value }.joinToString("")
@@ -32,13 +33,13 @@ class MemoOptionViewModel : ViewModel() {
 
             return when (this::optionFragment.isInitialized) {
                 true -> {
-                    val title = when (optionFragment.titleTextView.text.isEmpty()) {
-                        true -> "無題"
-                        false -> optionFragment.titleTextView.text.toString()
+                    val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
+                        true -> None
+                        false -> Some(optionFragment.titleBodyTextView.text.toString())
                     }
                     val category = when (optionFragment.categoryTextView.text.isEmpty()) {
-                        true -> "その他"
-                        false -> optionFragment.categoryTextView.text.toString()
+                        true -> None
+                        false -> Some(optionFragment.categoryTextView.text.toString())
                     }
                     val targetDate =
                         getReminderParams(convertDateTime(optionFragment.reminderDateView.text.toString()))
@@ -51,9 +52,7 @@ class MemoOptionViewModel : ViewModel() {
 
                     ValuesOfOptionSetting(title, category, targetDate, targetTime, preAlarm, postAlarm)
                 }
-                false -> {
-                    ValuesOfOptionSetting("無題", "その他", None, None, None, None)
-                }
+                false -> ValuesOfOptionSetting(None, None, None, None, None, None)
             }
         }
     }

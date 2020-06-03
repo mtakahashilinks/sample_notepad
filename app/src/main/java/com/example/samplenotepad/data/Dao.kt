@@ -1,6 +1,8 @@
 package com.example.samplenotepad.data
 
 import androidx.room.*
+import com.example.samplenotepad.entities.DataSetForCategoryList
+import com.example.samplenotepad.entities.DataSetForEachMemoList
 import com.example.samplenotepad.entities.MemoInfo
 
 
@@ -15,27 +17,58 @@ interface MemoInfoDao {
     @Delete(entity = MemoInfo::class)
     suspend fun deleteMemoInfo(memoInfo: MemoInfo)
 
-    @Query("SELECT * FROM memoInfoTable WHERE rowid == :id")
-    suspend fun getMemoInfo(id: Long): MemoInfo
+    @Query("""
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE memoId == :id
+        """)
+    suspend fun getMemoInfoById(id: Long): MemoInfo
 
-    //   @Query("""
-    //       SELECT * FROM MemoInfo
-    //       WHERE title LIKE :title AND category LIKE :category AND contentsText LIKE :text
-    //       ORDER BY createdDateTime ASC
-    //       """)
-    //   suspend fun searchMemoInfo(title: String, category: String, text: String): MemoContents
-//
-    //   @Query("""
-    //       SELECT * FROM MemoInfo
-    //       WHERE title LIKE :title OR contentsText LIKE :text
-    //       ORDER BY createdDateTime ASC
-    //       """)
-    //   suspend fun searchMemoInfoByContents(title: String, text: String): MemoContents
-//
-    //   @Query("""
-    //       SELECT * FROM MemoInfo
-    //       WHERE category LIKE :category
-    //       ORDER BY createdDateTime ASC
-    //       """)
-    //   suspend fun searchMemoInfoByCategory(category: String): MemoContents
+    @Query("""
+        DELETE
+        FROM memoInfoTable
+        WHERE memoId == :id
+    """)
+    suspend fun deleteById(id: Long)
+
+    @Query("""
+           SELECT category
+           FROM MemoInfoTable
+           GROUP BY category
+           ORDER BY category ASC
+           """)
+    suspend fun getCategoryList(): List<String>
+
+
+    @Query("""
+           SELECT category, COUNT(*)
+           FROM MemoInfoTable
+           GROUP BY category
+           ORDER BY category ASC
+           """)
+    suspend fun getCategoriesAndSize(): List<DataSetForCategoryList>
+
+    @Query("""
+        DELETE
+        FROM memoInfoTable
+        WHERE category == :category
+    """)
+    suspend fun deleteByCategory(category: String)
+
+    @Query("""
+         SELECT memoId, createdDateTime, title, contentsText
+         FROM MemoInfoTable
+         WHERE category Like :category
+         ORDER BY createdDateTime ASC
+          """)
+    suspend fun getDataSetInCategory(category: String): List<DataSetForEachMemoList>
+
+
+//      @Query("""
+//          SELECT *
+//          FROM MemoInfoTable
+//          WHERE contentsText LIKE :word
+//          ORDER BY createdDateTime ASC
+//          """)
+//      suspend fun searchMemoInfoByText(word: String): MemoInfo //wildcardはwordに"%ab_c%"のようなものを渡す
 }

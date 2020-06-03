@@ -1,5 +1,6 @@
 package com.example.samplenotepad.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -7,7 +8,9 @@ import androidx.room.PrimaryKey
 //各メモの情報
 @Entity(tableName = "memoInfoTable")
 data class MemoInfo(
-    @PrimaryKey(autoGenerate = true) val rowid: Long,
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "memoId")
+    val rowid: Long,
     val createdDateTime: Long,
     val title: String,
     val category: String,

@@ -19,16 +19,17 @@ import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.operationCheckBox
 import com.example.samplenotepad.usecases.saveOperation
-import com.example.samplenotepad.viewModels.MemoInputViewModel
+import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
-import kotlinx.android.synthetic.main.fragment_memo_input.*
+import com.example.samplenotepad.views.MemoAlertDialog
+import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.coroutines.launch
 
 
-class MemoInputFragment() : Fragment() {
+class MemoEditFragment() : Fragment() {
 
     companion object {
-        private lateinit var inputViewModel: MemoInputViewModel
+        private lateinit var editViewModel: MemoEditViewModel
         private lateinit var optionViewModel: MemoOptionViewModel
         private lateinit var memoContainer: ConstraintLayout
     }
@@ -41,7 +42,7 @@ class MemoInputFragment() : Fragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_memo_input, container, false)
+        return inflater.inflate(R.layout.fragment_memo_edit, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -49,13 +50,13 @@ class MemoInputFragment() : Fragment() {
 
         memoContainer = memoContentsContainerLayout
 
-        inputViewModel.initMainViewModel(this)
+        editViewModel.initMainViewModel(this)
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
-        menuImgBtn.setOnClickListener {
+        templateImgBtn.setOnClickListener {
             lifecycleScope.launch {
-                val dao = AppDatabase.getDatabase(this@MemoInputFragment.requireContext()).memoInfoDao()
-                val b = dao.getMemoInfo(1)
+                val dao = AppDatabase.getDatabase(this@MemoEditFragment.requireContext()).memoInfoDao()
+                val b = dao.getMemoInfoById(1)
           //      dao.deleteMemoInfo(b)
          //       val c = dao.getMemoInfo(1)
                 Log.d("場所:aaaa", "memoInfo(1b)=$b")
@@ -76,7 +77,7 @@ class MemoInputFragment() : Fragment() {
         }
 
         clearAllImgBtn.setOnClickListener {
-            clearAll()
+            showClearAllAlertDialog()
         }
 
         saveImgBtn.setOnClickListener {
@@ -87,19 +88,30 @@ class MemoInputFragment() : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        initMemoContentsOperation(this, inputViewModel, memoContainer, None)
+        initMemoContentsOperation(this, editViewModel, memoContainer, None)
     }
 
     override fun onResume() {
         super.onResume()
 
         //ツールバーのタイトルをセット
-        activity?.title = getString(R.string.input_new_memo)
+        activity?.title = getString(R.string.appbar_title_for_edit_fragment)
     }
 
 
-    internal fun setValues(inputVM: MemoInputViewModel, optionVM: MemoOptionViewModel) {
-        inputViewModel = inputVM
+    internal fun setValues(editVM: MemoEditViewModel, optionVM: MemoOptionViewModel) {
+        editViewModel = editVM
         optionViewModel = optionVM
+    }
+
+    private fun showClearAllAlertDialog() {
+        MemoAlertDialog(
+            R.string.dialog_clear_all_title,
+            R.string.dialog_clear_all_message,
+            R.string.dialog_clear_all_positive_button,
+            R.string.dialog_clear_all_negative_button,
+            { dialog, id -> clearAll() },
+            { dialog, id -> dialog.cancel() }
+        ).show(requireActivity().supportFragmentManager, "clear_all")
     }
 }

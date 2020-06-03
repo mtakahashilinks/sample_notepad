@@ -1,21 +1,21 @@
 package com.example.samplenotepad.views
 
 import arrow.core.internal.AtomicRefW
-import com.example.samplenotepad.views.main.MemoInputFragment
+import com.example.samplenotepad.views.main.MemoEditFragment
 
 
 object FragmentFactories {
 
-    private val inputFragment: AtomicRefW<MemoInputFragment?> = AtomicRefW(null)
+    private val EDIT_FRAGMENT: AtomicRefW<MemoEditFragment?> = AtomicRefW(null)
 
-    internal fun getInputFragment(): MemoInputFragment {
-        val fragment = inputFragment.updateAndGet { mFragment ->
+    internal fun getInputFragment(): MemoEditFragment {
+        val fragment = EDIT_FRAGMENT.updateAndGet { mFragment ->
             when (mFragment == null) {
-                true -> MemoInputFragment()
+                true -> MemoEditFragment()
                 false -> mFragment
             }
         }
 
-        return fragment ?: MemoInputFragment()
+        return fragment ?: MemoEditFragment()
     }
 }

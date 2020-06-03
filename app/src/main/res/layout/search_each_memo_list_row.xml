@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="3dp">
+
+
+    <TextView
+        android:id="@+id/createdDateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="2020/07/23" />
+
+    <TextView
+        android:id="@+id/titleLabelTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/search_each_memo_title_label_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/createdDateTextView"
+        tools:text="タイトル：" />
+
+    <TextView
+        android:id="@+id/titleBodyTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:maxLength="15"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@+id/titleLabelTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/titleLabelTextView"
+        app:layout_constraintTop_toTopOf="@+id/titleLabelTextView"
+        tools:text="買い物リスト" />
+
+    <TextView
+        android:id="@+id/memoBodyLabelTtextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/search_each_memo_body_label_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleLabelTextView"
+        tools:text="本文：" />
+
+    <TextView
+        android:id="@+id/memoBodyTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLength="15"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@+id/memoBodyLabelTtextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/memoBodyLabelTtextView"
+        app:layout_constraintTop_toTopOf="@+id/memoBodyLabelTtextView"
+        tools:text="メモの本文文文文文文文文文 …" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views.main
+package com.example.samplenotepad.views
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -7,7 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 
 
-class AlertDialogWithTwoActions(
+class MemoAlertDialog(
     private val title: Int,
     private val message: Int,
     private val positiveButton: Int,

@@ -10,7 +10,7 @@ import arrow.core.Some
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_memo_input.*
+import kotlinx.android.synthetic.main.fragment_memo_edit.*
 
 
 private lateinit var constraintSet: ConstraintSet
@@ -30,9 +30,9 @@ internal fun MemoRow.setTextAndCursorPosition(text: Text, selection: Int = 0) {
     }
 }
 
-internal fun showSnackbarForSaved(inputFragment: MemoInputFragment) {
-    inputFragment.saveImgBtn?.let {
-        Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_LONG).apply {
+internal fun showSnackbarForSaved(editFragment: MemoEditFragment) {
+    editFragment.saveImgBtn?.let {
+        Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
             view.alpha = 0.5f
             show()
         }
@@ -168,7 +168,7 @@ internal fun ConstraintLayout.setConstraintForDeleteMemoRow(targetMemoRow: MemoR
         "nextMemoRow: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.removeMemoRowFromLayout(fragment: MemoInputFragment,
+internal fun ConstraintLayout.removeMemoRowFromLayout(fragment: MemoEditFragment,
                                                       targetMemoRow: MemoRow,
                                                       formerMemoRow: MemoRow
 ) {
@@ -237,7 +237,7 @@ internal fun ConstraintLayout.setConstraintForDeleteBulletsView(targetMemoRow: M
         "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoInputFragment,
+internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoEditFragment,
                                                           targetMemoRow: MemoRow,
                                                           bulletsViewId: TypeForMemoRowInfo
 ) {

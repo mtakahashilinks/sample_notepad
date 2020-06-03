@@ -1,6 +1,7 @@
 package com.example.samplenotepad.entities
 
 import android.widget.EditText
+import androidx.room.ColumnInfo
 import arrow.core.*
 
 
@@ -41,10 +42,23 @@ data class MemoRowInfo(
 
 
 data class ValuesOfOptionSetting(
-    val title: String,
-    val category: String,
+    val title: Option<String>,
+    val category: Option<String>,
     val targetDate: Option<Int>,
     val targetTime: Option<Int>,
     val preAlarm: Option<Int>,
     val postAlarm: Option<Int>
+) { companion object }
+
+
+data class DataSetForCategoryList(
+    @ColumnInfo(name = "category") val name: String,
+    @ColumnInfo(name = "COUNT(*)") val listSize: Int
+) { companion object }
+
+data class DataSetForEachMemoList(
+    @ColumnInfo(name = "memoId") val memoInfoId: Long,
+    @ColumnInfo(name = "createdDateTime") val createdDate: Long,
+    @ColumnInfo(name = "title") val memoTitle: String,
+    @ColumnInfo(name = "contentsText") val memoText: String
 ) { companion object }

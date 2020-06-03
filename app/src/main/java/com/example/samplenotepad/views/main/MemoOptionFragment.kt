@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import androidx.appcompat.widget.ListPopupWindow
 import com.example.samplenotepad.*
-import com.example.samplenotepad.viewModels.MemoInputViewModel
+import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
+import com.example.samplenotepad.views.DatePickerFragment
+import com.example.samplenotepad.views.TimePickerFragment
 import kotlinx.android.synthetic.main.fragment_memo_option.*
 
 
@@ -17,7 +19,7 @@ class MemoOptionFragment : Fragment() {
 
     companion object {
         private lateinit var optionViewModel: MemoOptionViewModel
-        private lateinit var inputViewModel: MemoInputViewModel
+        private lateinit var editViewModel: MemoEditViewModel
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,18 +38,19 @@ class MemoOptionFragment : Fragment() {
         optionViewModel.initOptionViewModel(this)
 
         optionViewModel.apply {
-            setCounterText(titleTextView, titleCounterView, 15) //TitleのViewに文字数カウンターをセット
+            setCounterText(titleBodyTextView, titleCounterView, 15) //TitleのViewに文字数カウンターをセット
             setCounterText(categoryTextView, categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
             initReminderDateTime(reminderDateView, reminderTimeView)
         }
 
         //カテゴリーのTextを初期化
-        if (categoryTextView.text.isEmpty()) categoryTextView.setText("その他")
+        if (categoryTextView.text.isEmpty())
+            categoryTextView.setText(getString(R.string.memo_category_default_value))
 
         //カテゴリー選択リストの処理
         categoryDropDownImgBtn.setOnClickListener {
             ListPopupWindow(requireContext()).apply {
-                val data = inputViewModel.categoryList.value.toTypedArray()
+                val data = editViewModel.getCategoryList().toTypedArray()
                 val adapter = ArrayAdapter(requireContext(), R.layout.memo_category_list_row, data)
 
                 setAdapter(adapter)
@@ -98,7 +101,7 @@ class MemoOptionFragment : Fragment() {
         super.onResume()
 
         //ツールバーのタイトルをセット
-        activity?.title = getString(R.string.optional_setting)
+     //   activity?.title = getString(R.string.appbar_title_for_option_fragment)
     }
 
 
@@ -113,8 +116,8 @@ class MemoOptionFragment : Fragment() {
         postAlarmSpinnerView.visibility = visibility
     }
 
-    internal fun setValues(inputVM: MemoInputViewModel, optionVM: MemoOptionViewModel) {
-        inputViewModel = inputVM
+    internal fun setValues(editVM: MemoEditViewModel, optionVM: MemoOptionViewModel) {
+        editViewModel = editVM
         optionViewModel = optionVM
     }
 }

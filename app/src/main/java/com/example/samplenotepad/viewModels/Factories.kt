@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 class MemoInputViewModelFactory() : ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MemoInputViewModel() as T
+        return MemoEditViewModel() as T
     }
 }
 
