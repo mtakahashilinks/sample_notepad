@@ -9,11 +9,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import arrow.core.None
+import arrow.core.Option
 import com.example.samplenotepad.*
 import com.example.samplenotepad.viewModels.MemoOptionViewModel.Companion.getOptionValuesForSave
 import com.example.samplenotepad.data.AppDatabase
-import com.example.samplenotepad.entities.MemoRow
-import com.example.samplenotepad.entities.SaveMemoInfo
+import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
@@ -50,7 +50,7 @@ class MemoEditFragment() : Fragment() {
 
         memoContainer = memoContentsContainerLayout
 
-        editViewModel.initMainViewModel(this)
+        editViewModel.initEditViewModel(this, None, None)
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
         templateImgBtn.setOnClickListener {
@@ -81,14 +81,20 @@ class MemoEditFragment() : Fragment() {
         }
 
         saveImgBtn.setOnClickListener {
-            saveOperation(SaveMemoInfo(getOptionValuesForSave()))
+            val memoInfo = editViewModel.getMemoInfo()
+            val memoContents = editViewModel.getMemoContents()
+
+            saveOperation(SaveMemoInfo(memoInfo, memoContents))
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        initMemoContentsOperation(this, editViewModel, memoContainer, None)
+        when (editViewModel.getMemoInfo()) {
+            null -> initMemoContentsOperation(this, editViewModel, memoContainer, CreateNewMemo)
+            else -> initMemoContentsOperation(this, editViewModel, memoContainer, EditExistMemo)
+        }
     }
 
     override fun onResume() {
@@ -99,7 +105,8 @@ class MemoEditFragment() : Fragment() {
     }
 
 
-    internal fun setValues(editVM: MemoEditViewModel, optionVM: MemoOptionViewModel) {
+    internal fun setValues(editVM: MemoEditViewModel,
+                           optionVM: MemoOptionViewModel) {
         editViewModel = editVM
         optionViewModel = optionVM
     }

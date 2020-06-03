@@ -2,14 +2,17 @@ package com.example.samplenotepad.data
 
 import android.util.Log
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import arrow.core.*
 import arrow.core.extensions.list.semigroup.plus
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.MemoOptionViewModel.Companion.getOptionValuesForSave
 import com.example.samplenotepad.views.main.MemoEditFragment
 import com.example.samplenotepad.views.main.showSnackbarForSaved
+import com.example.samplenotepad.views.search.DisplayMemoFragment
 import com.example.samplenotepad.views.search.MemoSearchActivity
 import kotlinx.coroutines.*
 
@@ -69,11 +72,13 @@ internal fun deserializeMemoContents(value: String): MemoContents {
 }
 
 
-internal fun saveMemoInfoToDatabase(fragment: MemoEditFragment,
-                                    editViewModel: MemoEditViewModel,
-                                    optionValues: ValuesOfOptionSetting) = runBlocking {
+internal fun saveMemoInfo(
+    fragment: Fragment,
+    viewModel: ViewModel,
+    memoInfo: MemoInfo?,
+    memoContents: MemoContents
+) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")
-    Log.d("saveMemoInfo", "optionValues=${optionValues}")
 
     tailrec fun createContentsText(memoContents: List<MemoRowInfo>,
                                    builder: StringBuilder = StringBuilder("")): String {
@@ -83,22 +88,36 @@ internal fun saveMemoInfoToDatabase(fragment: MemoEditFragment,
         }
     }
 
+    fun saveMemoInfoToDatabase(newMemoInfo: MemoInfo) =
+        launch(Dispatchers.IO) {
+            val memoInfoDao = AppDatabase.getDatabase(fragment.requireContext()).memoInfoDao()
 
-    val memoContents = editViewModel.getMemoContents()
+            //新規のメモはMemoInfoTableに挿入。その他はtableにアップデート。
+            when (memoInfo) {
+                null -> {
+                    //databaseに新しいmemoInfoを挿入
+                    val rowId = memoInfoDao.insertMemoInfo(newMemoInfo)
+                    Log.d("場所:saveMemoInfo", "MemoInfoTableに挿入")
+                    Log.d("場所:saveMemoInfo", "idOfInsert=$rowId")
+                }
+                else -> {
+                    //databaseに編集したmemoInfoをアップデート
+                    memoInfoDao.updateMemoInfo(newMemoInfo)
+                    Log.d("場所:saveMemoInfo", "MemoInfoTableにupdate")
+                }
+            }
+        }
+
     val stringMemoContents = async(Dispatchers.Default) { serializeMemoContents(memoContents) }
     val contentsText = async(Dispatchers.Default) { createContentsText(memoContents.toList()) }
-    val category = optionValues.category.getOrElse { fragment.getString(R.string.memo_category_default_value) }
-    val memoInfoId = editViewModel.getMemoInfo()?.rowid
-    val appDatabase = AppDatabase.getDatabase(fragment.requireContext())
-    val memoInfoDao = appDatabase.memoInfoDao()
+    val optionValues = getOptionValuesForSave()
+    Log.d("saveMemoInfo", "optionValues=${optionValues}")
 
-    editViewModel.updateMemoContentsAtSavePoint()
-
-    val mMemoInfo = MemoInfo(
-        memoInfoId ?: 0,
+    val newMemoInfo = MemoInfo(
+        memoInfo?.rowid ?: 0,
         System.currentTimeMillis(),
         optionValues.title.getOrElse { fragment.getString(R.string.memo_title_default_value) },
-        category,
+        optionValues.category.getOrElse { fragment.getString(R.string.memo_category_default_value) },
         stringMemoContents.await(),
         contentsText.await(),
         optionValues.targetDate.getOrElse { null },
@@ -107,30 +126,27 @@ internal fun saveMemoInfoToDatabase(fragment: MemoEditFragment,
         optionValues.postAlarm.getOrElse { null }
     )
 
-    val databaseJob = launch(Dispatchers.IO) {
-        //新規のメモはMemoInfoTableに挿入。その他はtableにアップデート。
-        when (memoInfoId) {
-            null -> {
-                //databaseに新しいmemoInfoを挿入
-                val rowId = memoInfoDao.insertMemoInfo(mMemoInfo)
-                Log.d("場所:saveMemoInfo", "MemoInfoTableに挿入")
-                Log.d("場所:saveMemoInfo", "idOfInsert=$rowId")
+    when (fragment) {
+        is MemoEditFragment -> {
+            viewModel as MemoEditViewModel
+
+            val databaseJob = saveMemoInfoToDatabase(newMemoInfo)
+
+            viewModel.apply {
+                updateMemoContentsAtSavePoint()
+                updateMemoInfo { newMemoInfo }
             }
-            else -> {
-                memoInfoDao.updateMemoInfo(mMemoInfo)
-                Log.d("場所:saveMemoInfo", "MemoInfoTableにupdate")
-            }
+
+            databaseJob.join()
+
+            showSnackbarForSaved(fragment)
         }
+        is DisplayMemoFragment -> { }
     }
-
-    editViewModel.updateMemoInfo { mMemoInfo }
-
-    databaseJob.join()
-
-    showSnackbarForSaved(fragment)
 }
 
-//internal fun saveCategoryListExecution(context: Context, categoryList: List<String>) = runBlocking {
+
+//internal fun saveTemplateExecution(context: Context, categoryList: List<String>) = runBlocking {
 //    val dataForSave = categoryList.joinToString(separator = ",")
 //
 //    launch(Dispatchers.IO) {
@@ -141,7 +157,7 @@ internal fun saveMemoInfoToDatabase(fragment: MemoEditFragment,
 //}
 
 
-//internal fun loadCategoryList(fragment: MemoEditFragment): List<String> = runBlocking {
+//internal fun loadTemplate(fragment: MemoEditFragment): List<String> = runBlocking {
 //    val file = fragment.requireActivity().getFileStreamPath(MEMO_TEMPLATES_FILE)
 //
 //    withContext(Dispatchers.IO) {

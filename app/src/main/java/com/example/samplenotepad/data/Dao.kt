@@ -18,18 +18,19 @@ interface MemoInfoDao {
     suspend fun deleteMemoInfo(memoInfo: MemoInfo)
 
     @Query("""
-        SELECT * 
-        FROM memoInfoTable 
-        WHERE memoId == :id
-        """)
-    suspend fun getMemoInfoById(id: Long): MemoInfo
-
-    @Query("""
         DELETE
         FROM memoInfoTable
         WHERE memoId == :id
     """)
     suspend fun deleteById(id: Long)
+
+
+    @Query("""
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE memoId == :id
+        """)
+    suspend fun getMemoInfoById(id: Long): MemoInfo
 
     @Query("""
            SELECT category

@@ -11,53 +11,68 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.setPadding
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.*
 import com.example.samplenotepad.*
-import com.example.samplenotepad.data.saveMemoInfoToDatabase
+import com.example.samplenotepad.data.saveMemoInfo
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.main.*
 import com.example.samplenotepad.views.main.setConstraintForFirstMemoRow
 import com.example.samplenotepad.views.main.setConstraintForNextMemoRowWithNoBelow
 import com.example.samplenotepad.views.main.setTextAndCursorPosition
+import com.example.samplenotepad.views.search.DisplayMemoFragment
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 
 
 private lateinit var editFragment: MemoEditFragment
+private lateinit var displayFragment: DisplayMemoFragment
 private lateinit var editViewModel: MemoEditViewModel
+private lateinit var searchViewModel: SearchViewModel
 private lateinit var memoContainer: ConstraintLayout
 private lateinit var executeActor: SendChannel<TypeForExecuteMemoContents>
 
 
 @ObsoleteCoroutinesApi
-internal fun initMemoContentsOperation(fragment: MemoEditFragment,
-                                       viewModel: MemoEditViewModel,
-                                       container: ConstraintLayout,
-                                       mMemoContents: Option<MemoContents>) = runBlocking {
-    editFragment = fragment
-    editViewModel = viewModel
-    memoContainer = container
-    executeActor = viewModel.viewModelScope.executeMemoOperation()
+internal fun initMemoContentsOperation(
+    fragment: Fragment, viewModel: ViewModel, container: ConstraintLayout, executionType: WhichMemoExecution
+) = runBlocking {
+    when (executionType){
+        is CreateNewMemo -> {
+            editFragment = fragment as MemoEditFragment
+            editViewModel = viewModel as MemoEditViewModel
+            executeActor = viewModel.viewModelScope.executeMemoOperation()
+            memoContainer = container
 
-    when (mMemoContents){
-        is Some -> editViewModel.apply {
-            updateMemoContents { mMemoContents.t }
-            updateMemoContentsAtSavePoint()
+            editViewModel.apply {
+                updateMemoContents { listOf<MemoRowInfo>().k() }
+                viewModelScope.launch {
+                    executeActor.send(CreateFirstMemoRow(Text(""), CreateNewMemo))
+                }.join()
+                updateMemoContentsAtSavePoint()
+            }
         }
-        is None -> editViewModel.apply {
-            updateMemoContents { listOf<MemoRowInfo>().k() }
-            viewModelScope.launch { executeActor.send(CreateFirstMemoRow(Text(""))) }.join()
-            updateMemoContentsAtSavePoint()
+        is EditExistMemo -> {
+            editFragment = fragment as MemoEditFragment
+            editViewModel = viewModel as MemoEditViewModel
+            executeActor = viewModel.viewModelScope.executeMemoOperation()
+            memoContainer = container
+        }
+        is DisplayExistMemo -> {
+            displayFragment = fragment as DisplayMemoFragment
+            searchViewModel = viewModel as SearchViewModel
+            executeActor = viewModel.viewModelScope.executeMemoOperation()
+            memoContainer = container
         }
     }
 }
 
-internal fun closeMemoContentsOperation() {
-    executeActor.close()
-}
+internal fun closeMemoContentsOperation() = executeActor.close()
 
 //ボタンがクリックされた時のcheckBox処理の入り口
 internal fun MemoRow.operationCheckBox() {
@@ -69,9 +84,9 @@ internal fun MemoRow.operationCheckBox() {
         when {
             memoRowInfo.dotId.value is Some<Int> -> {
                 executeActor.send(DeleteDot(this@operationCheckBox))
-                executeActor.send(AddCheckBox(this@operationCheckBox))
+                executeActor.send(AddCheckBox(this@operationCheckBox, CreateNewMemo))
             }
-            checkBoxId is None -> executeActor.send(AddCheckBox(this@operationCheckBox))
+            checkBoxId is None -> executeActor.send(AddCheckBox(this@operationCheckBox, CreateNewMemo))
             checkBoxId is Some<Int> -> executeActor.send(DeleteCheckBox(this@operationCheckBox))
         }
     }
@@ -87,9 +102,9 @@ internal fun MemoRow.dotOperation() {
         when {
             memoRowInfo.checkBoxId.value is Some<Int> -> {
                 executeActor.send(DeleteCheckBox(this@dotOperation))
-                executeActor.send(AddDot(this@dotOperation))
+                executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
             }
-            dotId is None -> executeActor.send(AddDot(this@dotOperation))
+            dotId is None -> executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
             dotId is Some<Int> -> executeActor.send(DeleteDot(this@dotOperation))
         }
     }
@@ -97,8 +112,8 @@ internal fun MemoRow.dotOperation() {
 
 internal fun clearAll() {
     editViewModel.viewModelScope.launch {
-        executeActor.send(ClearAll())
-        executeActor.send(CreateFirstMemoRow(Text("")))
+        executeActor.send(ClearAll)
+        executeActor.send(CreateFirstMemoRow(Text(""), CreateNewMemo))
     }
 }
 
@@ -113,7 +128,7 @@ internal fun saveOperation(executeId: SaveMemoInfo) = runBlocking {
             executeActor.send(UpdateTextOfMemoRowInfo(focusView))
     }.join()
 
-    saveMemoInfoToDatabase(editFragment, editViewModel, executeId.optionValues)
+    saveMemoInfo(editFragment, editViewModel, executeId.memoInfo, executeId.memoContents)
 }
 
 //近い将来、代替えのAPIに切り替わるらしいので要注意
@@ -166,7 +181,7 @@ private fun MemoRow.setEnterKeyAction() {
                     )
 
                     editViewModel.viewModelScope.launch {
-                        executeActor.send(CreateNextMemoRow(Text(textBringToNextRow)))
+                        executeActor.send(CreateNextMemoRow(Text(textBringToNextRow), CreateNewMemo))
                     }
                 }
                 else -> return

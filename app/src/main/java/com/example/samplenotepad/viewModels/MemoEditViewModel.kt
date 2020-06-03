@@ -4,6 +4,8 @@ package com.example.samplenotepad.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.ListK
+import arrow.core.Option
+import arrow.core.Some
 import arrow.core.internal.AtomicBooleanW
 import arrow.core.internal.AtomicRefW
 import arrow.core.k
@@ -52,8 +54,13 @@ class MemoEditViewModel : ViewModel() {
     internal fun getCategoryList() = categoryList.value
 
 
-    internal fun initMainViewModel(fragment: MemoEditFragment) {
+    internal fun initEditViewModel(fragment: MemoEditFragment,
+                                   mMemoInfo: Option<MemoInfo>,
+                                   mMemoContents: Option<MemoContents>) {
         editFragment = fragment
+
+        if (mMemoInfo is Some) memoInfo.value = mMemoInfo.t
+        if (mMemoContents is Some) memoContents.value = mMemoContents.t
 
         loadAndSetCategoryList()
     }

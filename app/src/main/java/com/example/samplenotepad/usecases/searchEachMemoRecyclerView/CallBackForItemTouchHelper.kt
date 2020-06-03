@@ -52,8 +52,6 @@ internal fun RecyclerView.getCallbackForItemTouchHelper(
                 fragment.requireActivity().supportFragmentManager,
                 "search_each_memo_swipe_delete_dialog"
             )
-
-            adapter.notifyDataSetChanged()
         }
 
 

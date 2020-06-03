@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.samplenotepad.*
+import com.example.samplenotepad.entities.MemoContents
+import com.example.samplenotepad.entities.MemoInfo
 import com.example.samplenotepad.entities.SaveMemoInfo
 import com.example.samplenotepad.usecases.saveOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
@@ -29,7 +31,7 @@ const val categoryArray = "CATEGORY_ARRAY"
 
 class MainActivity : AppCompatActivity() {
 
-    //Pagerアダプター
+    //PagerにセットするAdapter
     private inner class MemoPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 2
 
@@ -43,6 +45,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    private lateinit var memoInfo: MemoInfo
+    private lateinit var memoContents: MemoContents
+
     private val editViewModel: MemoEditViewModel =
         ViewModelProvider.NewInstanceFactory().create(MemoEditViewModel::class.java)
     private val optionViewModel: MemoOptionViewModel =
@@ -54,6 +59,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(mainToolbar)
+
+        //新規ではなく検索したメモの編集の場合
+        if (::memoInfo.isInitialized) {
+            editViewModel.apply {
+                updateMemoInfo { memoInfo }
+                updateMemoContents { memoContents }
+                updateMemoContentsAtSavePoint()
+            }
+        }
 
         //Pagerの設定
         memoPager.apply {
@@ -97,6 +111,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+    }
+
+
+    //新規ではなく検索したメモの編集の場合に呼ばれる
+    internal fun setValue(mMemoInfo: MemoInfo, mMemoContents: MemoContents) {
+        memoInfo = mMemoInfo
+        memoContents = mMemoContents
     }
 
 
@@ -154,7 +175,11 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_close_edit_positive_button,
             R.string.dialog_close_edit_negative_button,
             { dialog, id ->
-                saveOperation(SaveMemoInfo(MemoOptionViewModel.getOptionValuesForSave()))
+                val memoInfo = editViewModel.getMemoInfo()
+                val memoContents = editViewModel.getMemoContents()
+
+                saveOperation(SaveMemoInfo(memoInfo, memoContents))
+
                 moveToMemoSearchActivity()
             },
             { dialog, id -> moveToMemoSearchActivity() }
@@ -168,7 +193,11 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_close_edit_positive_button,
             R.string.dialog_close_edit_negative_button,
             { dialog, id ->
-                saveOperation(SaveMemoInfo(MemoOptionViewModel.getOptionValuesForSave()))
+                val memoInfo = editViewModel.getMemoInfo()
+                val memoContents = editViewModel.getMemoContents()
+
+                saveOperation(SaveMemoInfo(memoInfo, memoContents))
+
                 super.onBackPressed()
             },
             { dialog, id -> super.onBackPressed() }

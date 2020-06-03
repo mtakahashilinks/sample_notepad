@@ -8,20 +8,48 @@ import arrow.core.*
 typealias MemoRow = EditText
 typealias MemoContents = ListK<MemoRowInfo>
 
+sealed class WhichMemoExecution
+object CreateNewMemo : WhichMemoExecution()
+object EditExistMemo : WhichMemoExecution()
+object DisplayExistMemo : WhichMemoExecution()
+
 sealed class TypeForExecuteMemoContents
-data class UpdateTextOfMemoRowInfo(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-data class CreateFirstMemoRow(val text: Text) : TypeForExecuteMemoContents() { companion object }
-data class CreateNextMemoRow(val text: Text) : TypeForExecuteMemoContents() { companion object }
-data class DeleteMemoRow(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-data class AddCheckBox(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-data class DeleteCheckBox(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-data class ChangeCheckBoxState(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-data class AddDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-data class DeleteDot(val memoRow: MemoRow) : TypeForExecuteMemoContents() { companion object }
-class ClearAll : TypeForExecuteMemoContents() { companion object }
-data class SaveMemoInfo(
-    val optionValues: ValuesOfOptionSetting
+data class UpdateTextOfMemoRowInfo(
+    val memoRow: MemoRow
 ) : TypeForExecuteMemoContents() { companion object }
+data class CreateFirstMemoRow(
+    val text: Text,
+    val executionType: WhichMemoExecution
+) : TypeForExecuteMemoContents() { companion object }
+data class CreateNextMemoRow(
+    val text: Text,
+    val executionType: WhichMemoExecution
+) : TypeForExecuteMemoContents() { companion object }
+data class DeleteMemoRow(
+    val memoRow: MemoRow
+) : TypeForExecuteMemoContents() { companion object }
+data class AddCheckBox(
+    val memoRow: MemoRow,
+    val executionType: WhichMemoExecution
+) : TypeForExecuteMemoContents() { companion object }
+data class DeleteCheckBox(
+    val memoRow: MemoRow
+) : TypeForExecuteMemoContents() { companion object }
+data class ChangeCheckBoxState(
+    val memoRow: MemoRow
+) : TypeForExecuteMemoContents() { companion object }
+data class AddDot(
+    val memoRow: MemoRow,
+    val executionType: WhichMemoExecution
+) : TypeForExecuteMemoContents() { companion object }
+data class DeleteDot(
+    val memoRow: MemoRow
+) : TypeForExecuteMemoContents() { companion object }
+object ClearAll : TypeForExecuteMemoContents()
+data class SaveMemoInfo(
+    val memoInfo: MemoInfo?,
+    val memoContents: MemoContents
+): TypeForExecuteMemoContents()
 
 
 sealed class TypeForMemoRowInfo
