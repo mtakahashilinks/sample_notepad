@@ -11,7 +11,8 @@ import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel.Companion.getOptionValuesForSave
 import com.example.samplenotepad.views.main.MemoEditFragment
-import com.example.samplenotepad.views.main.showSnackbarForSaved
+import com.example.samplenotepad.views.main.showSnackbarForSavedAtDisplayFragment
+import com.example.samplenotepad.views.main.showSnackbarForSavedAtEditFragment
 import com.example.samplenotepad.views.search.DisplayMemoFragment
 import com.example.samplenotepad.views.search.MemoSearchActivity
 import kotlinx.coroutines.*
@@ -22,18 +23,16 @@ const val MEMO_TEMPLATES_FILE = "memo_template_list"
 
 //Database挿入時のシリアライズ処理
 internal fun serializeMemoContents(memoContents: ListK<MemoRowInfo>): String {
-    fun convertFromOption(value: Option<Int>): Int? {
-        return when (value) {
-            is Some -> value.t
-            is None -> null
-        }
+    fun Option<Int>.convertFromOption(): Int? = when (this) {
+        is Some -> this.t
+        is None -> null
     }
 
     val stBuilder = StringBuilder()
 
     memoContents.map { stBuilder.append(
-        ":${it.memoRowId.value},${it.text.value},${convertFromOption(it.checkBoxId.value)}," +
-                "${it.checkBoxState.value},${convertFromOption(it.dotId.value)}"
+        ":${it.memoRowId.value},${it.text.value},${it.checkBoxId.value.convertFromOption()}," +
+                "${it.checkBoxState.value},${it.dotId.value.convertFromOption()}"
     ) }
 
     //完成したstBuilderから最初の「:」をdropしてリターン
@@ -42,33 +41,24 @@ internal fun serializeMemoContents(memoContents: ListK<MemoRowInfo>): String {
 
 //Databaseから取得する時のデシリアライズ処理
 internal fun deserializeMemoContents(value: String): MemoContents {
-    fun convertToOption(value: String): Option<Int> {
-        return when (value) {
-            "null" -> None
-            else -> Some(value.toInt())
-        }
+    fun String.convertToOption(): Option<Int> = when (this) {
+        "null" -> None
+        else -> Some(this.toInt())
     }
 
-    tailrec fun fromStringToMemoContents(mList: MutableList<MemoRowInfo>,
-                                         stList: List<List<String>>): MemoContents {
-        return when {
-            stList.isEmpty() -> mList.k()
-            else -> fromStringToMemoContents(
-                mList.apply {
-                    add(MemoRowInfo(
-                        MemoRowId(stList[0][0].toInt()),
-                        Text(stList[0][1]),
-                        CheckBoxId(convertToOption(stList[0][2])),
-                        CheckBoxState(stList[0][3].toBoolean()),
-                        DotId(convertToOption(stList[0][4]))
-                    ) )
-                }
-                , stList.drop(1)
-            )
-        }
+    fun List<List<String>>.fromStringToMemoContents(): MemoContents {
+        return this.flatMap { stList ->
+            mutableListOf<MemoRowInfo>().apply { add(MemoRowInfo(
+                MemoRowId(stList[0].toInt()),
+                Text(stList[1]),
+                CheckBoxId(stList[2].convertToOption()),
+                CheckBoxState(stList[3].toBoolean()),
+                DotId(stList[4].convertToOption())
+            ) ) }
+        }.k()
     }
 
-    return fromStringToMemoContents(mutableListOf(), value.split(":").map { it.split(",") })
+    return value.split(":").map { it.split(",") }.fromStringToMemoContents()
 }
 
 
@@ -126,22 +116,30 @@ internal fun saveMemoInfo(
         optionValues.postAlarm.getOrElse { null }
     )
 
+    val databaseJob = saveMemoInfoToDatabase(newMemoInfo)
+
     when (fragment) {
         is MemoEditFragment -> {
-            viewModel as MemoEditViewModel
-
-            val databaseJob = saveMemoInfoToDatabase(newMemoInfo)
-
-            viewModel.apply {
+            (viewModel as MemoEditViewModel).apply {
                 updateMemoContentsAtSavePoint()
                 updateMemoInfo { newMemoInfo }
             }
 
             databaseJob.join()
 
-            showSnackbarForSaved(fragment)
+            showSnackbarForSavedAtEditFragment(fragment)
         }
-        is DisplayMemoFragment -> { }
+        is DisplayMemoFragment -> {
+            (viewModel as MemoEditViewModel).apply {
+                updateMemoContentsAtSavePoint()
+                updateMemoInfo { newMemoInfo }
+            }
+
+            databaseJob.join()
+
+            showSnackbarForSavedAtDisplayFragment(fragment)
+        }
+        else -> {}
     }
 }
 

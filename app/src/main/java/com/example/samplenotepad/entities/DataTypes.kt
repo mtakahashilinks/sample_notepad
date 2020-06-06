@@ -19,18 +19,22 @@ data class UpdateTextOfMemoRowInfo(
 ) : TypeForExecuteMemoContents() { companion object }
 data class CreateFirstMemoRow(
     val text: Text,
-    val executionType: WhichMemoExecution
-) : TypeForExecuteMemoContents() { companion object }
+    val executionType: WhichMemoExecution,
+    val memoRowInfo: MemoRowInfo? = null
+    ) : TypeForExecuteMemoContents() { companion object }
 data class CreateNextMemoRow(
     val text: Text,
-    val executionType: WhichMemoExecution
-) : TypeForExecuteMemoContents() { companion object }
+    val executionType: WhichMemoExecution,
+    val memoRowInfo: MemoRowInfo? = null
+    ) : TypeForExecuteMemoContents() { companion object }
 data class DeleteMemoRow(
     val memoRow: MemoRow
 ) : TypeForExecuteMemoContents() { companion object }
 data class AddCheckBox(
     val memoRow: MemoRow,
-    val executionType: WhichMemoExecution
+    val executionType: WhichMemoExecution,
+    val checkBoxId: Int? = null,
+    val checkBoxState: Boolean = false
 ) : TypeForExecuteMemoContents() { companion object }
 data class DeleteCheckBox(
     val memoRow: MemoRow
@@ -40,16 +44,14 @@ data class ChangeCheckBoxState(
 ) : TypeForExecuteMemoContents() { companion object }
 data class AddDot(
     val memoRow: MemoRow,
-    val executionType: WhichMemoExecution
+    val executionType: WhichMemoExecution,
+    val dotId: Int? = null
 ) : TypeForExecuteMemoContents() { companion object }
 data class DeleteDot(
     val memoRow: MemoRow
 ) : TypeForExecuteMemoContents() { companion object }
 object ClearAll : TypeForExecuteMemoContents()
-data class SaveMemoInfo(
-    val memoInfo: MemoInfo?,
-    val memoContents: MemoContents
-): TypeForExecuteMemoContents()
+object SaveMemoInfo : TypeForExecuteMemoContents()
 
 
 sealed class TypeForMemoRowInfo

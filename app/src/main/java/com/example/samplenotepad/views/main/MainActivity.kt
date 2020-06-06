@@ -14,8 +14,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.MemoContents
 import com.example.samplenotepad.entities.MemoInfo
-import com.example.samplenotepad.entities.SaveMemoInfo
-import com.example.samplenotepad.usecases.saveOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.FragmentFactories.getInputFragment
@@ -25,6 +23,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlin.Exception
+import com.example.samplenotepad.usecases.*
 
 
 const val categoryArray = "CATEGORY_ARRAY"
@@ -178,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                 val memoInfo = editViewModel.getMemoInfo()
                 val memoContents = editViewModel.getMemoContents()
 
-                saveOperation(SaveMemoInfo(memoInfo, memoContents))
+                saveMemo()
 
                 moveToMemoSearchActivity()
             },
@@ -196,7 +195,7 @@ class MainActivity : AppCompatActivity() {
                 val memoInfo = editViewModel.getMemoInfo()
                 val memoContents = editViewModel.getMemoContents()
 
-                saveOperation(SaveMemoInfo(memoInfo, memoContents))
+                saveMemo()
 
                 super.onBackPressed()
             },

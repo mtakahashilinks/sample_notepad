@@ -9,16 +9,13 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import arrow.core.None
-import arrow.core.Option
 import com.example.samplenotepad.*
-import com.example.samplenotepad.viewModels.MemoOptionViewModel.Companion.getOptionValuesForSave
 import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
-import com.example.samplenotepad.usecases.operationCheckBox
-import com.example.samplenotepad.usecases.saveOperation
+import com.example.samplenotepad.usecases.checkBoxOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
@@ -56,7 +53,7 @@ class MemoEditFragment() : Fragment() {
         templateImgBtn.setOnClickListener {
             lifecycleScope.launch {
                 val dao = AppDatabase.getDatabase(this@MemoEditFragment.requireContext()).memoInfoDao()
-                val b = dao.getMemoInfoById(1)
+                val b = dao.getMemoInfoById(29)
           //      dao.deleteMemoInfo(b)
          //       val c = dao.getMemoInfo(1)
                 Log.d("場所:aaaa", "memoInfo(1b)=$b")
@@ -67,7 +64,7 @@ class MemoEditFragment() : Fragment() {
         checkBoxImgBtn.setOnClickListener {
             val targetMemoRow = memoContentsContainerLayout.findFocus()
             Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-            if (targetMemoRow is MemoRow) targetMemoRow.operationCheckBox()
+            if (targetMemoRow is MemoRow) targetMemoRow.checkBoxOperation()
         }
 
         bulletListImgBtn.setOnClickListener {
@@ -81,10 +78,7 @@ class MemoEditFragment() : Fragment() {
         }
 
         saveImgBtn.setOnClickListener {
-            val memoInfo = editViewModel.getMemoInfo()
-            val memoContents = editViewModel.getMemoContents()
-
-            saveOperation(SaveMemoInfo(memoInfo, memoContents))
+            saveMemo()
         }
     }
 
