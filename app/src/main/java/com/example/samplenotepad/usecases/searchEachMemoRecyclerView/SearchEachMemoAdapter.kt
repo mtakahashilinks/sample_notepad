@@ -1,5 +1,6 @@
 package com.example.samplenotepad.usecases.searchEachMemoRecyclerView
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,8 +37,9 @@ class SearchEachMemoListAdapter(
         viewHolder.itemView.setOnClickListener {
             val memoInfoId =
                 searchViewModel.getDataSetForEachMemoList()[viewHolder.adapterPosition].memoInfoId
-            val memoInfo = loadMemoInfoFromDatabase(fragment, memoInfoId)
-            val memoContents = deserializeMemoContents(memoInfo.contents)
+            val memoInfo = loadMemoInfoFromDatabase(fragment.requireActivity(), memoInfoId)
+            val memoContents = memoInfo.contents.deserializeMemoContents()
+            Log.d("場所:SearchEachMemoListAdapter", "memoId=${memoInfo.rowid} memoContents=${memoContents}")
 
             searchViewModel.apply {
                 updateMemoInfo { memoInfo }
@@ -51,7 +53,7 @@ class SearchEachMemoListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val createdDateFormatter = SimpleDateFormat("yyyy/MM/dd", Locale("ja","JP","JP")).apply {
+        val createdDateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale("ja","JP","JP")).apply {
             timeZone = TimeZone.getTimeZone("Asia/Tokyo")
         }
         val memoBodyFormatter = "%s"

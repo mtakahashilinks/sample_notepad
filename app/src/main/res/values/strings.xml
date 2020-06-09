@@ -23,8 +23,8 @@
     <string name="save_snackbar">保存しました</string>
     <string name="dialog_close_edit_title">メモの編集を終了します</string>
     <string name="dialog_close_edit_message">作業内容を保存しますか？</string>
-    <string name="dialog_close_edit_positive_button">YES</string>
-    <string name="dialog_close_edit_negative_button">NO</string>
+    <string name="dialog_close_edit_positive_button">保存する</string>
+    <string name="dialog_close_edit_negative_button">保存しない</string>
     <string name="dialog_clear_all_title">作業内容を削除します</string>
     <string name="dialog_clear_all_message">続行しますか？</string>
     <string name="dialog_clear_all_positive_button">YES</string>
@@ -69,5 +69,10 @@
     <string name="dialog_search_each_memo_swipe_delete_negative_button">NO</string>
 
     <string name="contents_edit_btn_description">メモの編集</string>
+    <string name="dialog_move_to_main_for_edit_memo_title">メモの内容が変更されています</string>
+    <string name="dialog_move_to_main_for_edit_memo_message">変更を保存しますか？</string>
+    <string name="dialog_move_to_main_for_edit_memo_positive_button">保存する</string>
+    <string name="dialog_move_to_main_for_edit_memo_negative_button">保存しない</string>
+
 
 </resources>

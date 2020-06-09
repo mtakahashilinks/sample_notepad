@@ -19,18 +19,18 @@ class MemoOptionViewModel : ViewModel() {
     companion object {
         private lateinit var optionFragment: MemoOptionFragment
 
+        //例）"2020/03/05" -> 20200305
+        private fun String.convertDateTime(): Some<Int> {
+            val matchedResults = Regex("""\d+""").findAll(this)
+            val result = matchedResults.map { it.value }.joinToString("")
+
+            return Some(result.toInt())
+        }
+
+        private fun Option<Int>.getReminderParams(): Option<Int> =
+            if (optionFragment.reminderOnOffSwitchView.isChecked) this else None
+
         internal fun getOptionValuesForSave(): ValuesOfOptionSetting {
-            //例）"2020/03/05" -> 20200305
-            fun convertDateTime(value: String): Some<Int> {
-                val matchedResults = Regex("""\d+""").findAll(value)
-                val result = matchedResults.map { it.value }.joinToString("")
-
-                return Some(result.toInt())
-            }
-
-            fun getReminderParams(result: Option<Int>): Option<Int> =
-                if (optionFragment.reminderOnOffSwitchView.isChecked) result else None
-
             return when (this::optionFragment.isInitialized) {
                 true -> {
                     val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
@@ -42,13 +42,13 @@ class MemoOptionViewModel : ViewModel() {
                         false -> Some(optionFragment.categoryTextView.text.toString())
                     }
                     val targetDate =
-                        getReminderParams(convertDateTime(optionFragment.reminderDateView.text.toString()))
+                        optionFragment.reminderDateView.text.toString().convertDateTime().getReminderParams()
                     val targetTime =
-                        getReminderParams(convertDateTime(optionFragment.reminderTimeView.text.toString()))
+                        optionFragment.reminderTimeView.text.toString().convertDateTime().getReminderParams()
                     val preAlarm =
-                        getReminderParams(Some(optionFragment.preAlarmSpinnerView.selectedItemPosition))
+                        Some(optionFragment.preAlarmSpinnerView.selectedItemPosition).getReminderParams()
                     val postAlarm =
-                        getReminderParams(Some(optionFragment.postAlarmSpinnerView.selectedItemPosition))
+                        Some(optionFragment.postAlarmSpinnerView.selectedItemPosition).getReminderParams()
 
                     ValuesOfOptionSetting(title, category, targetDate, targetTime, preAlarm, postAlarm)
                 }

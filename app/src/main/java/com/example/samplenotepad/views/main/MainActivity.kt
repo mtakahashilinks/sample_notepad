@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.samplenotepad.*
-import com.example.samplenotepad.entities.MemoContents
-import com.example.samplenotepad.entities.MemoInfo
+import com.example.samplenotepad.data.deserializeMemoContents
+import com.example.samplenotepad.data.loadMemoInfoFromDatabase
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.FragmentFactories.getInputFragment
@@ -26,9 +26,17 @@ import kotlin.Exception
 import com.example.samplenotepad.usecases.*
 
 
-const val categoryArray = "CATEGORY_ARRAY"
+const val MEMO_Id = "MEMO_ID"
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private val editViewModel: MemoEditViewModel =
+            ViewModelProvider.NewInstanceFactory().create(MemoEditViewModel::class.java)
+        private val optionViewModel: MemoOptionViewModel =
+            ViewModelProvider.NewInstanceFactory().create(MemoOptionViewModel::class.java)
+    }
+
 
     //PagerにセットするAdapter
     private inner class MemoPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
@@ -44,28 +52,22 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private lateinit var memoInfo: MemoInfo
-    private lateinit var memoContents: MemoContents
-
-    private val editViewModel: MemoEditViewModel =
-        ViewModelProvider.NewInstanceFactory().create(MemoEditViewModel::class.java)
-    private val optionViewModel: MemoOptionViewModel =
-        ViewModelProvider.NewInstanceFactory().create(MemoOptionViewModel::class.java)
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         setSupportActionBar(mainToolbar)
 
-        //新規ではなく検索したメモの編集の場合
-        if (::memoInfo.isInitialized) {
-            editViewModel.apply {
-                updateMemoInfo { memoInfo }
-                updateMemoContents { memoContents }
-                updateMemoContentsAtSavePoint()
-            }
+        val existMemoId = intent.getLongExtra(MEMO_Id, -1L)
+
+        if (existMemoId != -1L) {
+            val memoInfo = loadMemoInfoFromDatabase(this, existMemoId)
+            val memoContents = (memoInfo.contents).deserializeMemoContents()
+            Log.d("場所:MainActivity#onCreate", "memoId=${memoInfo.rowid}")
+            Log.d("場所:MainActivity#onCreate", "memoContents=${memoContents}")
+
+            editViewModel.updateMemoInfo { memoInfo }
+            editViewModel.updateMemoContents { memoContents }
         }
 
         //Pagerの設定
@@ -110,13 +112,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-    }
-
-
-    //新規ではなく検索したメモの編集の場合に呼ばれる
-    internal fun setValue(mMemoInfo: MemoInfo, mMemoContents: MemoContents) {
-        memoInfo = mMemoInfo
-        memoContents = mMemoContents
     }
 
 
@@ -182,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                 moveToMemoSearchActivity()
             },
             { dialog, id -> moveToMemoSearchActivity() }
-        ).show(supportFragmentManager, "main_to_Search_dialog")
+        ).show(supportFragmentManager, "main_to_search_dialog")
     }
 
     private fun showMainCloseAlertDialog() {

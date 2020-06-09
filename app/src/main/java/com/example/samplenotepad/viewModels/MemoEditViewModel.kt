@@ -4,16 +4,12 @@ package com.example.samplenotepad.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.ListK
-import arrow.core.Option
-import arrow.core.Some
 import arrow.core.internal.AtomicBooleanW
 import arrow.core.internal.AtomicRefW
 import arrow.core.k
 import com.example.samplenotepad.usecases.closeMemoContentsOperation
 import com.example.samplenotepad.data.loadCategoryListFromDatabase
-import com.example.samplenotepad.entities.MemoContents
-import com.example.samplenotepad.entities.MemoInfo
-import com.example.samplenotepad.entities.MemoRowInfo
+import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.main.MemoEditFragment
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.coroutines.*
@@ -54,13 +50,8 @@ class MemoEditViewModel : ViewModel() {
     internal fun getCategoryList() = categoryList.value
 
 
-    internal fun initEditViewModel(fragment: MemoEditFragment,
-                                   mMemoInfo: Option<MemoInfo>,
-                                   mMemoContents: Option<MemoContents>) {
+    internal fun initEditViewModel(fragment: MemoEditFragment) {
         editFragment = fragment
-
-        if (mMemoInfo is Some) memoInfo.value = mMemoInfo.t
-        if (mMemoContents is Some) memoContents.value = mMemoContents.t
 
         loadAndSetCategoryList()
     }

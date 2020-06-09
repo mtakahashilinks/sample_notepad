@@ -47,13 +47,13 @@ class MemoEditFragment() : Fragment() {
 
         memoContainer = memoContentsContainerLayout
 
-        editViewModel.initEditViewModel(this, None, None)
+        editViewModel.initEditViewModel(this)
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー登録
         templateImgBtn.setOnClickListener {
             lifecycleScope.launch {
                 val dao = AppDatabase.getDatabase(this@MemoEditFragment.requireContext()).memoInfoDao()
-                val b = dao.getMemoInfoById(29)
+                val b = dao.getMemoInfoById(32)
           //      dao.deleteMemoInfo(b)
          //       val c = dao.getMemoInfo(1)
                 Log.d("場所:aaaa", "memoInfo(1b)=$b")

@@ -24,6 +24,20 @@ interface MemoInfoDao {
     """)
     suspend fun deleteById(id: Long)
 
+    @Query("""
+        DELETE
+        FROM memoInfoTable
+        WHERE category == :category
+    """)
+    suspend fun deleteByCategory(category: String)
+
+    @Query("""
+        UPDATE memoInfoTable
+        SET createdDateTime = :timeStamp, contents = :newContents, contentsText = :newContentsText
+        WHERE memoId == :id
+    """)
+    suspend fun updateContents(id: Long, timeStamp: Long, newContents: String, newContentsText: String)
+
 
     @Query("""
         SELECT * 
@@ -33,36 +47,29 @@ interface MemoInfoDao {
     suspend fun getMemoInfoById(id: Long): MemoInfo
 
     @Query("""
-           SELECT category
-           FROM MemoInfoTable
-           GROUP BY category
-           ORDER BY category ASC
-           """)
+        SELECT category
+        FROM MemoInfoTable
+        GROUP BY category
+        ORDER BY category ASC
+        """)
     suspend fun getCategoryList(): List<String>
 
+    @Query("""
+        SELECT category, COUNT(*)
+        FROM MemoInfoTable
+        GROUP BY category
+        ORDER BY category ASC
+        """)
+    suspend fun getDataSetForCategoryList(): List<DataSetForCategoryList>
+
 
     @Query("""
-           SELECT category, COUNT(*)
-           FROM MemoInfoTable
-           GROUP BY category
-           ORDER BY category ASC
-           """)
-    suspend fun getCategoriesAndSize(): List<DataSetForCategoryList>
-
-    @Query("""
-        DELETE
-        FROM memoInfoTable
-        WHERE category == :category
-    """)
-    suspend fun deleteByCategory(category: String)
-
-    @Query("""
-         SELECT memoId, createdDateTime, title, contentsText
-         FROM MemoInfoTable
-         WHERE category Like :category
-         ORDER BY createdDateTime ASC
-          """)
-    suspend fun getDataSetInCategory(category: String): List<DataSetForEachMemoList>
+        SELECT memoId, createdDateTime, title, contentsText
+        FROM MemoInfoTable
+        WHERE category Like :category
+        ORDER BY createdDateTime DESC
+        """)
+    suspend fun getDataSetForEachMemoList(category: String): List<DataSetForEachMemoList>
 
 
 //      @Query("""

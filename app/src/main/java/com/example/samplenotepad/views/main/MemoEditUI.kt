@@ -6,6 +6,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.fragment.app.Fragment
 import arrow.core.Some
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
@@ -32,20 +33,19 @@ internal fun MemoRow.setTextAndCursorPosition(text: Text, selection: Int = 0) {
     }
 }
 
-internal fun showSnackbarForSavedAtEditFragment(editFragment: MemoEditFragment) {
-    editFragment.saveImgBtn?.let {
-        Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
-            view.alpha = 0.5f
-            show()
+internal fun showSnackbarForSavedMassage(fragment: Fragment) {
+    when (fragment) {
+        is MemoEditFragment -> fragment.saveImgBtn?.let {
+            Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
+                view.alpha = 0.5f
+                show()
+            }
         }
-    }
-}
-
-internal fun showSnackbarForSavedAtDisplayFragment(displayFragment: DisplayMemoFragment) {
-    displayFragment.displaySaveImgBtn?.let {
-        Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
-            view.alpha = 0.5f
-            show()
+        is DisplayMemoFragment -> fragment.displaySaveImgBtn?.let {
+            Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
+                view.alpha = 0.5f
+                show()
+            }
         }
     }
 }

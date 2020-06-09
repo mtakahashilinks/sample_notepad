@@ -40,7 +40,8 @@ data class DeleteCheckBox(
     val memoRow: MemoRow
 ) : TypeForExecuteMemoContents() { companion object }
 data class ChangeCheckBoxState(
-    val memoRow: MemoRow
+    val memoRow: MemoRow,
+    val executionType: WhichMemoExecution
 ) : TypeForExecuteMemoContents() { companion object }
 data class AddDot(
     val memoRow: MemoRow,
