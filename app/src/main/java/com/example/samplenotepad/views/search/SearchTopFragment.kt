@@ -17,13 +17,10 @@ import kotlinx.coroutines.runBlocking
 
 
 class SearchTopFragment : Fragment() {
-
-    private lateinit var searchViewModel: SearchViewModel
-
+    private val searchViewModel = SearchViewModel.getInstanceOrCreateNewOne()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -66,16 +63,12 @@ class SearchTopFragment : Fragment() {
     }
 
 
-    internal fun setValues(searchVM: SearchViewModel) {
-        searchViewModel = searchVM
-    }
-
     internal fun moveToSearchEachMemo(selectedCategory: String) {
+        searchViewModel.updateSelectedCategory(selectedCategory)
+
         requireActivity().supportFragmentManager.beginTransaction()
             .addToBackStack(null)
-            .replace(R.id.container, SearchEachMemoFragment().apply {
-                    setValues(searchViewModel, selectedCategory)
-                })
+            .replace(R.id.container, SearchEachMemoFragment())
             .commit()
     }
 }

@@ -1,18 +1,35 @@
 package com.example.samplenotepad.viewModels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import arrow.core.internal.AtomicRefW
 import arrow.core.k
 import com.example.samplenotepad.entities.*
 
 
 class SearchViewModel : ViewModel() {
+    companion object {
+        private lateinit var instanceOfVM: SearchViewModel
+
+        internal fun getInstanceOrCreateNewOne(): SearchViewModel =
+            when (::instanceOfVM.isInitialized) {
+                true -> instanceOfVM
+                false -> {
+                    val searchViewModel =
+                        ViewModelProvider.NewInstanceFactory().create(SearchViewModel::class.java)
+                    instanceOfVM = searchViewModel
+                    searchViewModel
+                }
+            }
+    }
+
 
     private val dataSetForCategoryList = AtomicRefW(listOf<DataSetForCategoryList>())
     private val dataSetForEachMemoList = AtomicRefW(listOf<DataSetForEachMemoList>())
     private val memoInfo = AtomicRefW(MemoInfo(-1, -1, "", "", "", "", -1, -1, -1, -1))
     private val memoContents = AtomicRefW(MemoContents(listOf<MemoRowInfo>().k()))
     private val memoContentsAtSavePoint = AtomicRefW(listOf<MemoRowInfo>().k())
+    private lateinit var selectedCategory: String
 
 
     internal fun getDataSetForCategoryList() = dataSetForCategoryList.value
@@ -37,6 +54,11 @@ class SearchViewModel : ViewModel() {
         memoContentsAtSavePoint.updateAndGet { memoContents.value }
     internal fun compareMemoContentsWithSavePoint(): Boolean {
         return memoContents.value == memoContentsAtSavePoint.value
+    }
+
+    internal fun getSelectedCategory() = selectedCategory
+    internal fun updateSelectedCategory(value: String) {
+        selectedCategory = value
     }
 
 

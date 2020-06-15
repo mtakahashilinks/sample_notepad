@@ -58,6 +58,7 @@ internal fun initMemoContentsOperation(
                 viewModelScope.launch {
                     executeActor.send(CreateFirstMemoRow(Text(""), CreateNewMemo))
                 }.join()
+
                 updateMemoContentsAtSavePoint()
             }
         }
@@ -66,8 +67,7 @@ internal fun initMemoContentsOperation(
             editViewModel = viewModel as MemoEditViewModel
             executeActor = viewModel.viewModelScope.executeMemoOperation()
             memoContainer = container
-            Log.d("場所:initMemoContentsOperation", "memoId=${editViewModel.getMemoInfo()?.rowid}")
-            Log.d("場所:initMemoContentsOperation", "memoContents=${editViewModel.getMemoContents()}")
+            Log.d("場所:initMemoContentsOperation", "memoId=${editViewModel.getMemoInfo()?.rowid} memoContents=${editViewModel.getMemoContents()}")
 
             createMemoRowsForExistMemo(executionType, editViewModel.getMemoContents())
         }
@@ -120,10 +120,16 @@ internal fun MemoRow.dotOperation() {
     }
 }
 
-internal fun clearAll() {
+internal fun clearAll() = runBlocking {
+    Log.d("場所:clearAll", "ClearAll処理に入った")
+
+    memoContainer.removeAllViews()
+
     editViewModel.viewModelScope.launch {
-        executeActor.send(ClearAll)
-    }
+        executeActor.send(CreateFirstMemoRow(Text(""), CreateNewMemo))
+    }.join()
+
+    editViewModel.updateMemoContentsAtSavePoint()
 }
 
 internal fun saveMemo() = runBlocking {
@@ -139,7 +145,10 @@ private fun saveOperation() = runBlocking {
     saveMemoInfo(editFragment, editViewModel, editViewModel.getMemoInfo(), editViewModel.getMemoContents())
 }
 
-private fun createMemoRowsForExistMemo(executionType: WhichMemoExecution, memoContents: MemoContents) {
+private fun createMemoRowsForExistMemo(
+    executionType: WhichMemoExecution,
+    memoContents: MemoContents
+) = runBlocking {
     suspend fun List<MemoRowInfo>.createFirstRow(): List<MemoRowInfo> {
         val targetMemoRowInfo = this@createFirstRow[0]
 
@@ -156,13 +165,22 @@ private fun createMemoRowsForExistMemo(executionType: WhichMemoExecution, memoCo
 
     Log.d("場所:createMemoRowsForExistMemo", "memoContents=${memoContents.toList()}")
 
-    val scope = when (executionType) {
-        is DisplayExistMemo -> searchViewModel.viewModelScope
-        else -> editViewModel.viewModelScope
-    }
+    //主要な処理
+    when (executionType) {
+        is DisplayExistMemo -> {
+            searchViewModel.viewModelScope.launch {
+                memoContents.toList().createFirstRow().createNextRow()
+            }.join()
 
-    scope.launch {
-        memoContents.toList().createFirstRow().createNextRow()
+            searchViewModel.updateMemoContentsAtSavePoint()
+        }
+        else -> {
+            editViewModel.viewModelScope.launch {
+                memoContents.toList().createFirstRow().createNextRow()
+            }.join()
+
+            editViewModel.updateMemoContentsAtSavePoint()
+        }
     }
 }
 
@@ -201,26 +219,15 @@ private fun CoroutineScope.executeMemoOperation() = actor<TypeForExecuteMemoCont
                 is DeleteMemoRow -> deleteMemoRow(msg)
                 is AddCheckBox -> addCheckBox(msg)
                 is DeleteCheckBox -> deleteCheckBox(msg)
-                is ChangeCheckBoxState -> changeCheckBoxState(msg)
+                is ChangeCheckBoxState -> switchByExecutionTypeForUpdateCheckBoxState(msg)
                 is AddDot -> addDot(msg)
                 is DeleteDot -> deleteDot(msg)
-                is ClearAll -> clearAllInMemoContents()
                 is SaveMemoInfo -> saveOperation()
             }
 
             Log.d("場所:executeMemoOperation", "executeMemoOperationが終わった executeId=$msg")
         }
     }
-
-
-private fun clearAllInMemoContents() {
-    Log.d("場所:AllInMemoContents", "ClearAll処理に入った")
-
-    memoContainer.removeAllViews()
-
-    editViewModel.updateMemoContents { listOf<MemoRowInfo>().k() }
-    Log.d("場所:clearAllInMemoContents", "memoContents=${editViewModel.getMemoContents()}")
-}
 
 
 private fun updateTextOfMemoRowInfo(executeId: UpdateTextOfMemoRowInfo) {
@@ -356,7 +363,6 @@ private fun createNewMemoRowView(
         setTouchAction()
         setBackSpaceKeyAction(executeId)
         setEnterKeyAction()
-        setTextAndCursorPosition(memoRowText, memoRowText.value.length)
     }
 
     fun setLayoutParamForEditText() =
@@ -376,6 +382,7 @@ private fun createNewMemoRowView(
             EditText(editFragment.context, null, 0, R.style.MemoEditTextStyle).apply {
                 layoutParams = setLayoutParamForEditText()
                 id = memoRowId ?: throw(NullPointerException("memoRowId mast not be null"))
+                setText(memoRowText.value)
                 setActionsAndText()
             }
         }
@@ -414,6 +421,8 @@ private fun createFirstMemoRow(executeId: CreateFirstMemoRow) {
             }
             Log.d("場所:createFirstMemoRow",
                 "変更後:size=${editViewModel.getMemoContents().size} memoContents=${editViewModel.getMemoContents()}")
+
+            newMemoRow.setTextAndCursorPosition(editViewModel, executeId.text)
         }
         else -> {
             memoContainer.setConstraintForFirstMemoRow(newMemoRow)
@@ -486,23 +495,18 @@ private fun createNextMemoRow(executeId: CreateNextMemoRow) {
                 }
             }
             //これを最後にしないと無限ループになる
-            newMemoRow.setTextAndCursorPosition(executeId.text)
-
-            editViewModel.updateIfAtFirstInText(true)
-            Log.d("場所:createNextMemoRow", "ifAtFirstInText=${editViewModel.getIfAtFirstInText()}")
+            newMemoRow.setTextAndCursorPosition(editViewModel, executeId.text)
 
             Log.d("場所:createNextMemoRow",
                 "変更後:size=${editViewModel.getMemoContents().size} MemoContents=${editViewModel.getMemoContents()}")
         }
         else -> {
             memoContainer.setConstraintForNextMemoRowWithNoBelow(
-                newMemoRow,
-                MemoRowId(formerMemoRowForExistMemo.id)
+                newMemoRow, MemoRowId(formerMemoRowForExistMemo.id)
             )
 
-            if (executeId.memoRowInfo != null) {
+            if (executeId.memoRowInfo != null)
                 newMemoRow.addCheckBoxAndDot(executeId.memoRowInfo, executeId.executionType)
-            }
 
             formerMemoRowForExistMemo = newMemoRow
         }
@@ -541,7 +545,9 @@ private fun deleteMemoRow(executeId: DeleteMemoRow) {
         memoContainer.removeMemoRowFromLayout(editFragment, targetMemoRow, formerMemoRow)
 
         formerMemoRow.setTextAndCursorPosition(
-            Text(textOfFormerMemoRow + targetMemoRow.text.toString()), textOfFormerMemoRow.length
+            editViewModel,
+            Text(textOfFormerMemoRow + targetMemoRow.text.toString()),
+            textOfFormerMemoRow.length
         )
 
         memoContents.filter { it.memoRowId.value != targetMemoRow.id }.k()
@@ -550,7 +556,7 @@ private fun deleteMemoRow(executeId: DeleteMemoRow) {
         "変更後:size=${editViewModel.getMemoContents().size} MemoContents=${editViewModel.getMemoContents()}")
 }
 
-private fun MemoContents.updateCheckBoxStateOfMemoContentsInViewModel(memoRowId: Int): MemoContents {
+private fun MemoContents.updateCheckBoxStateInMemoContents(memoRowId: Int): MemoContents {
     val indexOfMemoRow = this.indexOfFirst { it.memoRowId.value == memoRowId}
 
     return this.flatMap {
@@ -559,46 +565,50 @@ private fun MemoContents.updateCheckBoxStateOfMemoContentsInViewModel(memoRowId:
         else listOf(it).k()
     }
 }
+private fun MemoRow.changeTextColorByCheckBoxState(checkBoxState: Boolean, executionType: WhichMemoExecution) {
+    when {
+        executionType is DisplayExistMemo && checkBoxState->
+            this.setTextColor(resources.getColor(R.color.colorGray, displayFragment.activity?.theme))
+        executionType is DisplayExistMemo && !checkBoxState->
+            this.setTextColor(resources.getColor(R.color.colorBlack, displayFragment.activity?.theme))
+        executionType !is DisplayExistMemo && checkBoxState->
+            this.setTextColor(resources.getColor(R.color.colorGray, editFragment.activity?.theme))
+        executionType !is DisplayExistMemo && !checkBoxState->
+            this.setTextColor(resources.getColor(R.color.colorBlack, editFragment.activity?.theme))
+    }
+}
 
-private fun changeCheckBoxState(executeId: ChangeCheckBoxState) {
-    val memoRowId = executeId.memoRow.id
-
+private fun switchByExecutionTypeForUpdateCheckBoxState(executeId: ChangeCheckBoxState) =
     when (executeId.executionType) {
         is DisplayExistMemo -> {
             searchViewModel.updateMemoContents { memoContents ->
                 Log.d("場所:changeCheckBoxState", "変更前:size=${memoContents.size} memoContents=${memoContents}")
-
-                memoContents.updateCheckBoxStateOfMemoContentsInViewModel(memoRowId)
+                memoContents.updateCheckBoxStateInMemoContents(executeId.memoRow.id)
             }
-
             Log.d("場所:changeCheckBoxState", "変更後:size=${searchViewModel.getMemoContents().size} memoContents=${searchViewModel.getMemoContents()}")
         }
         else -> {
             editViewModel.updateMemoContents { memoContents ->
                 Log.d("場所:changeCheckBoxState", "変更前:size=${memoContents.size} memoContents=${memoContents}")
-
-                memoContents.updateCheckBoxStateOfMemoContentsInViewModel(memoRowId)
+                memoContents.updateCheckBoxStateInMemoContents(executeId.memoRow.id)
             }
-
             Log.d("場所:changeCheckBoxState", "変更後:size=${editViewModel.getMemoContents().size} memoContents=${editViewModel.getMemoContents()}")
         }
     }
-}
 
 private fun CheckBox.setCheckedChangeAction(executeId: AddCheckBox) {
     this.setOnCheckedChangeListener { buttonView, isChecked ->
         val memoRow = executeId.memoRow
         Log.d("場所:setOnCheckedChangeListener", "targetMemoRowId=${memoRow.id} targetCheckBoxId=${executeId.checkBoxId}")
-        editViewModel.viewModelScope.launch {
-            when (isChecked) {
-                true -> {
-                    memoRow.setTextColor(resources.getColor(R.color.colorGray, editFragment.activity?.theme))
 
+        editViewModel.viewModelScope.launch {
+            when (isChecked){
+                true -> {
+                    memoRow.changeTextColorByCheckBoxState(true, executeId.executionType)
                     executeActor.send(ChangeCheckBoxState(memoRow, executeId.executionType))
                 }
                 false -> {
-                    memoRow.setTextColor(resources.getColor(R.color.colorBlack, editFragment.activity?.theme))
-
+                    memoRow.changeTextColorByCheckBoxState(false, executeId.executionType)
                     executeActor.send(ChangeCheckBoxState(memoRow, executeId.executionType))
                 }
             }
@@ -625,6 +635,13 @@ private fun createNewCheckBoxView(executeId: AddCheckBox): CheckBox {
             is EditExistMemo , is DisplayExistMemo ->
                 executeId.checkBoxId ?: throw(NullPointerException("CheckBoxId mast not be null"))
         }
+
+        //既存メモの編集の場合、setCheckedChangeActionの前にCheckBoxViewを変更しておく
+        if (executeId.checkBoxState) {
+            isChecked = true
+            executeId.memoRow.changeTextColorByCheckBoxState(true, executeId.executionType)
+        }
+
         setCheckedChangeAction(executeId)
     }
 }
@@ -645,7 +662,7 @@ private fun addCheckBox(executeId: AddCheckBox) {
                 Log.d("場所:addCheckBox", "変更前:size=${memoContents.size} memoContents=${memoContents}")
 
                 memoContents.flatMap {
-                    if (it.memoRowId.value == executeId.memoRow.id)
+                    if (it.memoRowId.value == memoRow.id)
                         listOf(memoContents[indexOfMemoRow].copy(
                                 checkBoxId = CheckBoxId(Some(newCheckBox.id)),
                                 checkBoxState = CheckBoxState(false)
@@ -655,17 +672,7 @@ private fun addCheckBox(executeId: AddCheckBox) {
             }
             Log.d("場所:addCheckBox", "変更後:size=${editViewModel.getMemoContents().size} MemoContents=${editViewModel.getMemoContents()}")
         }
-        else -> {
-            memoContainer.setConstraintForBulletsView(executeId.memoRow, newCheckBox, 80)
-
-            if (executeId.checkBoxState) {
-                newCheckBox.isChecked = true
-
-                memoRow.setTextColor (
-                    memoContainer.resources.getColor(R.color.colorGray, editFragment.activity?.theme)
-                )
-            }
-        }
+        else -> memoContainer.setConstraintForBulletsView(memoRow, newCheckBox, 80)
     }
 }
 

@@ -51,7 +51,6 @@ data class AddDot(
 data class DeleteDot(
     val memoRow: MemoRow
 ) : TypeForExecuteMemoContents() { companion object }
-object ClearAll : TypeForExecuteMemoContents()
 object SaveMemoInfo : TypeForExecuteMemoContents()
 
 

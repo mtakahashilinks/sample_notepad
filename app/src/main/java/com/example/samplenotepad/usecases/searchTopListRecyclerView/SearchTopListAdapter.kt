@@ -25,10 +25,7 @@ class SearchTopListAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.search_top_container_row, parent, false)
-        val viewHolder =
-            ViewHolder(
-                view
-            )
+        val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
             fragment.moveToSearchEachMemo(

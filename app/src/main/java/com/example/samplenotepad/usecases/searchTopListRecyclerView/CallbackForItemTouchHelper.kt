@@ -81,6 +81,7 @@ internal fun RecyclerView.getItemTouchHelperCallback(
 
             deleteMemoByCategoryFromDatabase(fragment, targetCategory)
 
+            //リストから削除されたCategoryを除去。ただし先頭(DefaultCategory)の場合はlistSizeを0に変更するだけ
             when (adapterPosition == 0) {
                 true -> {
                     searchViewModel.updateDataSetForCategoryList { categoryTupleList ->

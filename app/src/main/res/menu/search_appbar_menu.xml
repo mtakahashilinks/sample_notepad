@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/addFormat"
-        android:title="@string/add_format" />
-
+        android:id="@+id/createNewMemo"
+        android:title="@string/appbar_menu_create_new_memo"
+        app:showAsAction="never" />
 </menu>

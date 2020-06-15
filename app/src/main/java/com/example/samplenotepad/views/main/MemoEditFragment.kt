@@ -7,30 +7,35 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import arrow.core.None
 import com.example.samplenotepad.*
-import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.checkBoxOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
-import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
-import kotlinx.coroutines.launch
 
 
-class MemoEditFragment() : Fragment() {
-
+class MemoEditFragment : Fragment() {
     companion object {
-        private lateinit var editViewModel: MemoEditViewModel
-        private lateinit var optionViewModel: MemoOptionViewModel
-        private lateinit var memoContainer: ConstraintLayout
+        private lateinit var instanceOfFragment: MemoEditFragment
+
+        internal fun getInstanceOrCreateNewOne(): MemoEditFragment =
+            when (::instanceOfFragment.isInitialized) {
+                true -> instanceOfFragment
+                false -> {
+                    val editFragment = MemoEditFragment()
+                    instanceOfFragment = editFragment
+                    editFragment
+                }
+            }
     }
 
+
+    private val editViewModel = MemoEditViewModel.getInstanceOrCreateNewOne()
+    private lateinit var memoContainer: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,32 +54,31 @@ class MemoEditFragment() : Fragment() {
 
         editViewModel.initEditViewModel(this)
 
-        //メモテキスト編集に使うイメージボタンのクリックリスナー登録
+        //メモテキスト編集に使うイメージボタンのクリックリスナー群
         templateImgBtn.setOnClickListener {
-            lifecycleScope.launch {
-                val dao = AppDatabase.getDatabase(this@MemoEditFragment.requireContext()).memoInfoDao()
-                val b = dao.getMemoInfoById(32)
-          //      dao.deleteMemoInfo(b)
-         //       val c = dao.getMemoInfo(1)
-                Log.d("場所:aaaa", "memoInfo(1b)=$b")
-         //       Log.d("場所:aaaa", "memoInfo(1c)=$c")
-            }
+            TemplateListDialogFragment.getInstanceOrCreateNewOne().show(
+                this@MemoEditFragment.requireActivity().supportFragmentManager, "template_list_dialog"
+            )
         }
 
         checkBoxImgBtn.setOnClickListener {
-            val targetMemoRow = memoContentsContainerLayout.findFocus()
-            Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-            if (targetMemoRow is MemoRow) targetMemoRow.checkBoxOperation()
+            if (memoContainer.findFocus() != null) {
+                val targetMemoRow = memoContainer.findFocus()
+                Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
+                if (targetMemoRow is MemoRow) targetMemoRow.checkBoxOperation()
+            }
         }
 
         bulletListImgBtn.setOnClickListener {
-            val targetMemoRow = memoContentsContainerLayout.findFocus()
-            Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-            if (targetMemoRow is MemoRow) targetMemoRow.dotOperation()
+            if (memoContainer.findFocus() != null) {
+                val targetMemoRow = memoContainer.findFocus()
+                Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
+                if (targetMemoRow is MemoRow) targetMemoRow.dotOperation()
+            }
         }
 
         clearAllImgBtn.setOnClickListener {
-            showClearAllAlertDialog()
+            showAlertDialogToClearAll()
         }
 
         saveImgBtn.setOnClickListener {
@@ -99,13 +103,7 @@ class MemoEditFragment() : Fragment() {
     }
 
 
-    internal fun setValues(editVM: MemoEditViewModel,
-                           optionVM: MemoOptionViewModel) {
-        editViewModel = editVM
-        optionViewModel = optionVM
-    }
-
-    private fun showClearAllAlertDialog() {
+    private fun showAlertDialogToClearAll() {
         MemoAlertDialog(
             R.string.dialog_clear_all_title,
             R.string.dialog_clear_all_message,

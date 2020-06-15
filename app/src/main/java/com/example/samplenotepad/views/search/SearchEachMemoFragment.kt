@@ -17,8 +17,7 @@ import com.example.samplenotepad.usecases.searchEachMemoRecyclerView.getCallback
 
 
 class SearchEachMemoFragment : Fragment() {
-
-    private lateinit var searchViewModel: SearchViewModel
+    private val searchViewModel = SearchViewModel.getInstanceOrCreateNewOne()
     private lateinit var category: String
 
 
@@ -35,6 +34,7 @@ class SearchEachMemoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        category = searchViewModel.getSelectedCategory()
         categoryTextView.text = getString(R.string.search_each_memo_category_name_text, category)
 
         searchViewModel.updateDataSetForEachMemoList { loadDataSetForEachMemoListFromDatabase(this, category) }
@@ -70,15 +70,10 @@ class SearchEachMemoFragment : Fragment() {
     }
 
 
-    internal fun setValues(searchVM: SearchViewModel, mCategory: String) {
-        searchViewModel = searchVM
-        category = mCategory
-    }
-
     internal fun moveToDisplayMemo() {
         requireActivity().supportFragmentManager.beginTransaction()
             .addToBackStack(null)
-            .replace(R.id.container, DisplayMemoFragment().apply { setValues(searchViewModel) })
+            .replace(R.id.container, DisplayMemoFragment())
             .commit()
     }
 }

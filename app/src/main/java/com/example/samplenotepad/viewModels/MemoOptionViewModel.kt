@@ -5,9 +5,11 @@ import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.TextView
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
+import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.ValuesOfOptionSetting
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.android.synthetic.main.fragment_memo_option.*
@@ -15,23 +17,45 @@ import java.util.*
 
 
 class MemoOptionViewModel : ViewModel() {
-
     companion object {
         private lateinit var optionFragment: MemoOptionFragment
+        private lateinit var instanceOfVM: MemoOptionViewModel
 
-        //例）"2020/03/05" -> 20200305
-        private fun String.convertDateTime(): Some<Int> {
-            val matchedResults = Regex("""\d+""").findAll(this)
-            val result = matchedResults.map { it.value }.joinToString("")
+        internal fun getInstanceOrCreateNewOne(): MemoOptionViewModel =
+                when (::instanceOfVM.isInitialized) {
+                    true ->  instanceOfVM
+                    false -> {
+                        val optionViewModel =
+                            ViewModelProvider.NewInstanceFactory().create(MemoOptionViewModel::class.java)
+                        instanceOfVM = optionViewModel
+                        optionViewModel
+                    }
+                }
 
-            return Some(result.toInt())
+        internal fun resetOptionStatesForCreateNewMemo() {
+            fun MemoOptionFragment.resetReminderDateTime() {
+                val calendar = Calendar.getInstance()
+
+                this.reminderDateView.text =
+                    android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
+                this.reminderTimeView.text =
+                    android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
+            }
+
+            if (::optionFragment.isInitialized) {
+                optionFragment.apply {
+                    titleBodyTextView.setText("")
+                    categoryTextView.setText(R.string.memo_category_default_value)
+                    reminderOnOffSwitchView.isEnabled = false
+                    resetReminderDateTime()
+                    preAlarmSpinnerView.setSelection(0)
+                    postAlarmSpinnerView.setSelection(0)
+                }
+            }
         }
 
-        private fun Option<Int>.getReminderParams(): Option<Int> =
-            if (optionFragment.reminderOnOffSwitchView.isChecked) this else None
-
         internal fun getOptionValuesForSave(): ValuesOfOptionSetting {
-            return when (this::optionFragment.isInitialized) {
+            return when (::optionFragment.isInitialized) {
                 true -> {
                     val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
                         true -> None
@@ -55,17 +79,33 @@ class MemoOptionViewModel : ViewModel() {
                 false -> ValuesOfOptionSetting(None, None, None, None, None, None)
             }
         }
+
+        //例）"2020/03/05" -> 20200305
+        private fun String.convertDateTime(): Some<Int> {
+            val matchedResults = Regex("""\d+""").findAll(this)
+            val result = matchedResults.map { it.value }.joinToString("")
+
+            return Some(result.toInt())
+        }
+
+        private fun Option<Int>.getReminderParams(): Option<Int> =
+            if (optionFragment.reminderOnOffSwitchView.isChecked) this else None
     }
+
 
     internal fun initOptionViewModel(oFragment: MemoOptionFragment) {
         optionFragment = oFragment
+
+        oFragment.initReminderDateTime()
     }
 
-    internal fun initReminderDateTime(dateView: TextView, timeView: TextView) {
+    private fun MemoOptionFragment.initReminderDateTime() {
         val calendar = Calendar.getInstance()
 
-        dateView.text = android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
-        timeView.text = android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
+        this.reminderDateView.text =
+            android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
+        this.reminderTimeView.text =
+            android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
     }
 
     //Textの文字数カウンターのセット

@@ -18,9 +18,7 @@ import kotlinx.android.synthetic.main.fragment_display_memo.*
 
 
 class DisplayMemoFragment : Fragment() {
-
-    private lateinit var searchViewModel:SearchViewModel
-
+    private val searchViewModel = SearchViewModel.getInstanceOrCreateNewOne()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -39,7 +37,6 @@ class DisplayMemoFragment : Fragment() {
                     val memoContents = searchViewModel.getMemoContents()
 
                     updateMemoContentsInDatabase(this, memoId, memoContents)
-
                     moveToMainActivityForEditMemo(memoId)
                 }
             }
@@ -50,7 +47,6 @@ class DisplayMemoFragment : Fragment() {
             val memoContents = searchViewModel.getMemoContents()
 
             searchViewModel.updateMemoContentsAtSavePoint()
-
             updateMemoContentsInDatabase(this, memoId, memoContents)
         }
     }
@@ -65,10 +61,6 @@ class DisplayMemoFragment : Fragment() {
 
     }
 
-
-    internal fun setValues(searchVM: SearchViewModel) {
-        searchViewModel = searchVM
-    }
 
     private fun moveToMainActivityForEditMemo(memoId: Long) {
         Log.d("場所:DisplayMemoFragment#moveToMainActivityForEditMemo#fromVM", "memoId=$memoId memoContents=${searchViewModel.getMemoContents()}")

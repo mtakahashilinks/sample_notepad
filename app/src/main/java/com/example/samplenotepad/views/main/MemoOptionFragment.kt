@@ -16,11 +16,8 @@ import kotlinx.android.synthetic.main.fragment_memo_option.*
 
 
 class MemoOptionFragment : Fragment() {
-
-    companion object {
-        private lateinit var optionViewModel: MemoOptionViewModel
-        private lateinit var editViewModel: MemoEditViewModel
-    }
+    private val optionViewModel = MemoOptionViewModel.getInstanceOrCreateNewOne()
+    private val editViewModel = MemoEditViewModel.getInstanceOrCreateNewOne()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,12 +32,10 @@ class MemoOptionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        optionViewModel.initOptionViewModel(this)
-
         optionViewModel.apply {
+            initOptionViewModel(this@MemoOptionFragment)
             setCounterText(titleBodyTextView, titleCounterView, 15) //TitleのViewに文字数カウンターをセット
             setCounterText(categoryTextView, categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
-            initReminderDateTime(reminderDateView, reminderTimeView)
         }
 
         //カテゴリーのTextを初期化
@@ -114,10 +109,5 @@ class MemoOptionFragment : Fragment() {
         preAlarmSpinnerView.visibility = visibility
         postAlarmLabelView.isEnabled = enable
         postAlarmSpinnerView.visibility = visibility
-    }
-
-    internal fun setValues(editVM: MemoEditViewModel, optionVM: MemoOptionViewModel) {
-        editViewModel = editVM
-        optionViewModel = optionVM
     }
 }
