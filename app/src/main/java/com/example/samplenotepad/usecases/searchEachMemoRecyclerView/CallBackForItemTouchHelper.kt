@@ -58,7 +58,7 @@ internal fun RecyclerView.getCallbackForItemTouchHelper(
         fun deleteItemFromEachMemoDataSet(adapterPosition: Int) {
             val targetMemoId = searchViewModel.getDataSetForEachMemoList()[adapterPosition].memoInfoId
 
-            deleteMemoByIdFromDatabase(fragment, targetMemoId)
+            deleteMemoByIdFromDatabase(targetMemoId)
 
             searchViewModel.updateDataSetForEachMemoList { dataSetList ->
                 dataSetList.filterNot { dataSet -> dataSet.memoInfoId == targetMemoId }

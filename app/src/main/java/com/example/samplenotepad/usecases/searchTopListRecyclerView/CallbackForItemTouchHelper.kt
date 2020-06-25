@@ -10,9 +10,8 @@ import com.example.samplenotepad.views.search.SearchTopFragment
 
 
 //SwipeでリストのItemを削除するためのCallback
-internal fun RecyclerView.getItemTouchHelperCallback(
+internal fun SearchViewModel.getItemTouchHelperCallback(
     fragment: SearchTopFragment,
-    searchViewModel: SearchViewModel,
     adapter: SearchTopListAdapter
 ) =
     object : ItemTouchHelper.Callback() {
@@ -77,14 +76,14 @@ internal fun RecyclerView.getItemTouchHelperCallback(
 
 
         fun SearchTopListAdapter.deleteItemFromDataSetForCategoryList(adapterPosition: Int) {
-            val targetCategory = searchViewModel.getDataSetForCategoryList()[adapterPosition].name
+            val targetCategory = getDataSetForCategoryList()[adapterPosition].name
 
-            deleteMemoByCategoryFromDatabase(fragment, targetCategory)
+            deleteMemoByCategoryFromDatabase(targetCategory)
 
             //リストから削除されたCategoryを除去。ただし先頭(DefaultCategory)の場合はlistSizeを0に変更するだけ
             when (adapterPosition == 0) {
                 true -> {
-                    searchViewModel.updateDataSetForCategoryList { categoryTupleList ->
+                    updateDataSetForCategoryList { categoryTupleList ->
                         categoryTupleList.mapIndexed { index, categoryTuple ->
                             when (index) {
                                 0 -> categoryTuple.copy(listSize = 0)
@@ -93,7 +92,7 @@ internal fun RecyclerView.getItemTouchHelperCallback(
                         }
                     }
                 }
-                false -> searchViewModel.updateDataSetForCategoryList { categoryTupleList ->
+                false -> updateDataSetForCategoryList { categoryTupleList ->
                     categoryTupleList.filterNot { categoryTuple -> categoryTuple.name == targetCategory }
                 }
             }

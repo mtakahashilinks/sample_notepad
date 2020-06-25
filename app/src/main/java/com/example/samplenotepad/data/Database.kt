@@ -13,7 +13,7 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var dbInstance: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        internal fun getDatabase(context: Context): AppDatabase {
             val instance = dbInstance
 
             return when (instance == null) {
@@ -31,6 +31,10 @@ abstract class AppDatabase : RoomDatabase() {
                 }
                 false -> instance
             }
+        }
+
+        internal fun clearDBInstanceFlag() {
+            dbInstance = null
         }
     }
 }

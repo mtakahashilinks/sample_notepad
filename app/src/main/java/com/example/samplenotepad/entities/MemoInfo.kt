@@ -18,6 +18,6 @@ data class MemoInfo(
     val contentsText: String, //中身の検索用(MemoContentsの全てのTextを繋げてシリアライズしたもの)
     val reminderDate: Int?,
     val reminderTime: Int?,
-    val preAlarmTime: Int?,
-    val postAlarmTime: Int?
+    val preAlarmTime: Int,
+    val postAlarmTime: Int
 ) { companion object }

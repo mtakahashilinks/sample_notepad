@@ -7,7 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
 import com.example.samplenotepad.*
+import com.example.samplenotepad.data.getShowMassageForSavedLiveData
+import com.example.samplenotepad.data.resetValueOfShowMassageForSavedLiveData
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
@@ -19,22 +22,20 @@ import kotlinx.android.synthetic.main.fragment_memo_edit.*
 
 
 class MemoEditFragment : Fragment() {
-    companion object {
-        private lateinit var instanceOfFragment: MemoEditFragment
 
-        internal fun getInstanceOrCreateNewOne(): MemoEditFragment =
-            when (::instanceOfFragment.isInitialized) {
-                true -> instanceOfFragment
-                false -> {
-                    val editFragment = MemoEditFragment()
-                    instanceOfFragment = editFragment
-                    editFragment
-                }
-            }
+    companion object {
+        private var instance: MemoEditFragment? = null
+
+        internal fun getInstanceOrCreateNew(): MemoEditFragment =
+            instance ?: MemoEditFragment().apply { if (instance == null) instance = this }
+
+        private fun clearEditFragmentInstanceFlag() {
+            instance = null
+        }
     }
 
 
-    private val editViewModel = MemoEditViewModel.getInstanceOrCreateNewOne()
+    private lateinit var editViewModel: MemoEditViewModel
     private lateinit var memoContainer: ConstraintLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,13 +51,22 @@ class MemoEditFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        editViewModel = MainActivity.editViewModel
         memoContainer = memoContentsContainerLayout
 
-        editViewModel.initEditViewModel(this)
+        getShowMassageForSavedLiveData().observe(viewLifecycleOwner) { fragmentType ->
+            if (fragmentType is EditFragment) this.showSnackbarForSavedMassageAtEditMemo()
+        }
+
+        editViewModel.getClearAllFocusInMemoContainerLiveData().observe(viewLifecycleOwner) { flag ->
+            if (flag) memoContentsContainerLayout.clearFocus()
+        }
+
+        editViewModel.initEditViewModel()
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー群
         templateImgBtn.setOnClickListener {
-            TemplateListDialogFragment.getInstanceOrCreateNewOne().show(
+            TemplateListDialogFragment.getInstanceOrCreateNew().show(
                 this@MemoEditFragment.requireActivity().supportFragmentManager, "template_list_dialog"
             )
         }
@@ -82,14 +92,14 @@ class MemoEditFragment : Fragment() {
         }
 
         saveImgBtn.setOnClickListener {
-            saveMemo()
+            saveMemo(CreateNewMemo)
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        when (editViewModel.getMemoInfo()) {
+        when (val memoInfo = editViewModel.getMemoInfo()) {
             null -> initMemoContentsOperation(this, editViewModel, memoContainer, CreateNewMemo)
             else -> initMemoContentsOperation(this, editViewModel, memoContainer, EditExistMemo)
         }
@@ -100,6 +110,21 @@ class MemoEditFragment : Fragment() {
 
         //ツールバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_for_edit_fragment)
+
+        //ViewPagerとTabでFragmentを切り替えたときにFocusが外れるので取得しなおす
+        if (memoContainer.focusedChild == null) firstMemoRow.requestFocus()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        clearEditFragmentInstanceFlag()
+        resetValueOfShowMassageForSavedLiveData()
+        editViewModel.resetValueOfClearAllFocusInMemoContainerLiveData()
     }
 
 
@@ -111,6 +136,6 @@ class MemoEditFragment : Fragment() {
             R.string.dialog_clear_all_negative_button,
             { dialog, id -> clearAll() },
             { dialog, id -> dialog.cancel() }
-        ).show(requireActivity().supportFragmentManager, "clear_all")
+        ).show(requireActivity().supportFragmentManager, "clear_all_dialog")
     }
 }

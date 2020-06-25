@@ -1,12 +1,13 @@
 package com.example.samplenotepad.entities
 
-import android.widget.EditText
 import androidx.room.ColumnInfo
 import arrow.core.*
 
 
-typealias MemoRow = EditText
-typealias MemoContents = ListK<MemoRowInfo>
+sealed class WhichFragment
+object EditFragment : WhichFragment()
+object DisplayFragment : WhichFragment()
+object NoneOfThem : WhichFragment()
 
 sealed class WhichMemoExecution
 object CreateNewMemo : WhichMemoExecution()
@@ -51,7 +52,9 @@ data class AddDot(
 data class DeleteDot(
     val memoRow: MemoRow
 ) : TypeForExecuteMemoContents() { companion object }
-object SaveMemoInfo : TypeForExecuteMemoContents()
+data class SaveMemoInfo(
+    val executionType: WhichMemoExecution
+) : TypeForExecuteMemoContents()
 
 
 sealed class TypeForMemoRowInfo
@@ -90,5 +93,6 @@ data class DataSetForEachMemoList(
     @ColumnInfo(name = "memoId") val memoInfoId: Long,
     @ColumnInfo(name = "createdDateTime") val createdDate: Long,
     @ColumnInfo(name = "title") val memoTitle: String,
-    @ColumnInfo(name = "contentsText") val memoText: String
+    @ColumnInfo(name = "contentsText") val memoText: String,
+    @ColumnInfo(name = "reminderDate") val reminderDate: Int?
 ) { companion object }

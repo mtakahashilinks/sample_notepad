@@ -1,54 +1,54 @@
 package com.example.samplenotepad.views.main
 
-import android.content.Context
 import android.util.Log
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.fragment.app.Fragment
 import arrow.core.Some
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
-import com.example.samplenotepad.views.search.DisplayMemoFragment
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 
 
 private lateinit var constraintSet: ConstraintSet
 
-internal fun View.restartSoftwareKeyBoard(context: Context?) {
-    val inputManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+internal fun MemoRow.setFocus() = this.requestFocus()
 
-    inputManager.restartInput(this)
-}
+//internal fun View.restartSoftwareKeyBoard(context: Context?) {
+//    val inputManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//
+//    inputManager.restartInput(this)
+//}
 
-internal fun Fragment.getFocusAndShowSoftwareKeyboard(container: ConstraintLayout) {
-    val childCount = container.childCount
+//internal fun getFocusAndShowSoftwareKeyboard(container: ConstraintLayout) {
+//    val editFragment = MemoEditFragment.getInstanceOrCreateNew()
+//    val childCount = container.childCount
+//
+//    Log.d("場所:getFocusAndShowSoftwareKeyboard", "add=${editFragment.isAdded} detach=${editFragment.isDetached} layout=${editFragment.isInLayout} remove=${editFragment.isRemoving}")
+//    if (childCount != 0) {
+//        val inputManager = editFragment.context?.getSystemService(
+//            Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//
+//        container.getChildAt(childCount - 1).apply {
+//            requestFocus()
+//            inputManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+//        }
+//    }
+//}
 
-    if (childCount != 0) {
-        val inputManager = this.context?.getSystemService(
-            Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        container.getChildAt(childCount - 1).apply {
-            requestFocus()
-            inputManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-        }
-    }
-}
-
-internal fun MemoRow.setTextAndCursorPosition(
+internal fun MemoRow.setFocusAndTextAndCursorPosition(
     editViewModel: MemoEditViewModel,
     text: Text,
     selection: Int = 0
 ) {
-    Log.d("場所:setTextAndCursorPosition", "setTextAndCursorPositionに入った")
+    Log.d("場所:setFocusAndTextAndCursorPosition", "setFocusAndTextAndCursorPositionに入った")
+
     this.apply {
+        setFocus()
         setText(text.value)
         setSelection(selection)
-        requestFocus()
     }
 
     when (selection) {
@@ -58,21 +58,11 @@ internal fun MemoRow.setTextAndCursorPosition(
     Log.d("場所:setTextAndCursorPosition", "ifAtFirstInText=${editViewModel.getIfAtFirstInText()}")
 }
 
-internal fun showSnackbarForSavedMassage(fragment: Fragment) {
-    when (fragment) {
-        is MemoEditFragment -> fragment.saveImgBtn?.let {
-            Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
-                view.alpha = 0.5f
-                show()
-            }
-        }
-        is DisplayMemoFragment -> fragment.displaySaveImgBtn?.let {
-            Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
-                view.alpha = 0.5f
-                show()
-            }
-        }
-    }
+internal fun MemoEditFragment.showSnackbarForSavedMassageAtEditMemo() {
+    this.saveImgBtn?.let { Snackbar.make(it, R.string.save_snackbar, Snackbar.LENGTH_SHORT).apply {
+        view.alpha = 0.5f
+        show()
+    } }
 }
 
 
@@ -99,7 +89,9 @@ internal fun ConstraintLayout.setConstraintForFirstMemoRow(targetMemoRow: MemoRo
 
 internal fun ConstraintLayout.setConstraintForNextMemoRowWithNoBelow(
     newMemoRow: MemoRow,
-    formerMemoRowId: MemoRowId
+    formerMemoRowId: MemoRowId,
+    editViewModel: MemoEditViewModel,
+    text: Text
 ) {
     Log.d("場所:setConstraintForNextMemoRowWithNoBelow", "Constraintのセットに入った")
     val targetParam = newMemoRow.layoutParams as ConstraintLayout.LayoutParams
@@ -120,13 +112,18 @@ internal fun ConstraintLayout.setConstraintForNextMemoRowWithNoBelow(
         applyTo(this@setConstraintForNextMemoRowWithNoBelow)
     }
 
+    newMemoRow.setFocusAndTextAndCursorPosition(editViewModel, text)
+
     Log.d("場所:setConstraintForNextMemoRowWithNoBelow [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
     Log.d("場所:setConstraintForNextMemoRowWithNoBelow [after set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToTop} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.setConstraintForNextMemoRowWithBelow(newMemoRow: MemoRow,
-                                                                   formerMemoRowId: MemoRowId,
-                                                                   nextMemoRowId: MemoRowId
+internal fun ConstraintLayout.setConstraintForNextMemoRowWithBelow(
+    newMemoRow: MemoRow,
+    formerMemoRowId: MemoRowId,
+    nextMemoRowId: MemoRowId,
+    editViewModel: MemoEditViewModel,
+    text: Text
 ) {
     Log.d("場所:setConstraintForNextMemoRowWithBelow", "Constraintのセットに入った")
     val targetParam = newMemoRow.layoutParams as ConstraintLayout.LayoutParams
@@ -151,6 +148,8 @@ internal fun ConstraintLayout.setConstraintForNextMemoRowWithBelow(newMemoRow: M
             newMemoRow.id, ConstraintSet.BOTTOM, 0)
         applyTo(this@setConstraintForNextMemoRowWithBelow)
     }
+
+    newMemoRow.setFocusAndTextAndCursorPosition(editViewModel, text)
 
     Log.d("場所:setConstraintForNextMemoRowWithBelow [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
     Log.d("場所:setConstraintForNextMemoRowWithBelow [after set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
@@ -182,17 +181,26 @@ internal fun ConstraintLayout.setConstraintForDeleteMemoRow(targetMemoRow: MemoR
     Log.d("場所:setConstraintForDeleteMemoRow [after set]", "nextMemoRow: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.removeMemoRowFromLayout(fragment: MemoEditFragment,
-                                                      targetMemoRow: MemoRow,
-                                                      formerMemoRow: MemoRow
+internal fun ConstraintLayout.removeMemoRowFromLayout(
+    targetMemoRow: MemoRow,
+    formerMemoRow: MemoRow,
+    editViewModel: MemoEditViewModel
 ) {
     Log.d("場所:removeMemoRowFromLayout", "リムーブ処理に入った")
     val formerParam = formerMemoRow.layoutParams as ConstraintLayout.LayoutParams
+    val textOfFormerMemoRow = formerMemoRow.text.toString()
+
     Log.d("場所:removeMemoRowFromLayout [before remove view]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 
     this.removeView(targetMemoRow)
 
-    formerMemoRow.restartSoftwareKeyBoard(fragment.context)
+    formerMemoRow.apply {
+        setFocusAndTextAndCursorPosition(
+            editViewModel,
+            Text(textOfFormerMemoRow + targetMemoRow.text.toString()),
+            textOfFormerMemoRow.length
+        )
+    }
 
     Log.d("場所:removeMemoRowFromLayout [after remove view]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 }

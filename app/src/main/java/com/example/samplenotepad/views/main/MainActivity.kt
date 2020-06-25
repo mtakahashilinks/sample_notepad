@@ -3,82 +3,69 @@ package com.example.samplenotepad.views.main
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.samplenotepad.*
 import com.example.samplenotepad.data.AppDatabase
-import com.example.samplenotepad.data.deserializeMemoContents
-import com.example.samplenotepad.data.loadMemoInfoFromDatabase
+import com.example.samplenotepad.entities.CreateNewMemo
+import com.example.samplenotepad.entities.MEMO_Id
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.search.MemoSearchActivity
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlin.Exception
 import com.example.samplenotepad.usecases.*
 
 
-const val MEMO_Id = "MEMO_ID"
-const val MEMO_TEMPLATE_NAME_LIST_FILE = "memo_template_name_list"
-const val MEMO_TEMPLATE_FILE = "memo_template_"
-
-
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        lateinit var mainActivity: MainActivity private set
+        lateinit var editViewModel: MemoEditViewModel private set
+        lateinit var optionViewModel: MemoOptionViewModel private set
+    }
+
+
     //PagerにセットするAdapter
     private inner class MemoPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 2
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
-                0 -> MemoEditFragment.getInstanceOrCreateNewOne()
-                1 -> MemoOptionFragment()
+                0 -> MemoEditFragment.getInstanceOrCreateNew()
+                1 -> MemoOptionFragment.getInstanceOrCreateNew()
                 else -> throw Exception("total number of fragments is different from getItemCount() ")
             }
         }
     }
 
 
-    private val editViewModel: MemoEditViewModel = MemoEditViewModel.getInstanceOrCreateNewOne()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         setSupportActionBar(mainToolbar)
 
+        mainActivity = this
+        editViewModel = ViewModelProvider(this).get(MemoEditViewModel::class.java)
+        optionViewModel = ViewModelProvider(this).get(MemoOptionViewModel::class.java)
+
         val existMemoId = intent.getLongExtra(MEMO_Id, -1L)
-
-        if (existMemoId != -1L) {
-            val memoInfo = loadMemoInfoFromDatabase(this, existMemoId)
-            val memoContents = memoInfo.contents.deserializeMemoContents()
-            Log.d("場所:MainActivity#onCreate", "memoId=${memoInfo.rowid}")
-            Log.d("場所:MainActivity#onCreate", "memoContents=${memoContents}")
-
-            editViewModel.updateMemoInfo { memoInfo }
-            editViewModel.updateMemoContents { memoContents }
-        }
 
         //Pagerの設定
         memoPager.apply {
             adapter = MemoPagerAdapter(this@MainActivity)
 
-            //MemoEditFragmentに遷移した時に改めてフォーカスを取得してsoftwareKeyboardをrestartする
             memoPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     when (position) {
-                        0 -> {
-                            val fragment = MemoEditFragment.getInstanceOrCreateNewOne()
-                            val container = fragment.memoContentsContainerLayout
-
-                            fragment.getFocusAndShowSoftwareKeyboard(container)
-                        }
+                        0 -> super.onPageSelected(position)
                         else -> super.onPageSelected(position)
                     }
                 }
@@ -92,6 +79,9 @@ class MainActivity : AppCompatActivity() {
                 1 -> tab.text = getText(R.string.tab_title_for_option_fragment)
             }
         }.attach()
+
+        if (existMemoId != -1L)
+            editViewModel.initViewModelForExistMemo(existMemoId)
     }
 
 
@@ -99,7 +89,12 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         viewModelStore.clear()
-        AppDatabase.getDatabase(this).close()
+        AppDatabase.apply {
+            getDatabase(this@MainActivity).close()
+            clearDBInstanceFlag()
+        }
+
+        editViewModel.resetValueOfClearAllFocusInMemoContainerLiveData()
     }
 
 
@@ -116,8 +111,7 @@ class MainActivity : AppCompatActivity() {
                 when (editViewModel.compareMemoContentsWithSavePoint()) {
                     true -> {
                         editViewModel.resetEditStatesForCreateNewMemo()
-                        viewModelStore.clear()
-                        MemoOptionViewModel.resetOptionStatesForCreateNewMemo()
+                        resetOptionStatesForCreateNewMemo()
                         true
                     }
                     false -> {
@@ -147,6 +141,7 @@ class MainActivity : AppCompatActivity() {
             0 -> {
                 when (editViewModel.compareMemoContentsWithSavePoint()) {
                     true -> {
+                        viewModelStore.clear()
                         finish()
                         super.onBackPressed()
                     }
@@ -164,8 +159,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         startActivity(intent)
+        viewModelStore.clear()
         finish()
     }
+
+    private fun resetOptionStatesForCreateNewMemo() {
+        if (MemoOptionFragment.isInstance())
+            MemoOptionFragment.getInstanceOrCreateNew().resetValueOfAllView()
+    }
+
 
     private fun showAlertDialogToSearchTop() {
         MemoAlertDialog(
@@ -174,7 +176,7 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_close_edit_positive_button,
             R.string.dialog_close_edit_negative_button,
             { dialog, id ->
-                saveMemo()
+                saveMemo(CreateNewMemo)
                 moveToMemoSearchActivity()
             },
             { dialog, id -> moveToMemoSearchActivity() }
@@ -188,11 +190,13 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_close_edit_positive_button,
             R.string.dialog_close_edit_negative_button,
             { dialog, id ->
-                saveMemo()
+                saveMemo(CreateNewMemo)
+                viewModelStore.clear()
                 finish()
                 super.onBackPressed()
             },
             { dialog, id ->
+                viewModelStore.clear()
                 finish()
                 super.onBackPressed()
             }
@@ -206,15 +210,13 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_reboot_and_create_new_memo_positive_button,
             R.string.dialog_reboot_and_create_new_memo_negative_button,
             { dialog, id ->
-                saveMemo()
+                saveMemo(CreateNewMemo)
                 editViewModel.resetEditStatesForCreateNewMemo()
-                viewModelStore.clear()
-                MemoOptionViewModel.resetOptionStatesForCreateNewMemo()
+                resetOptionStatesForCreateNewMemo()
             },
             { dialog, id ->
                 editViewModel.resetEditStatesForCreateNewMemo()
-                viewModelStore.clear()
-                MemoOptionViewModel.resetOptionStatesForCreateNewMemo()
+                resetOptionStatesForCreateNewMemo()
             }
         ).show(supportFragmentManager, "reboot_and_create_new_memo_dialog")
     }

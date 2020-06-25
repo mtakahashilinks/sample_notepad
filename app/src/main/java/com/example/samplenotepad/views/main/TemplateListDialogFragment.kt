@@ -1,6 +1,7 @@
 package com.example.samplenotepad.views.main
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -10,8 +11,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.saveTemplateNameListToFile
-import com.example.samplenotepad.data.saveTemplateToFile
 import com.example.samplenotepad.usecases.memoTemplateRecyclerView.MemoTemplateAdapter
 import com.example.samplenotepad.usecases.memoTemplateRecyclerView.getItemTouchHelperCallback
 import com.example.samplenotepad.viewModels.MemoEditViewModel
@@ -20,31 +19,29 @@ import kotlinx.android.synthetic.main.fragment_template_list_dialog.view.*
 
 
 class TemplateListDialogFragment : DialogFragment() {
-    companion object {
-        private lateinit var instanceOfFragment: TemplateListDialogFragment
 
-        internal fun getInstanceOrCreateNewOne(): TemplateListDialogFragment =
-            when (::instanceOfFragment.isInitialized) {
-                true -> instanceOfFragment
-                false -> {
-                    val dialogFragment = TemplateListDialogFragment()
-                    instanceOfFragment = dialogFragment
-                    dialogFragment
-                }
-            }
+    companion object {
+        private var instance: TemplateListDialogFragment? = null
+
+        internal fun getInstanceOrCreateNew(): TemplateListDialogFragment =
+            instance ?: TemplateListDialogFragment().apply { if (instance == null) instance = this }
+
+        internal fun clearTemplateListDialogFragmentInstanceFlag() {
+            instance = null
+        }
     }
 
 
-    private val editFragment = MemoEditFragment.getInstanceOrCreateNewOne()
-    private val editViewModel = MemoEditViewModel.getInstanceOrCreateNewOne()
-
+    private lateinit var editFragment: MemoEditFragment
+    private lateinit var editViewModel: MemoEditViewModel
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val view =
-            requireActivity().layoutInflater.inflate(R.layout.fragment_template_list_dialog, null, false)
-        val errorTextView = view.templateNameErrorTextView
+        editFragment = MemoEditFragment.getInstanceOrCreateNew()
+        editViewModel = MainActivity.editViewModel
 
-        if (errorTextView.visibility == View.VISIBLE) errorTextView.visibility = View.GONE
+        val view = requireActivity().layoutInflater.inflate(
+            R.layout.fragment_template_list_dialog, null, false
+        ).apply { templateNameEditText.requestFocus() }
 
         view.templateRecyclerView.apply {
             val mAdapter = MemoTemplateAdapter(editFragment, editViewModel)
@@ -65,43 +62,42 @@ class TemplateListDialogFragment : DialogFragment() {
 
         view.addNewTemplateBtn.setOnClickListener {
             val newTemplateName = view.templateNameEditText.text.toString()
+            val errorTextView = view.templateNameErrorTextView
 
             when {
                 newTemplateName.isEmpty() -> {
-                    errorTextView.showErrorText(R.string.template_add_error_not_input)
+                    errorTextView.showErrorText(R.string.error_not_input_new_name)
                     return@setOnClickListener
                 }
                 editViewModel.getTemplateNameList().contains(newTemplateName) -> {
-                    errorTextView.showErrorText(R.string.template_add_error_has_same)
+                    errorTextView.showErrorText(R.string.error_already_has_same_name)
                     return@setOnClickListener
                 }
-                editViewModel.getTemplateNameList().size == 5 -> {
+                editViewModel.getTemplateNameList().size >= 5 -> {
                     errorTextView.showErrorText(R.string.template_add_error_max_amount)
                     return@setOnClickListener
                 }
             }
 
             editFragment.memoContentsContainerLayout.clearFocus()
-            editViewModel.updateTemplateNameList { list -> list.plus(newTemplateName) }
 
-            saveTemplateNameListToFile(editFragment.requireContext(), editViewModel.getTemplateNameList())
-
-            saveTemplateToFile(
-                editFragment.requireContext(), newTemplateName, editViewModel.getMemoContents()
-            )
+            editViewModel.addItemInTemplateNameListAndSaveTemplateFile(newTemplateName)
 
             dialog.dismiss()
-
-            editFragment.getFocusAndShowSoftwareKeyboard(editFragment.memoContentsContainerLayout)
         }
 
         return dialog
     }
 
-    private fun TextView.showErrorText(massageId: Int) {
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+
+        clearTemplateListDialogFragmentInstanceFlag()
+    }
+
+    private fun TextView.showErrorText(massageId: Int) =
         this.apply {
             visibility = View.VISIBLE
             setText(massageId)
         }
-    }
 }

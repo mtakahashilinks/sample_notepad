@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.deleteTemplateFile
 import com.example.samplenotepad.data.saveTemplateNameListToFile
+import com.example.samplenotepad.entities.AdapterPosition
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.main.MemoEditFragment
@@ -35,10 +36,8 @@ internal fun RecyclerView.getItemTouchHelperCallback(
                 R.string.dialog_memo_template_swipe_delete_positive_button,
                 R.string.dialog_memo_template_swipe_delete_negative_button,
                 { dialog, id ->
-                    adapter.apply {
-                        deleteTemplateFileAndUpdateNameList(viewHolder.adapterPosition)
-                        notifyDataSetChanged()
-                    }
+                    viewHolder.adapterPosition.deleteTemplateFileAndUpdateNameList()
+                    adapter.notifyDataSetChanged()
                 },
                 { dialog, id -> adapter.notifyDataSetChanged() }
             ).show(
@@ -48,15 +47,15 @@ internal fun RecyclerView.getItemTouchHelperCallback(
         }
 
 
-        fun MemoTemplateAdapter.deleteTemplateFileAndUpdateNameList(adapterPosition: Int) {
+        private fun AdapterPosition.deleteTemplateFileAndUpdateNameList() {
             val templateNameList = editViewModel.getTemplateNameList()
-            val targetTemplateName = templateNameList[adapterPosition]
-            val modifiedTemplateList = templateNameList.take(adapterPosition)
-                .plus(templateNameList.drop(adapterPosition + 1))
+            val targetTemplateName = templateNameList[this]
+            val modifiedTemplateList = templateNameList.take(this)
+                .plus(templateNameList.drop(this + 1))
 
-            deleteTemplateFile(editFragment, targetTemplateName)
+            deleteTemplateFile(targetTemplateName)
 
-            saveTemplateNameListToFile(editFragment.requireContext(), modifiedTemplateList)
+            saveTemplateNameListToFile(modifiedTemplateList)
             editViewModel.updateTemplateNameList { modifiedTemplateList }
         }
     }

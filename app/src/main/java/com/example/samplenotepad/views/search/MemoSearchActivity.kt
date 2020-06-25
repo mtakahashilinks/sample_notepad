@@ -1,5 +1,6 @@
 package com.example.samplenotepad.views.search
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,32 +8,47 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.ViewModelProvider
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.loadDataSetForCategoryListFromDatabase
+import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.main.MainActivity
 import kotlinx.android.synthetic.main.memo_search_activity.*
 
 
 class MemoSearchActivity : AppCompatActivity() {
+
+    companion object {
+        lateinit var instanceOfActivity: Activity private set
+        lateinit var searchViewModel: SearchViewModel private set
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.memo_search_activity)
         setSupportActionBar(searchToolbar)
 
-        val searchViewModel: SearchViewModel = SearchViewModel.getInstanceOrCreateNewOne()
+        instanceOfActivity = this
+        searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
 
-        //ViewModelのcategoryDataSetListをセット
-        searchViewModel.updateDataSetForCategoryList { loadDataSetForCategoryListFromDatabase(this) }
-
+        searchViewModel.initViewModelForSearchTop()
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.container, SearchTopFragment())
+            .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())
             .commit()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+
         viewModelStore.clear()
+        AppDatabase.apply {
+            getDatabase(this@MemoSearchActivity).close()
+            clearDBInstanceFlag()
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
     }
 
 
@@ -51,6 +67,7 @@ class MemoSearchActivity : AppCompatActivity() {
                 }
 
                 startActivity(intent)
+                viewModelStore.clear()
                 finish()
 
                 true
@@ -60,7 +77,4 @@ class MemoSearchActivity : AppCompatActivity() {
     }
 
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-    }
 }

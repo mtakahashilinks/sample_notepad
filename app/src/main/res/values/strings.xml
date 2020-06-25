@@ -1,26 +1,33 @@
 <resources>
     <string name="app_name">Sample Notepad</string>
-
+    <!-- MemoEditFragment -->
     <string name="appbar_title_for_edit_fragment">Sample Notepad - メモ作成</string>
     <string name="tab_title_for_edit_fragment">メモ本文</string>
     <string name="tab_title_for_option_fragment">オプション設定</string>
     <string name="appbar_menu_create_new_memo">新規メモの作成</string>
     <string name="appbar_menu_to_search_top">メモリストへ</string>
     <string name="memo_title_default_value">(no title)</string>
-    <string name="memo_category_default_value">Others</string>
+    <string name="memo_category_default_value">no category</string>
     <string name="template_add_error_max_amount">※テンプレートは最大5個までです</string>
-    <string name="template_add_error_not_input">※テンプレート名を入力してください</string>
-    <string name="template_add_error_has_same">※その名前はすでに存在しています</string>
+    <string name="error_not_input_new_name">※新しい名前を入力してください</string>
+    <string name="error_already_has_same_name">※その名前はすでに存在しています</string>
     <string name="template_list_title">テンプレートリスト</string>
-    <string name="template_name_hint">追加するテンプレート名を入力</string>
     <string name="template_number_view_text">%s.</string>
     <string name="add_template_to_list">追加</string>
+    <string name="dialog_rename_template_title">テンプテート名の変更</string>
+    <string name="dialog_rename_category_title">カテゴリー名の変更</string>
+    <string name="dialog_rename_name_before_change">変更前：「%s」</string>
+    <string name="dialog_rename_edit_text_hint">新しい名前を入力</string>
+    <string name="dialog_rename_new_name_label">新しい名前：</string>
+    <string name="dialog_rename_positive_button">変更する</string>
+    <string name="dialog_rename_negative_button">キャンセル</string>
     <string name="contents_menu_btn_description">メニュー</string>
     <string name="contents_checkbox_btn_description">チェックボックスの追加と削除</string>
     <string name="contents_bullet_btn_description">ビュレットの追加と削除</string>
     <string name="contents_clear_btn_description">入力内容の全削除</string>
     <string name="contents_save_btn_description">メモの保存</string>
 
+    <!-- MemoOptionFragment -->
     <string name="memo_title_label">タイトル</string>
     <string name="memo_category_label">カテゴリー</string>
     <string name="register_reminder">リマインダー登録</string>
@@ -66,6 +73,7 @@
         <item>24時間後</item>
     </string-array>
 
+    <!-- SearchTopFragment -->
     <string name="appbar_title_search_top">Sample Notepad - カテゴリー</string>
     <string name="dialog_search_top_swipe_delete_others_title">このカテゴリー内を空にします</string>
     <string name="dialog_search_top_swipe_delete_others_message">よろしいですか？</string>
@@ -76,6 +84,7 @@
     <string name="dialog_search_top_swipe_delete_positive_button">削除する</string>
     <string name="dialog_search_top_swipe_delete_negative_button">キャンセル</string>
 
+    <!-- SearchEachMemoFragment -->
     <string name="appbar_title_search_each_memo">Sample Notepad - メモリスト</string>
     <string name="search_each_memo_category_name_text">カテゴリー：「%1s」</string>
     <string name="search_each_memo_title_label_text">タイトル：</string>
@@ -87,7 +96,21 @@
 
     <string name="contents_edit_btn_description">メモの編集</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- DisplayMemoFragment -->
+    <string name="dialog_show_reminder_states_title">リマインダー設定</string>
+    <string name="target_date_label">設定日時：</string>
+    <string name="pre_alarm_label">Preアラーム：</string>
+    <string name="post_alarm_label">Postアラーム：</string>
+    <string name="alarm_none">なし</string>
+    <string name="pre_alarm_5m">5分前</string>
+    <string name="pre_alarm_10m">10分前</string>
+    <string name="pre_alarm_30m">30分前</string>
+    <string name="pre_alarm_1h">1時間前</string>
+    <string name="pre_alarm_24h">24時間前</string>
+    <string name="post_alarm_5m">5分後</string>
+    <string name="post_alarm_10m">10分後</string>
+    <string name="post_alarm_30m">30分後</string>
+    <string name="post_alarm_1h">1時間後</string>
+    <string name="post_alarm_24h">24時間後</string>
 
 </resources>

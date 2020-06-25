@@ -38,6 +38,13 @@ interface MemoInfoDao {
     """)
     suspend fun updateContents(id: Long, timeStamp: Long, newContents: String, newContentsText: String)
 
+    @Query("""
+        UPDATE memoInfoTable
+        SET category = :newCategoryName
+        WHERE category == :oldCategoryName
+    """)
+    suspend fun renameCategory(oldCategoryName: String, newCategoryName: String)
+
 
     @Query("""
         SELECT * 
@@ -64,7 +71,7 @@ interface MemoInfoDao {
 
 
     @Query("""
-        SELECT memoId, createdDateTime, title, contentsText
+        SELECT memoId, createdDateTime, title, contentsText, reminderDate
         FROM MemoInfoTable
         WHERE category Like :category
         ORDER BY createdDateTime DESC
