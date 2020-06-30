@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,6 +44,23 @@ class SearchTopFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
+        //SearchViewの設定
+        memoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
+            android.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
+                true -> false
+                false -> {
+                    searchViewModel.searchMemoInfoAndSetWordAndResultForSearchTop(query)
+                    moveToSearchResult()
+                    true
+                }
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+        })
+
         //RecyclerViewの設定
         searchTopRecyclerView.apply {
             val mAdapter = SearchTopListAdapter(this@SearchTopFragment, searchViewModel)
@@ -75,13 +93,21 @@ class SearchTopFragment : Fragment() {
     }
 
 
-    internal fun moveToSearchEachMemo(selectedCategory: String) {
-        searchViewModel.updateSelectedCategory(selectedCategory)
+    internal fun moveToSearchInACategory(selectedCategory: String) {
+        searchViewModel.loadDataSetForMemoListAndSetPropertyInViewModel(selectedCategory)
+
         Log.d("場所:SearchTopFragment", "selectedCategoryをセット category=$selectedCategory viewModel=$searchViewModel")
 
         requireActivity().supportFragmentManager.beginTransaction()
             .addToBackStack(null)
-            .replace(R.id.searchContainer, SearchEachMemoFragment.getInstanceOrCreateNew())
+            .replace(R.id.searchContainer, SearchInACategoryFragment.getInstanceOrCreateNew())
+            .commit()
+    }
+
+    private fun moveToSearchResult() {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.searchContainer, SearchResultFragment.getInstanceOrCreateNew())
             .commit()
     }
 }

@@ -1,7 +1,9 @@
 package com.example.samplenotepad.views.main
 
+import android.content.Context
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import arrow.core.Some
@@ -14,7 +16,26 @@ import kotlinx.android.synthetic.main.fragment_memo_edit.*
 
 private lateinit var constraintSet: ConstraintSet
 
-internal fun MemoRow.setFocus() = this.requestFocus()
+//internal fun ConstraintLayout.restartSoftwareKeyboardAndGetFocus() {
+//    val editFragment = MemoEditFragment.getInstanceOrCreateNew()
+//    val childCount = this.childCount
+//
+//    if (childCount != 0) {
+//        val inputManager =
+//            editFragment.context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//
+//        this.getChildAt(childCount - 1).apply {
+//            inputManager.restartInput(this)
+//            requestFocus()
+//        }
+//    }
+//}
+
+//internal fun View.showSoftwareKeyBoard(context: Context?) {
+//    val inputManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//
+//    inputManager.showSoftInput(this, InputMethodManager.SHOW_FORCED)
+//}
 
 //internal fun View.restartSoftwareKeyBoard(context: Context?) {
 //    val inputManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -22,21 +43,15 @@ internal fun MemoRow.setFocus() = this.requestFocus()
 //    inputManager.restartInput(this)
 //}
 
-//internal fun getFocusAndShowSoftwareKeyboard(container: ConstraintLayout) {
-//    val editFragment = MemoEditFragment.getInstanceOrCreateNew()
-//    val childCount = container.childCount
-//
-//    Log.d("場所:getFocusAndShowSoftwareKeyboard", "add=${editFragment.isAdded} detach=${editFragment.isDetached} layout=${editFragment.isInLayout} remove=${editFragment.isRemoving}")
-//    if (childCount != 0) {
-//        val inputManager = editFragment.context?.getSystemService(
-//            Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//
-//        container.getChildAt(childCount - 1).apply {
-//            requestFocus()
-//            inputManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
-//        }
-//    }
-//}
+internal fun View.hideSoftwareKeyBoard(context: Context){
+    if (this.findFocus() != null) {
+        val inputManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+
+        inputManager.hideSoftInputFromWindow(this.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+    }
+}
+
+internal fun MemoRow.setFocus() = this.requestFocus()
 
 internal fun MemoRow.setFocusAndTextAndCursorPosition(
     editViewModel: MemoEditViewModel,

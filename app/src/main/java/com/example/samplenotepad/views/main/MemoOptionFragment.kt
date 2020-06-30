@@ -130,7 +130,10 @@ class MemoOptionFragment : Fragment() {
         //リマインダー登録スイッチのON・Off切り替えによる処理
         reminderOnOffSwitchView.setOnCheckedChangeListener { buttonView, isChecked ->
             when (isChecked) {
-                true -> changeStateForReminderSwitch(true, View.VISIBLE)
+                true -> {
+                    view.hideSoftwareKeyBoard(requireContext())
+                    changeStateForReminderSwitch(true, View.VISIBLE)
+                }
                 false -> changeStateForReminderSwitch(false, View.INVISIBLE)
             }
         }

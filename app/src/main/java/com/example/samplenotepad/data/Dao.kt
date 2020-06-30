@@ -2,7 +2,7 @@ package com.example.samplenotepad.data
 
 import androidx.room.*
 import com.example.samplenotepad.entities.DataSetForCategoryList
-import com.example.samplenotepad.entities.DataSetForEachMemoList
+import com.example.samplenotepad.entities.DataSetForMemoList
 import com.example.samplenotepad.entities.MemoInfo
 
 
@@ -71,12 +71,28 @@ interface MemoInfoDao {
 
 
     @Query("""
-        SELECT memoId, createdDateTime, title, contentsText, reminderDate
+        SELECT memoId, createdDateTime, title, category, contentsText, reminderDate
         FROM MemoInfoTable
-        WHERE category Like :category
+        WHERE category LIKE :category
         ORDER BY createdDateTime DESC
         """)
-    suspend fun getDataSetForEachMemoList(category: String): List<DataSetForEachMemoList>
+    suspend fun getDataSetForMemoList(category: String): List<DataSetForMemoList>
+
+    @Query("""
+        SELECT memoId, createdDateTime, title, category, contentsText, reminderDate 
+        FROM memoInfoTable 
+        WHERE title LIKE :word OR category LIKE :word OR contentsText LIKE :word
+        ORDER BY createdDateTime DESC
+        """)
+    suspend fun searchMemoInfoForSearchTop(word: String): List<DataSetForMemoList>
+
+    @Query("""
+        SELECT memoId, createdDateTime, title, category, contentsText, reminderDate 
+        FROM memoInfoTable 
+        WHERE category LIKE :category AND (title LIKE :word OR contentsText LIKE :word)
+        ORDER BY createdDateTime DESC
+        """)
+    suspend fun searchMemoInfoForSearchInACategory(category: String, word: String): List<DataSetForMemoList>
 
 
 //      @Query("""

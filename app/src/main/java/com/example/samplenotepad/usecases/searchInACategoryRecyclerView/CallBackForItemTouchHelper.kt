@@ -1,20 +1,19 @@
-package com.example.samplenotepad.usecases.searchEachMemoRecyclerView
+package com.example.samplenotepad.usecases.searchInACategoryRecyclerView
 
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.deleteMemoByIdFromDatabase
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
-import com.example.samplenotepad.views.search.SearchEachMemoFragment
 
 
 //SwipeでリストのItemを削除するためのCallback
 internal fun RecyclerView.getCallbackForItemTouchHelper(
-    fragment: SearchEachMemoFragment,
+    activity: FragmentActivity,
     searchViewModel: SearchViewModel,
-    adapter: SearchEachMemoListAdapter,
-    category: String
+    adapter: SearchInACategoryAdapter
 ) =
     object : ItemTouchHelper.Callback() {
         override fun getMovementFlags(
@@ -43,35 +42,37 @@ internal fun RecyclerView.getCallbackForItemTouchHelper(
                 R.string.dialog_search_each_memo_swipe_delete_negative_button,
                 { dialog, id ->
                     adapter.apply {
-                        deleteItemFromEachMemoDataSet(viewHolder.adapterPosition)
+                        deleteSelectedItemFromDataSetList(viewHolder.adapterPosition)
                         notifyDataSetChanged()
                     }
                 },
                 { dialog, id -> adapter.notifyDataSetChanged() }
             ).show(
-                fragment.requireActivity().supportFragmentManager,
+                activity.supportFragmentManager,
                 "search_each_memo_swipe_delete_dialog"
             )
         }
 
 
-        fun deleteItemFromEachMemoDataSet(adapterPosition: Int) {
-            val targetMemoId = searchViewModel.getDataSetForEachMemoList()[adapterPosition].memoInfoId
+        fun deleteSelectedItemFromDataSetList(adapterPosition: Int) {
+            val targetDataSet = searchViewModel.getDataSetForMemoList()[adapterPosition]
+            val targetMemoId = targetDataSet.memoInfoId
+            val targetCategory = targetDataSet.memoCategory
 
             deleteMemoByIdFromDatabase(targetMemoId)
 
-            searchViewModel.updateDataSetForEachMemoList { dataSetList ->
+            searchViewModel.updateDataSetForMemoList { dataSetList ->
                 dataSetList.filterNot { dataSet -> dataSet.memoInfoId == targetMemoId }
             }
 
             searchViewModel.updateDataSetForCategoryList { dataSetList ->
-                val targetIndex = dataSetList.indexOf(dataSetList.find { it.name == category })
+                val targetIndex = dataSetList.indexOf(dataSetList.find { it.name == targetCategory })
                 val targetListSize = dataSetList[targetIndex].listSize
                 val updatedTarget = dataSetList[targetIndex].copy(listSize = targetListSize - 1)
 
                 //CategoryがDefaultValueでなく且つ中身が空になった場合はそのcategoryをリストから削除する。
                 //それ以外の場合はcategoryの中身の数だけ減らす
-                when (targetListSize == 1 && category != fragment.getString(
+                when (targetListSize == 1 && targetCategory != activity.getString(
                     R.string.memo_category_default_value)) {
                     true -> {
                         dataSetList.take(targetIndex).plus(dataSetList.drop(targetIndex + 1))

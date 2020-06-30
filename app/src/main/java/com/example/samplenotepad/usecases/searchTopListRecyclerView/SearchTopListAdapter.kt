@@ -31,7 +31,7 @@ class SearchTopListAdapter(
         val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
-            fragment.moveToSearchEachMemo(
+            fragment.moveToSearchInACategory(
                 searchViewModel.getDataSetForCategoryList()[viewHolder.adapterPosition].name
             )
         }

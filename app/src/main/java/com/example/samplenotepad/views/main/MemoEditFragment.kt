@@ -7,10 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.observe
 import com.example.samplenotepad.*
-import com.example.samplenotepad.data.getShowMassageForSavedLiveData
-import com.example.samplenotepad.data.resetValueOfShowMassageForSavedLiveData
+import com.example.samplenotepad.data.getShowMassageForSavedFlow
+import com.example.samplenotepad.data.resetValueOfShowMassageForSavedFlow
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
@@ -19,6 +18,10 @@ import com.example.samplenotepad.usecases.checkBoxOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 class MemoEditFragment : Fragment() {
@@ -37,6 +40,7 @@ class MemoEditFragment : Fragment() {
 
     private lateinit var editViewModel: MemoEditViewModel
     private lateinit var memoContainer: ConstraintLayout
+    private var isShowingPopupWindow = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,21 +58,46 @@ class MemoEditFragment : Fragment() {
         editViewModel = MainActivity.editViewModel
         memoContainer = memoContentsContainerLayout
 
-        getShowMassageForSavedLiveData().observe(viewLifecycleOwner) { fragmentType ->
-            if (fragmentType is EditFragment) this.showSnackbarForSavedMassageAtEditMemo()
+        CoroutineScope(Dispatchers.Main).launch {
+            getShowMassageForSavedFlow().collect { fragmentType ->
+                if (fragmentType is EditFragment)
+                    this@MemoEditFragment.showSnackbarForSavedMassageAtEditMemo()
+
+                resetValueOfShowMassageForSavedFlow()
+            }
         }
 
-        editViewModel.getClearAllFocusInMemoContainerLiveData().observe(viewLifecycleOwner) { flag ->
-            if (flag) memoContentsContainerLayout.clearFocus()
+        CoroutineScope(Dispatchers.Main).launch {
+            editViewModel.getClearAllFocusInMemoContainerFlow().collect { flag ->
+                if (flag) memoContentsContainerLayout.clearFocus()
+
+                editViewModel.resetValueOfClearAllFocusInMemoContainerFlow()
+            }
         }
 
         editViewModel.initEditViewModel()
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー群
         templateImgBtn.setOnClickListener {
-            TemplateListDialogFragment.getInstanceOrCreateNew().show(
-                this@MemoEditFragment.requireActivity().supportFragmentManager, "template_list_dialog"
-            )
+            val popupWindow = getTemplatePopupWindow()
+
+            isShowingPopupWindow = when (isShowingPopupWindow) {
+                true -> {
+                    popupWindow.dismissTemplatePopupWindow(this)
+                    false
+                }
+                false -> {
+                    popupWindow.apply {
+                        update()
+                        showAsDropDown(templateImgBtn)
+                    }
+                    true
+                }
+            }
+
+//            TemplateListDialogFragment.getInstanceOrCreateNew().show(
+//                this@MemoEditFragment.requireActivity().supportFragmentManager, "template_list_dialog"
+ //           )
         }
 
         checkBoxImgBtn.setOnClickListener {
@@ -99,7 +128,7 @@ class MemoEditFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        when (val memoInfo = editViewModel.getMemoInfo()) {
+        when (editViewModel.getMemoInfo()) {
             null -> initMemoContentsOperation(this, editViewModel, memoContainer, CreateNewMemo)
             else -> initMemoContentsOperation(this, editViewModel, memoContainer, EditExistMemo)
         }
@@ -123,8 +152,6 @@ class MemoEditFragment : Fragment() {
         super.onDestroy()
 
         clearEditFragmentInstanceFlag()
-        resetValueOfShowMassageForSavedLiveData()
-        editViewModel.resetValueOfClearAllFocusInMemoContainerLiveData()
     }
 
 
@@ -137,5 +164,9 @@ class MemoEditFragment : Fragment() {
             { dialog, id -> clearAll() },
             { dialog, id -> dialog.cancel() }
         ).show(requireActivity().supportFragmentManager, "clear_all_dialog")
+    }
+
+    internal fun setIsShowingPopupWindow(value: Boolean) {
+        isShowingPopupWindow = value
     }
 }

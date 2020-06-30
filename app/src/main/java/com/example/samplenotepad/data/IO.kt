@@ -2,7 +2,6 @@ package com.example.samplenotepad.data
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import arrow.core.extensions.list.semigroup.plus
 import arrow.core.getOrElse
@@ -15,14 +14,17 @@ import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 
 
-private val showMassageForSavedLiveData: MutableLiveData<WhichFragment> = MutableLiveData()
+private val showMassageForSavedFlow = MutableStateFlow<WhichFragment>(NoneOfThem)
 
-internal fun getShowMassageForSavedLiveData() = showMassageForSavedLiveData
+internal fun getShowMassageForSavedFlow() = showMassageForSavedFlow
 
-internal fun resetValueOfShowMassageForSavedLiveData() = showMassageForSavedLiveData.postValue(NoneOfThem)
+internal fun resetValueOfShowMassageForSavedFlow() {
+    showMassageForSavedFlow.value = NoneOfThem
+}
 
 //Database挿入時のシリアライズ処理
 internal fun MemoContents.serializeMemoContents(): String {
@@ -33,7 +35,7 @@ internal fun MemoContents.serializeMemoContents(): String {
                 "${it.checkBoxState.value},${it.dotId.value.orNull()}"
     ) }
 
-    //完成したstBuilderから最初の「:」をdropしてリターン
+    //完成したstBuilderから最初の「:」をdropして返す
     return stBuilder.drop(1).toString()
 }
 
@@ -144,8 +146,8 @@ internal fun saveMemoInfo(
     newMemoInfo.saveMemoInfoToDatabaseAsync(viewModel).join()
 
     when (executionType) {
-        is DisplayExistMemo -> showMassageForSavedLiveData.postValue(DisplayFragment)
-        else -> showMassageForSavedLiveData.postValue(EditFragment)
+        is DisplayExistMemo -> showMassageForSavedFlow.value = DisplayFragment
+        else -> showMassageForSavedFlow.value = EditFragment
     }
 }
 
@@ -164,8 +166,8 @@ internal fun updateMemoContentsInDatabase(
         memoInfoDao.updateContents(memoId, timeStamp, newContents, newContentsText)
 
         when (executionType) {
-            is CreateNewMemo -> showMassageForSavedLiveData.postValue(EditFragment)
-            is DisplayExistMemo -> showMassageForSavedLiveData.postValue(DisplayFragment)
+            is CreateNewMemo -> showMassageForSavedFlow.value = EditFragment
+            is DisplayExistMemo -> showMassageForSavedFlow.value = DisplayFragment
         }
 
         Log.d("場所:updateMemoContentsInDatabase#Update後", "MemoId=$memoId MemoContents=${loadMemoInfoFromDatabase(memoId).contents.deserializeMemoContents()}")
@@ -233,6 +235,28 @@ internal fun renameTemplateFile(oldTemplateName: String, newTemplateName: String
     from.renameTo(to)
 }
 
+internal fun searchMemoInfoForSearchTopInDatabase(
+    word: String
+): List<DataSetForMemoList> = runBlocking {
+    withContext(Dispatchers.IO) {
+        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+        val searchWord = "%$word%"
+
+        memoInfoDao.searchMemoInfoForSearchTop(searchWord)
+    }
+}
+
+internal fun searchMemoInfoForSearchInACategoryInDatabase(
+    category: String,
+    word: String
+): List<DataSetForMemoList> = runBlocking {
+    withContext(Dispatchers.IO) {
+        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+        val searchWord = "%$word%"
+
+        memoInfoDao.searchMemoInfoForSearchInACategory(category, searchWord)
+    }
+}
 
 internal fun loadMemoInfoFromDatabase(memoInfoId: Long): MemoInfo = runBlocking {
     withContext(Dispatchers.IO) {
@@ -291,13 +315,13 @@ internal fun loadDataSetForCategoryListFromDatabase(): List<DataSetForCategoryLi
     }
 }
 
-internal fun loadDataSetForEachMemoListFromDatabase(
+internal fun loadDataSetForMemoListFromDatabase(
     category: String
-): List<DataSetForEachMemoList> = runBlocking {
+): List<DataSetForMemoList> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
-        memoInfoDao.getDataSetForEachMemoList(category)
+        memoInfoDao.getDataSetForMemoList(category)
     }
 }
 

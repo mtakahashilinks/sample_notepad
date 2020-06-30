@@ -7,12 +7,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.observe
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.getShowMassageForSavedLiveData
-import com.example.samplenotepad.data.resetValueOfShowMassageForSavedLiveData
+import com.example.samplenotepad.data.getShowMassageForSavedFlow
+import com.example.samplenotepad.data.resetValueOfShowMassageForSavedFlow
 import com.example.samplenotepad.entities.DisplayExistMemo
 import com.example.samplenotepad.entities.DisplayFragment
 import com.example.samplenotepad.entities.MEMO_Id
@@ -20,7 +17,10 @@ import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.main.MainActivity
 import kotlinx.android.synthetic.main.fragment_display_memo.*
-import kotlinx.android.synthetic.main.reminder_states_dialog.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 class DisplayMemoFragment : Fragment() {
@@ -38,6 +38,7 @@ class DisplayMemoFragment : Fragment() {
 
 
     private lateinit var searchViewModel: SearchViewModel
+    private var isShowingPopupWindow = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -49,44 +50,32 @@ class DisplayMemoFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
-        getShowMassageForSavedLiveData().observe(viewLifecycleOwner) { fragmentType ->
-            if (fragmentType is DisplayFragment) this.showSnackbarForSavedMassageAtDisplayMemo()
+        CoroutineScope(Dispatchers.Main).launch {
+            getShowMassageForSavedFlow().collect { fragmentType ->
+                if (fragmentType is DisplayFragment)
+                    this@DisplayMemoFragment.showSnackbarForSavedMassageAtDisplayMemo()
+
+                resetValueOfShowMassageForSavedFlow()
+            }
         }
 
         if (searchViewModel.getMemoInfo().reminderDate != null)
             reminderStatesImgBtn.visibility = View.VISIBLE
 
+        //reminderの設定表示用のPopupWindowの設定
         reminderStatesImgBtn.setOnClickListener {
-            val layoutView = this.requireActivity().layoutInflater.inflate(
-                R.layout.reminder_states_dialog, null, false
-            )
+            val popupWindow = getReminderStatesPopupWindow()
 
-            layoutView.apply {
-                val memoInfo = searchViewModel.getMemoInfo()
-                val mTargetReminderTime = memoInfo.reminderTime.toString()
-                val targetReminderTime = when (mTargetReminderTime.length == 3) {
-                    true -> "0".plus(mTargetReminderTime)
-                    false -> mTargetReminderTime
+            isShowingPopupWindow = when (isShowingPopupWindow) {
+                true -> {
+                    popupWindow.dismissReminderStatesPopupWindow(this)
+                    false
                 }
-                Log.d("場所:DisplayMemoFragment", "reminderDate=${memoInfo.reminderDate} reminderTime=${memoInfo.reminderTime}")
-
-                targetDateTimeBodyTextView.setTargetDateTimeTextView(
-                    memoInfo.reminderDate.toString() , targetReminderTime
-                )
-
-                memoInfo.preAlarmTime.let {
-                    preAlarmBodyTextView.setText(getPreAlarmTextFromPosition(it))
-                }
-
-                memoInfo.postAlarmTime.let {
-                    postAlarmBodyTextView.setText(getPostAlarmTextFromPosition(it))
+                false -> {
+                    popupWindow.showAsDropDown(reminderStatesImgBtn)
+                    true
                 }
             }
-
-            AlertDialog.Builder(this.requireContext()).apply {
-                setTitle(R.string.dialog_show_reminder_states_title)
-                setView(layoutView)
-            }.show()
         }
 
         displayToEditImgBtn.setOnClickListener {
@@ -114,11 +103,17 @@ class DisplayMemoFragment : Fragment() {
 
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        //アプリバーのタイトルをセット
+        activity?.title = getString(R.string.appbar_title_display_memo)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
         clearDisplayMemoFragmentInstanceFlag()
-        resetValueOfShowMassageForSavedLiveData()
     }
 
 
@@ -138,35 +133,7 @@ class DisplayMemoFragment : Fragment() {
         }
     }
 
-    private fun getPreAlarmTextFromPosition(position: Int) = when (position) {
-        0 -> R.string.alarm_none
-        1 -> R.string.pre_alarm_5m
-        2 -> R.string.pre_alarm_10m
-        3 -> R.string.pre_alarm_30m
-        4 -> R.string.pre_alarm_1h
-        else -> R.string.pre_alarm_24h
-    }
-
-    private fun getPostAlarmTextFromPosition(position: Int) = when (position) {
-        0 -> R.string.alarm_none
-        1 -> R.string.post_alarm_5m
-        2 -> R.string.post_alarm_10m
-        3 -> R.string.post_alarm_30m
-        4 -> R.string.post_alarm_1h
-        else -> R.string.post_alarm_24h
-    }
-
-    private fun TextView.setTargetDateTimeTextView(
-        targetDate: String,
-        targetTime: String
-    ) {
-        this.text = String.format(
-            "%s/%s/%s  %s:%s",
-            targetDate.slice(0..3),
-            targetDate.slice(4..5),
-            targetDate.slice(6..7),
-            targetTime.slice(0..1),
-            targetTime.slice(2..3)
-        )
+    internal fun setIsShowingPopupWindow(value: Boolean) {
+        isShowingPopupWindow = value
     }
 }

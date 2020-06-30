@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import arrow.core.internal.AtomicRefW
 import arrow.core.k
 import com.example.samplenotepad.data.*
-import com.example.samplenotepad.data.loadDataSetForEachMemoListFromDatabase
+import com.example.samplenotepad.data.loadDataSetForMemoListFromDatabase
 import com.example.samplenotepad.data.loadMemoInfoFromDatabase
 import com.example.samplenotepad.data.renameCategory
 import com.example.samplenotepad.data.updateMemoContentsInDatabase
@@ -16,11 +16,11 @@ import kotlinx.coroutines.runBlocking
 class SearchViewModel : ViewModel() {
 
     private val dataSetForCategoryList = AtomicRefW(listOf<DataSetForCategoryList>())
-    private val dataSetForEachMemoList = AtomicRefW(listOf<DataSetForEachMemoList>())
+    private val dataSetForMemoList = AtomicRefW(listOf<DataSetForMemoList>())
     private val memoInfo = AtomicRefW(MemoInfo(-1, -1, "", "", "", "", -1, -1, -1, -1))
     private val memoContents = AtomicRefW(MemoContents(listOf<MemoRowInfo>().k()))
     private val memoContentsAtSavePoint = AtomicRefW(listOf<MemoRowInfo>().k())
-    private lateinit var selectedCategory: String
+    private val searchWord = AtomicRefW("")
 
     internal fun getDataSetForCategoryList() = dataSetForCategoryList.value
 
@@ -40,12 +40,22 @@ class SearchViewModel : ViewModel() {
         renameCategory(oldCategoryName, newCategoryName)
     }
 
+    internal fun loadDataSetForCategoryListAndSetPropertyInViewModel() {
+        val mDataSetForCategoryList = loadDataSetForCategoryListFromDatabase()
+        dataSetForCategoryList.updateAndGet { mDataSetForCategoryList }
+    }
 
-    internal fun getDataSetForEachMemoList() = dataSetForEachMemoList.value
 
-    internal fun updateDataSetForEachMemoList(
-        newValue: (List<DataSetForEachMemoList>) -> List<DataSetForEachMemoList>
-    ) = dataSetForEachMemoList.updateAndGet { newValue(dataSetForEachMemoList.value) }
+    internal fun getDataSetForMemoList() = dataSetForMemoList.value
+
+    internal fun updateDataSetForMemoList(
+        newValue: (List<DataSetForMemoList>) -> List<DataSetForMemoList>
+    ) = dataSetForMemoList.updateAndGet { newValue(dataSetForMemoList.value) }
+
+    internal fun loadDataSetForMemoListAndSetPropertyInViewModel(category: String) = runBlocking {
+        val mDataSetForMemoList = loadDataSetForMemoListFromDatabase(category)
+        dataSetForMemoList.updateAndGet { mDataSetForMemoList }
+    }
 
 
     internal fun getMemoInfo() = memoInfo.value
@@ -80,21 +90,30 @@ class SearchViewModel : ViewModel() {
     }
 
 
-    internal fun getSelectedCategory() = selectedCategory
+    internal fun searchMemoInfoAndSetWordAndResultForSearchTop(searchWord: String): List<DataSetForMemoList> {
+        val result = searchMemoInfoForSearchTopInDatabase(searchWord)
 
-    internal fun updateSelectedCategory(value: String) {
-        selectedCategory = value
+        this.searchWord.updateAndGet { searchWord }
+        dataSetForMemoList.updateAndGet { result }
+
+        return result
     }
 
-    internal fun initViewModelForSearchTop() {
-        val mDataSetForCategoryList = loadDataSetForCategoryListFromDatabase()
-        dataSetForCategoryList.updateAndGet { mDataSetForCategoryList }
+    internal fun searchMemoInfoAndSetWordAndResultForSearchInACategory(
+        category: String,
+        searchWord: String
+    ): List<DataSetForMemoList> {
+        val result = searchMemoInfoForSearchInACategoryInDatabase(category, searchWord)
+
+        this.searchWord.updateAndGet { searchWord }
+        dataSetForMemoList.updateAndGet { result }
+
+        return result
     }
 
-    internal fun initViewModelForSearchEachMemo(category: String) = runBlocking {
-        val mDataSetForEachMemoList = loadDataSetForEachMemoListFromDatabase(category)
-        dataSetForEachMemoList.updateAndGet { mDataSetForEachMemoList }
-    }
+        internal fun getSearchWord() = searchWord.value
+
+
 
 
     override fun onCleared() {

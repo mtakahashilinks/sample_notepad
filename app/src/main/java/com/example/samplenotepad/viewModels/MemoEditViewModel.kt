@@ -16,6 +16,7 @@ import com.example.samplenotepad.data.saveTemplateNameListToFile
 import com.example.samplenotepad.usecases.closeMemoContentsOperation
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.clearAll
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 class MemoEditViewModel : ViewModel() {
@@ -26,7 +27,7 @@ class MemoEditViewModel : ViewModel() {
     private val ifAtFirstInText = AtomicBooleanW(false) //DelKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
     private val categoryList = AtomicRefW(listOf<String>(""))
     private val templateNameList = AtomicRefW(listOf<String>())
-    private val clearAllFocusInMemoContainerLiveData = MutableLiveData<Boolean>()
+    private val clearAllFocusInMemoContainerFlow = MutableStateFlow(false)
 
     internal fun getMemoInfo() = memoInfo.value
 
@@ -49,7 +50,7 @@ class MemoEditViewModel : ViewModel() {
 
     internal fun compareMemoContentsWithSavePoint(): Boolean {
         //まずFocusを外してmemoContentsのTextを更新してから比較する
-        clearAllFocusInMemoContainerLiveData.postValue(true)
+        clearAllFocusInMemoContainerFlow.value = true
         Log.d("場所:compareMemoContentsWithSavePoint#1", "MemoContents=${memoContents.value}")
         Log.d("場所:compareMemoContentsWithSavePoint#2", "SavePoint=${memoContentsAtSavePoint.value}")
         return memoContents.value == memoContentsAtSavePoint.value
@@ -103,11 +104,11 @@ class MemoEditViewModel : ViewModel() {
     private fun loadAndSetTemplateNameList() =
         templateNameList.updateAndGet { loadTemplateNameListFromFile() }
 
-    internal fun getClearAllFocusInMemoContainerLiveData() = clearAllFocusInMemoContainerLiveData
+    internal fun getClearAllFocusInMemoContainerFlow() = clearAllFocusInMemoContainerFlow
 
-    internal fun resetValueOfClearAllFocusInMemoContainerLiveData() =
-        clearAllFocusInMemoContainerLiveData.postValue(false)
-
+    internal fun resetValueOfClearAllFocusInMemoContainerFlow() {
+        clearAllFocusInMemoContainerFlow.value = false
+    }
 
     internal fun initEditViewModel() {
         loadAndSetCategoryList()

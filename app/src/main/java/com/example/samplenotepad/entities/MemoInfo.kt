@@ -16,7 +16,7 @@ data class MemoInfo(
     val category: String,
     val contents: String, //MemoContentsをシリアライズしたもの
     val contentsText: String, //中身の検索用(MemoContentsの全てのTextを繋げてシリアライズしたもの)
-    val reminderDate: Int?,
+    val reminderDate: Int?, //この値がSetされていればリマインダーが設定されている
     val reminderTime: Int?,
     val preAlarmTime: Int,
     val postAlarmTime: Int

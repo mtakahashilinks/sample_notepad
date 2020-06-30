@@ -30,7 +30,7 @@ class MemoSearchActivity : AppCompatActivity() {
         instanceOfActivity = this
         searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
 
-        searchViewModel.initViewModelForSearchTop()
+        searchViewModel.loadDataSetForCategoryListAndSetPropertyInViewModel()
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())

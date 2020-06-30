@@ -4,16 +4,19 @@ import androidx.room.ColumnInfo
 import arrow.core.*
 
 
+//どのFragmentに依存した処理なのかを明示するため
 sealed class WhichFragment
 object EditFragment : WhichFragment()
 object DisplayFragment : WhichFragment()
 object NoneOfThem : WhichFragment()
 
+//MemoのViewを作成するときに新規作成なのか再編集なのか編集なし(表示のみ)なのかを判断するため
 sealed class WhichMemoExecution
 object CreateNewMemo : WhichMemoExecution()
 object EditExistMemo : WhichMemoExecution()
 object DisplayExistMemo : WhichMemoExecution()
 
+//EditViewModelのMemoContentsの値を変更する操作で使用。どの操作なのかを判断するため。
 sealed class TypeForExecuteMemoContents
 data class UpdateTextOfMemoRowInfo(
     val memoRow: MemoRow
@@ -73,7 +76,7 @@ data class MemoRowInfo(
     val dotId: DotId = DotId(None)
 ) { companion object }
 
-
+//メモの保存時にOption設定の値を渡すのに使用
 data class ValuesOfOptionSetting(
     val title: Option<String>,
     val category: Option<String>,
@@ -83,16 +86,18 @@ data class ValuesOfOptionSetting(
     val postAlarm: Option<Int>
 ) { companion object }
 
-
+//検索TOPのCategoryリストを表示するためのDataSet
 data class DataSetForCategoryList(
     @ColumnInfo(name = "category") val name: String,
     @ColumnInfo(name = "COUNT(*)") val listSize: Int
 ) { companion object }
 
-data class DataSetForEachMemoList(
+//検索でメモリストを表示するためのDataSet
+data class DataSetForMemoList(
     @ColumnInfo(name = "memoId") val memoInfoId: Long,
     @ColumnInfo(name = "createdDateTime") val createdDate: Long,
     @ColumnInfo(name = "title") val memoTitle: String,
+    @ColumnInfo(name = "category") val memoCategory: String,
     @ColumnInfo(name = "contentsText") val memoText: String,
     @ColumnInfo(name = "reminderDate") val reminderDate: Int?
 ) { companion object }

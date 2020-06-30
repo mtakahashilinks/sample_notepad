@@ -93,8 +93,6 @@ class MainActivity : AppCompatActivity() {
             getDatabase(this@MainActivity).close()
             clearDBInstanceFlag()
         }
-
-        editViewModel.resetValueOfClearAllFocusInMemoContainerLiveData()
     }
 
 

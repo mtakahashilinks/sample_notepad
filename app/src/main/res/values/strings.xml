@@ -5,13 +5,16 @@
     <string name="tab_title_for_edit_fragment">メモ本文</string>
     <string name="tab_title_for_option_fragment">オプション設定</string>
     <string name="appbar_menu_create_new_memo">新規メモの作成</string>
-    <string name="appbar_menu_to_search_top">メモリストへ</string>
+    <string name="appbar_menu_to_search_top">メモ検索へ</string>
     <string name="memo_title_default_value">(no title)</string>
     <string name="memo_category_default_value">no category</string>
     <string name="template_add_error_max_amount">※テンプレートは最大5個までです</string>
-    <string name="error_not_input_new_name">※新しい名前を入力してください</string>
+    <string name="error_not_input_new_name">※テンプレート名を入力してください</string>
     <string name="error_already_has_same_name">※その名前はすでに存在しています</string>
     <string name="template_list_title">テンプレートリスト</string>
+    <string name="dialog_template_name_edit_text_hint">追加するテンプレート名を入力</string>
+    <string name="dialog_memo_template_swipe_delete_title">このテンプレートを削除します</string>
+    <string name="dialog_memo_template_swipe_delete_message">続行しますか？</string>
     <string name="template_number_view_text">%s.</string>
     <string name="add_template_to_list">追加</string>
     <string name="dialog_rename_template_title">テンプテート名の変更</string>
@@ -33,8 +36,8 @@
     <string name="register_reminder">リマインダー登録</string>
     <string name="reminder_set_date_label">日付</string>
     <string name="reminder_set_time_label">時間</string>
-    <string name="reminder_pre_alarm_label">PRE アラーム</string>
-    <string name="reminder_post_alarm_label">POST アラーム</string>
+    <string name="reminder_pre_alarm_label">事前通知</string>
+    <string name="reminder_post_alarm_label">事後通知</string>
     <string name="add_format">フォーマットに追加</string>
     <string name="save_snackbar">保存しました</string>
     <string name="dialog_close_edit_title">メモの編集を終了します</string>
@@ -49,8 +52,6 @@
     <string name="dialog_reboot_and_create_new_memo_message">保存しますか？</string>
     <string name="dialog_reboot_and_create_new_memo_positive_button">保存する</string>
     <string name="dialog_reboot_and_create_new_memo_negative_button">保存しない</string>
-    <string name="dialog_memo_template_swipe_delete_title">このテンプレートを削除します</string>
-    <string name="dialog_memo_template_swipe_delete_message">続行しますか？</string>
     <string name="dialog_memo_template_swipe_delete_positive_button">YES</string>
     <string name="dialog_memo_template_swipe_delete_negative_button">キャンセル</string>
 
@@ -74,7 +75,7 @@
     </string-array>
 
     <!-- SearchTopFragment -->
-    <string name="appbar_title_search_top">Sample Notepad - カテゴリー</string>
+    <string name="appbar_title_search_top">Sample Notepad - メモ検索</string>
     <string name="dialog_search_top_swipe_delete_others_title">このカテゴリー内を空にします</string>
     <string name="dialog_search_top_swipe_delete_others_message">よろしいですか？</string>
     <string name="dialog_search_top_swipe_delete_others_positive_button">YES</string>
@@ -83,9 +84,10 @@
     <string name="dialog_search_top_swipe_delete_message">カテゴリー内のメモも削除されます。続行しますか？</string>
     <string name="dialog_search_top_swipe_delete_positive_button">削除する</string>
     <string name="dialog_search_top_swipe_delete_negative_button">キャンセル</string>
+    <string name="search_view_hint_search_top">メモの検索</string>
 
-    <!-- SearchEachMemoFragment -->
-    <string name="appbar_title_search_each_memo">Sample Notepad - メモリスト</string>
+    <!-- SearchInACategoryFragment -->
+    <string name="appbar_title_search_each_memo">Sample Notepad - メモ検索</string>
     <string name="search_each_memo_category_name_text">カテゴリー：「%1s」</string>
     <string name="search_each_memo_title_label_text">タイトル：</string>
     <string name="search_each_memo_body_label_text">本文：</string>
@@ -97,10 +99,11 @@
     <string name="contents_edit_btn_description">メモの編集</string>
 
     <!-- DisplayMemoFragment -->
-    <string name="dialog_show_reminder_states_title">リマインダー設定</string>
+    <string name="appbar_title_display_memo">Sample Notepad - メモの表示</string>
+    <string name="popup_window_reminder_states_title">リマインダー設定</string>
     <string name="target_date_label">設定日時：</string>
-    <string name="pre_alarm_label">Preアラーム：</string>
-    <string name="post_alarm_label">Postアラーム：</string>
+    <string name="pre_alarm_label">事前通知：</string>
+    <string name="post_alarm_label">事後通知：</string>
     <string name="alarm_none">なし</string>
     <string name="pre_alarm_5m">5分前</string>
     <string name="pre_alarm_10m">10分前</string>
@@ -112,5 +115,11 @@
     <string name="post_alarm_30m">30分後</string>
     <string name="post_alarm_1h">1時間後</string>
     <string name="post_alarm_24h">24時間後</string>
+
+    <!-- SearchResultFragment -->
+    <string name="appbar_title_search_result">Sample Notepad - 検索結果</string>
+    <string name="search_view_hint_search_result">メモの検索</string>
+    <string name="search_word_text">検索ワード：「%1s」</string>
+    <string name="no_match_result_text">一致するメモがありませんでした</string>
 
 </resources>

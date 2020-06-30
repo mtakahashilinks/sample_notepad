@@ -13,7 +13,8 @@ import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.main.MemoEditFragment
-import com.example.samplenotepad.views.main.TemplateListDialogFragment
+import com.example.samplenotepad.views.main.dismissTemplatePopupWindow
+import com.example.samplenotepad.views.main.getTemplatePopupWindow
 import kotlinx.android.synthetic.main.fragment_rename_dialog.view.*
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.android.synthetic.main.memo_template_list_row.view.*
@@ -39,7 +40,7 @@ class MemoTemplateAdapter(
             clearAll()
             editViewModel.loadTemplateAndUpdateMemoContents(viewHolder.templateNameView.text.toString())
 
-            TemplateListDialogFragment.getInstanceOrCreateNew().dismiss()
+            getTemplatePopupWindow().dismissTemplatePopupWindow(editFragment)
 
             initMemoContentsOperation(
                 editFragment,
