@@ -59,7 +59,7 @@ class DisplayMemoFragment : Fragment() {
             }
         }
 
-        if (searchViewModel.getMemoInfo().reminderDate != null)
+        if (searchViewModel.getMemoInfo().reminderDateTime.isNotEmpty())
             reminderStatesImgBtn.visibility = View.VISIBLE
 
         //reminderの設定表示用のPopupWindowの設定

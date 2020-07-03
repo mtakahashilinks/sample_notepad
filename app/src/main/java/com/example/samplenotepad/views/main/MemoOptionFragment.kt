@@ -20,6 +20,7 @@ import com.example.samplenotepad.views.DatePickerFragment
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.TimePickerFragment
 import kotlinx.android.synthetic.main.fragment_memo_option.*
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -51,30 +52,26 @@ class MemoOptionFragment : Fragment() {
                         true -> None
                         false -> Some(optionFragment.categoryTextView.text.toString())
                     }
-                    val targetDate = optionFragment.reminderDateView.getTargetDateTimeParams(reminderSwitch)
-                    val targetTime = optionFragment.reminderTimeView.getTargetDateTimeParams(reminderSwitch)
+                    val targetDateTime = optionFragment.getTargetDateTimeParams(reminderSwitch)
                     val preAlarm =
                         optionFragment.preAlarmSpinnerView.getPreAndPostAlarmParams(reminderSwitch)
                     val postAlarm =
                         optionFragment.postAlarmSpinnerView.getPreAndPostAlarmParams(reminderSwitch)
 
-                    ValuesOfOptionSetting(title, category, targetDate, targetTime, preAlarm, postAlarm)
+                    ValuesOfOptionSetting(title, category, targetDateTime, preAlarm, postAlarm)
                 }
-                false -> ValuesOfOptionSetting(None, None, None, None, None, None)
+                false -> ValuesOfOptionSetting(None, None, None, None, None)
             }
         }
 
-        //例）"2020/03/05" -> 20200305 , "01:03" -> 103
-        private fun String.convertTargetDateTime(): Some<Int> {
-            val matchedResults = Regex("""\d+""").findAll(this)
-            val result = matchedResults.map { it.value }.joinToString("")
-
-            return Some(result.toInt())
-        }
-
-        private fun Button.getTargetDateTimeParams(switchView: Switch): Option<Int> =
+        private fun MemoOptionFragment.getTargetDateTimeParams(switchView: Switch): Option<String> =
             when (switchView.isChecked) {
-                true -> this.text.toString().convertTargetDateTime()
+                true -> {
+                    val reminderDate = this.reminderDateView.text.toString().replace('/', '-')
+                    val reminderTime = this.reminderTimeView.text.toString().replace(" ", "")
+
+                    Some("$reminderDate $reminderTime")
+                }
                 false -> None
             }
 
@@ -165,91 +162,85 @@ class MemoOptionFragment : Fragment() {
 
 
     private fun MemoInfo?.initValueOfAllViewWithMemoInfo() {
-        when (this?.reminderDate != null) {
-            true -> {
-                titleBodyTextView.setCounterText (titleCounterView, 15) //TitleのViewに文字数カウンターをセット
-                categoryTextView.setCounterText(categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
+        val memoInfo = this
 
-                this.setReminderSwitchOnForExistMemo()
+        titleBodyTextView.setCounterText (titleCounterView, 15) //TitleのViewに文字数カウンターをセット
+        categoryTextView.setCounterText(categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
+
+        memoInfo?.setViewsProperties() ?: setCurrentValueInReminderDateTimeView()
+    }
+
+    private fun MemoInfo.setViewsProperties() {
+        when (this.reminderDateTime.isEmpty()){
+            true -> this.apply {
+                setTitleTextWithMemoInfo()
+                setCategoryTextWithMemoInfo()
             }
             false -> {
-                titleBodyTextView.setCounterText (titleCounterView, 15) //TitleのViewに文字数カウンターをセット
-                categoryTextView.setCounterText(categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
-
-                setCurrentValueInReminderDateTimeView()
-
-                this.apply {
-                    setTitleTextWithMemoInfo()
-                    setCategoryTextWithMemoInfo()
-                }
+                this.setReminderSwitchOnForExistMemo(this@setViewsProperties.reminderDateTime.split(" "))
             }
         }
     }
 
-    private fun MemoInfo?.setReminderSwitchOnForExistMemo() {
+    private fun MemoInfo.setReminderSwitchOnForExistMemo(reminderDateTimeList: List<String>) {
         reminderOnOffSwitchView.isChecked = true
         changeStateForReminderSwitch(true, View.VISIBLE)
 
-        this. apply {
+        reminderDateTimeList.setReminderTargetDateTimeWithMemoInfo()
+
+        this.apply {
             setTitleTextWithMemoInfo()
             setCategoryTextWithMemoInfo()
-            setReminderTargetDateTimeWithMemoInfo()
             setReminderPreAndPostAlarmWithMemoInfo()
         }
     }
 
-    private fun MemoInfo?.setTitleTextWithMemoInfo() {
-        when (this?.title) {
+    private fun MemoInfo.setTitleTextWithMemoInfo() {
+        when (this.title) {
             SampleMemoApplication.instance.getString(R.string.memo_title_default_value) ->
                 titleBodyTextView.setText("")
-            else -> titleBodyTextView.setText(this?.title)
+            else -> titleBodyTextView.setText(this.title)
         }
     }
 
-    private fun MemoInfo?.setCategoryTextWithMemoInfo() {
-        when (this?.category) {
+    private fun MemoInfo.setCategoryTextWithMemoInfo() {
+        when (this.category) {
             SampleMemoApplication.instance.getString(R.string.memo_category_default_value) ->
                 categoryTextView.setText("")
-            else -> categoryTextView.setText(this?.category)
+            else -> categoryTextView.setText(this.category)
         }
     }
 
-    private fun MemoInfo?.setReminderTargetDateTimeWithMemoInfo() {
-        val targetDate = this?.reminderDate.toString()
-        val mTargetTime = this?.reminderTime.toString()
-        val targetTime = when (mTargetTime.length == 3) {
-            true -> "0".plus(mTargetTime)
-            false -> mTargetTime
-        }
-
-        reminderDateView.text =
-            String.format("%s/%s/%s", targetDate.slice(0..3), targetDate.slice(4..5), targetDate.slice(6..7))
-
-        reminderTimeView.text = String.format("%s : %s" , targetTime.slice(0..1), targetTime.slice(2..3))
+    private fun List<String>.setReminderTargetDateTimeWithMemoInfo() {
+        reminderDateView.text = this[0].replace('-', '/')
+        reminderTimeView.text = this[1].replace(":", " : ")
     }
 
-    private fun MemoInfo?.setReminderPreAndPostAlarmWithMemoInfo() {
-        this?.let { preAlarmSpinnerView.setSelection(it.preAlarmTime) }
-        this?.let { postAlarmSpinnerView.setSelection(it.postAlarmTime) }
+    private fun MemoInfo.setReminderPreAndPostAlarmWithMemoInfo() {
+        preAlarmSpinnerView.setSelection(this.preAlarm)
+        postAlarmSpinnerView.setSelection(this.postAlarm)
     }
 
     internal fun resetValueOfAllView() {
         titleBodyTextView.setText("")
         categoryTextView.setText("")
-        reminderOnOffSwitchView.isEnabled = false
         setCurrentValueInReminderDateTimeView()
         preAlarmSpinnerView.setSelection(0)
         postAlarmSpinnerView.setSelection(0)
+        reminderOnOffSwitchView.apply {
+            isChecked = false
+            isEnabled = false
+        }
     }
 
     //ReminderのTargetDateTimeを現在時刻にSetする
     private fun setCurrentValueInReminderDateTimeView() {
-        val calendar = Calendar.getInstance()
+        val formatterForDate = SimpleDateFormat("yyyy/MM/dd", Locale.getDefault())
+        val formatterForTime = SimpleDateFormat("HH : mm", Locale.getDefault())
+        val currentDateTime = System.currentTimeMillis()
 
-        this.reminderDateView.text =
-            android.text.format.DateFormat.format("yyyy/MM/dd", calendar).toString()
-        this.reminderTimeView.text =
-            android.text.format.DateFormat.format("HH : mm", calendar.time).toString()
+        this.reminderDateView.text = formatterForDate.format(currentDateTime)
+        this.reminderTimeView.text = formatterForTime.format(currentDateTime)
     }
 
     //Textの文字数カウンターのセット

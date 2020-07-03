@@ -2,6 +2,8 @@ package com.example.samplenotepad.entities
 
 import androidx.room.ColumnInfo
 import arrow.core.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 
 //どのFragmentに依存した処理なのかを明示するため
@@ -61,27 +63,32 @@ data class SaveMemoInfo(
 
 
 sealed class TypeForMemoRowInfo
+@Serializable
 data class MemoRowId(val value: Int) : TypeForMemoRowInfo() { companion object }
+@Serializable
 data class Text(val value: String) : TypeForMemoRowInfo() { companion object }
-data class CheckBoxId(val value: Option<Int>) : TypeForMemoRowInfo() { companion object }
+@Serializable
+data class CheckBoxId(val value: Int?) : TypeForMemoRowInfo() { companion object }
+@Serializable
 data class CheckBoxState(val value: Boolean) : TypeForMemoRowInfo() { companion object }
-data class DotId(val value: Option<Int>) : TypeForMemoRowInfo() { companion object }
+@Serializable
+data class DotId(val value: Int?) : TypeForMemoRowInfo() { companion object }
 
 //メモの中の各行(View)の情報
+@Serializable
 data class MemoRowInfo(
     val memoRowId: MemoRowId,
     val text: Text = Text(""),
-    val checkBoxId: CheckBoxId = CheckBoxId(None),
+    val checkBoxId: CheckBoxId = CheckBoxId(null),
     val checkBoxState: CheckBoxState = CheckBoxState(false),
-    val dotId: DotId = DotId(None)
+    val dotId: DotId = DotId(null)
 ) { companion object }
 
 //メモの保存時にOption設定の値を渡すのに使用
 data class ValuesOfOptionSetting(
     val title: Option<String>,
     val category: Option<String>,
-    val targetDate: Option<Int>,
-    val targetTime: Option<Int>,
+    val targetDateTime: Option<String>,
     val preAlarm: Option<Int>,
     val postAlarm: Option<Int>
 ) { companion object }
@@ -95,9 +102,9 @@ data class DataSetForCategoryList(
 //検索でメモリストを表示するためのDataSet
 data class DataSetForMemoList(
     @ColumnInfo(name = "memoId") val memoInfoId: Long,
-    @ColumnInfo(name = "createdDateTime") val createdDate: Long,
+    @ColumnInfo(name = "createdDateTime") val createdDate: String,
     @ColumnInfo(name = "title") val memoTitle: String,
     @ColumnInfo(name = "category") val memoCategory: String,
     @ColumnInfo(name = "contentsText") val memoText: String,
-    @ColumnInfo(name = "reminderDate") val reminderDate: Int?
+    @ColumnInfo(name = "reminderDateTime") val reminderDateTime: String
 ) { companion object }

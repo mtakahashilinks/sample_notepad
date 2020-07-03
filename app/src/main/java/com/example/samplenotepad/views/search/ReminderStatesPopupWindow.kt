@@ -1,11 +1,11 @@
 package com.example.samplenotepad.views.search
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
 import com.example.samplenotepad.R
+import com.example.samplenotepad.entities.*
 import kotlinx.android.synthetic.main.reminder_states_popup_window.view.*
 
 
@@ -51,58 +51,37 @@ private fun createPopupWindow(): PopupWindow {
 }
 
 private fun View.setTextForReminderPopupWindow() {
-    this.apply {
-        val memoInfo = MemoSearchActivity.searchViewModel.getMemoInfo()
-        val mTargetReminderTime = memoInfo.reminderTime.toString()
-        //3桁の場合は頭に0を足して4桁にする
-        val targetReminderTime = when (mTargetReminderTime.length == 3) {
-            true -> "0".plus(mTargetReminderTime)
-            false -> mTargetReminderTime
-        }
-        Log.d("場所:DisplayMemoFragment", "reminderDate=${memoInfo.reminderDate} reminderTime=${memoInfo.reminderTime}")
+    val memoInfo = MemoSearchActivity.searchViewModel.getMemoInfo()
 
-        targetDateTimeBodyTextView.setTargetDateTimeTextView(
-            memoInfo.reminderDate.toString() , targetReminderTime
-        )
+    if (memoInfo.reminderDateTime.isNotEmpty())
+        targetDateTimeBodyTextView.setTargetDateTimeTextView(memoInfo.reminderDateTime.split(" "))
 
-        memoInfo.preAlarmTime.let {
-            preAlarmBodyTextView.setText(getPreAlarmTextFromPosition(it))
-        }
-
-        memoInfo.postAlarmTime.let {
-            postAlarmBodyTextView.setText(getPostAlarmTextFromPosition(it))
-        }
-    }
+    preAlarmBodyTextView.setText(getPreAlarmTextFromPosition(memoInfo.preAlarm))
+    postAlarmBodyTextView.setText(getPostAlarmTextFromPosition(memoInfo.postAlarm))
 }
 
 private fun getPreAlarmTextFromPosition(position: Int) = when (position) {
-    0 -> R.string.alarm_none
-    1 -> R.string.pre_alarm_5m
-    2 -> R.string.pre_alarm_10m
-    3 -> R.string.pre_alarm_30m
-    4 -> R.string.pre_alarm_1h
+    PRE_POST_ALARM_NO_SET -> R.string.alarm_none
+    PRE_POST_ALARM_5M -> R.string.pre_alarm_5m
+    PRE_POST_ALARM_10M -> R.string.pre_alarm_10m
+    PRE_POST_ALARM_30M -> R.string.pre_alarm_30m
+    PRE_POST_ALARM_1H -> R.string.pre_alarm_1h
     else -> R.string.pre_alarm_24h
 }
 
 private fun getPostAlarmTextFromPosition(position: Int) = when (position) {
-    0 -> R.string.alarm_none
-    1 -> R.string.post_alarm_5m
-    2 -> R.string.post_alarm_10m
-    3 -> R.string.post_alarm_30m
-    4 -> R.string.post_alarm_1h
+    PRE_POST_ALARM_NO_SET -> R.string.alarm_none
+    PRE_POST_ALARM_5M -> R.string.post_alarm_5m
+    PRE_POST_ALARM_10M -> R.string.post_alarm_10m
+    PRE_POST_ALARM_30M -> R.string.post_alarm_30m
+    PRE_POST_ALARM_1H -> R.string.post_alarm_1h
     else -> R.string.post_alarm_24h
 }
 
-private fun TextView.setTargetDateTimeTextView(
-    targetDate: String,
-    targetTime: String
-) {
-    this.text = String.format(
-        "%s/%s/%s  %s:%s",
-        targetDate.slice(0..3),
-        targetDate.slice(4..5),
-        targetDate.slice(6..7),
-        targetTime.slice(0..1),
-        targetTime.slice(2..3)
-    )
+private fun TextView.setTargetDateTimeTextView(targetDateTimeList: List<String>) {
+    val targetDate = targetDateTimeList[0].replace('-', '/')
+    val targetTime = targetDateTimeList[1].replace(":", " : ")
+    val targetDateTime = "$targetDate $targetTime"
+
+    this.text = targetDateTime
 }

@@ -114,20 +114,20 @@
             app:layout_constraintStart_toStartOf="@+id/reminderDateView"
             app:layout_constraintTop_toBottomOf="@+id/reminderOnOffSwitchView" />
 
-        <Button
-            android:id="@+id/reminderDateView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:background="@color/colorLightGray"
-            android:elevation="8dp"
-            android:enabled="false"
-            android:minHeight="0dp"
-            android:padding="8dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            app:layout_constraintStart_toStartOf="@+id/reminderOnOffSwitchView"
-            app:layout_constraintTop_toBottomOf="@+id/reminderDateLabelView"
-            tools:text="2020/12/17" />
+    <Button
+        android:id="@+id/reminderDateView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@color/colorLightGray"
+        android:elevation="8dp"
+        android:enabled="false"
+        android:minHeight="0dp"
+        android:padding="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@+id/reminderOnOffSwitchView"
+        app:layout_constraintTop_toBottomOf="@+id/reminderDateLabelView"
+        tools:text="2020/12/17" />
 
         <TextView
             android:id="@+id/reminderTimeLabelView"
@@ -140,21 +140,21 @@
             app:layout_constraintEnd_toEndOf="@+id/reminderTimeView"
             app:layout_constraintStart_toStartOf="@+id/reminderTimeView" />
 
-        <Button
-            android:id="@+id/reminderTimeView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:background="@color/colorLightGray"
-            android:elevation="8dp"
-            android:enabled="false"
-            android:minHeight="0dp"
-            android:padding="8dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            app:layout_constraintBottom_toBottomOf="@+id/reminderDateView"
-            app:layout_constraintStart_toEndOf="@+id/reminderDateView"
-            app:layout_constraintTop_toTopOf="@+id/reminderDateView"
-            tools:text="10 : 45" />
+    <Button
+        android:id="@+id/reminderTimeView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="@color/colorLightGray"
+        android:elevation="8dp"
+        android:enabled="false"
+        android:minHeight="0dp"
+        android:padding="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/reminderDateView"
+        app:layout_constraintStart_toEndOf="@+id/reminderDateView"
+        app:layout_constraintTop_toTopOf="@+id/reminderDateView"
+        tools:text="10 : 45" />
 
 
         <TextView

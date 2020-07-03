@@ -2,7 +2,6 @@ package com.example.samplenotepad.viewModels
 
 
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import arrow.core.internal.AtomicBooleanW
 import arrow.core.internal.AtomicRefW
@@ -17,6 +16,8 @@ import com.example.samplenotepad.usecases.closeMemoContentsOperation
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.clearAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 
 
 class MemoEditViewModel : ViewModel() {
@@ -33,7 +34,6 @@ class MemoEditViewModel : ViewModel() {
 
     internal fun updateMemoInfo(newValue: (MemoInfo?) -> MemoInfo?) =
         memoInfo.updateAndGet { newValue(memoInfo.value) }
-
 
 
     internal fun getMemoContents() = memoContents.value
@@ -117,7 +117,7 @@ class MemoEditViewModel : ViewModel() {
 
     internal fun initViewModelForExistMemo(memoId: Long): MemoInfo {
         val mMemoInfo = loadMemoInfoFromDatabase(memoId)
-        val mMemoContents = mMemoInfo.contents.deserializeMemoContents()
+        val mMemoContents = Json.parse(MemoRowInfo.serializer().list, mMemoInfo.contents).k()
 
         memoInfo.updateAndGet { mMemoInfo }
         memoContents.updateAndGet { mMemoContents }
@@ -130,7 +130,6 @@ class MemoEditViewModel : ViewModel() {
         memoInfo.updateAndGet { null }
         loadAndSetCategoryList()
     }
-
 
 
     override fun onCleared() {

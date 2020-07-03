@@ -7,13 +7,14 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import arrow.core.k
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.deserializeMemoContents
+import com.example.samplenotepad.entities.MemoRowInfo
 import com.example.samplenotepad.viewModels.SearchViewModel
 import kotlinx.android.synthetic.main.search_in_a_category_list_row.view.*
 import kotlinx.android.synthetic.main.search_in_a_category_list_row.view.titleBodyTextView
-import java.text.SimpleDateFormat
-import java.util.*
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 
 
 class SearchInACategoryAdapter(
@@ -38,7 +39,7 @@ class SearchInACategoryAdapter(
             val memoInfoId =
                 searchViewModel.getDataSetForMemoList()[viewHolder.adapterPosition].memoInfoId
             val memoInfo = searchViewModel.loadMemoInfoAndUpdateInViewModel(memoInfoId)
-            val memoContents = memoInfo.contents.deserializeMemoContents()
+            val memoContents = Json.parse(MemoRowInfo.serializer().list, memoInfo.contents).k()
             Log.d("場所:SearchEachMemoListAdapter", "memoId=${memoInfo.rowid} memoContents=${memoContents}")
 
             searchViewModel.apply {
@@ -53,19 +54,15 @@ class SearchInACategoryAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val createdDateFormatter = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale("ja","JP","JP")).apply {
-            timeZone = TimeZone.getTimeZone("Asia/Tokyo")
-        }
-        val memoBodyFormatter = "%s"
         val dataSetForMemoList = searchViewModel.getDataSetForMemoList()[position]
 
-        holder.createdDate.text = createdDateFormatter.format(dataSetForMemoList.createdDate)
+        holder.createdDate.text = dataSetForMemoList.createdDate.replace('-', '/')
         holder.title.text = dataSetForMemoList.memoTitle
-        holder.memoBody.text = memoBodyFormatter.format(dataSetForMemoList.memoText)
+        holder.memoBody.text = dataSetForMemoList.memoText
 
-        when (dataSetForMemoList.reminderDate) {
-            null -> holder.isSetRemainder.visibility = View.GONE
-            else -> holder.isSetRemainder.visibility = View.VISIBLE
+        when (dataSetForMemoList.reminderDateTime.isEmpty()) {
+            true -> holder.isSetRemainder.visibility = View.GONE
+            false -> holder.isSetRemainder.visibility = View.VISIBLE
         }
     }
 

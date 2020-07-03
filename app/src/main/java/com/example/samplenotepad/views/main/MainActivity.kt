@@ -10,10 +10,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import arrow.core.k
 import com.example.samplenotepad.*
 import com.example.samplenotepad.data.AppDatabase
-import com.example.samplenotepad.entities.CreateNewMemo
-import com.example.samplenotepad.entities.MEMO_Id
+import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
@@ -22,6 +22,12 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
 import com.example.samplenotepad.usecases.*
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {

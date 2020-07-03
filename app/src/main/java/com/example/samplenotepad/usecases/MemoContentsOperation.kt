@@ -92,12 +92,12 @@ internal fun MemoRow.checkBoxOperation() = runBlocking {
     val checkBoxId = memoRowInfo.checkBoxId.value
 
     when {
-        memoRowInfo.dotId.value is Some<Int> -> {
+        memoRowInfo.dotId.value != null -> {
             executeActor.send(DeleteDot(this@checkBoxOperation))
             executeActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
         }
-        checkBoxId is None -> executeActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
-        checkBoxId is Some<Int> -> executeActor.send(DeleteCheckBox(this@checkBoxOperation))
+        checkBoxId != null -> executeActor.send(DeleteCheckBox(this@checkBoxOperation))
+        else -> executeActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
     }
 }
 
@@ -108,12 +108,12 @@ internal fun MemoRow.dotOperation() = runBlocking {
     val dotId = memoRowInfo.dotId.value
 
     when {
-        memoRowInfo.checkBoxId.value is Some<Int> -> {
+        memoRowInfo.checkBoxId.value != null -> {
             executeActor.send(DeleteCheckBox(this@dotOperation))
             executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
         }
-        dotId is None -> executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
-        dotId is Some<Int> -> executeActor.send(DeleteDot(this@dotOperation))
+        dotId != null -> executeActor.send(DeleteDot(this@dotOperation))
+        else -> executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
     }
 }
 
@@ -139,11 +139,8 @@ internal fun saveMemo(executionType: WhichMemoExecution) = runBlocking {
 private fun saveOperation(executeId: SaveMemoInfo) = runBlocking {
     Log.d("saveOperation", "save処理に入った")
 
-    saveMemoInfo(
-        executeId.executionType,
-        editViewModel,
-        editViewModel.getMemoInfo(),
-        editViewModel.getMemoContents()
+    editViewModel.getMemoInfo().saveMemoInfo(
+        executeId.executionType, editViewModel, editViewModel.getMemoContents()
     )
 }
 
@@ -182,23 +179,19 @@ private fun createMemoRowsForExistMemo(
     }
 }
 
-private fun MemoRow.addCheckBoxAndDot(
+private fun MemoRow.addCheckBoxAndDotForExistMemo(
     memoRowInfo: MemoRowInfo,
     executionType: WhichMemoExecution
 ) {
-    if (memoRowInfo.checkBoxId.value is Some) {
-        val checkBoxId = memoRowInfo.checkBoxId.value.getOrElse {
-            throw(NullPointerException("CheckBoxId must not be null"))
-        }
+    if (memoRowInfo.checkBoxId.value != null) {
+        val checkBoxId = memoRowInfo.checkBoxId.value
         val checkBoxState = memoRowInfo.checkBoxState.value
 
         addCheckBox(AddCheckBox(this, executionType, checkBoxId, checkBoxState))
     }
 
-    if (memoRowInfo.dotId.value is Some) {
-        val dotId = memoRowInfo.dotId.value.getOrElse {
-            throw(NullPointerException("DotId must not be null"))
-        }
+    if (memoRowInfo.dotId.value != null) {
+        val dotId = memoRowInfo.dotId.value
 
         addDot(AddDot(this, executionType, dotId))
     }
@@ -297,8 +290,8 @@ private fun MemoRow.setBackSpaceKeyAction(executeId: TypeForExecuteMemoContents)
 
                     editViewModel.viewModelScope.launch {
                         when {
-                            memoRowInfo.checkBoxId.value is Some -> executeActor.send(DeleteCheckBox(v))
-                            memoRowInfo.dotId.value is Some -> executeActor.send(DeleteDot(v))
+                            memoRowInfo.checkBoxId.value != null -> executeActor.send(DeleteCheckBox(v))
+                            memoRowInfo.dotId.value != null -> executeActor.send(DeleteDot(v))
                         }
 
                         executeActor.send(DeleteMemoRow(v))
@@ -431,7 +424,7 @@ private fun createFirstMemoRow(executeId: CreateFirstMemoRow) {
             memoContainer.setConstraintForFirstMemoRow(newMemoRow)
 
             if (executeId.memoRowInfo != null) {
-                newMemoRow.addCheckBoxAndDot(executeId.memoRowInfo, executeId.executionType)
+                newMemoRow.addCheckBoxAndDotForExistMemo(executeId.memoRowInfo, executeId.executionType)
             }
 
             formerMemoRowForExistMemo = newMemoRow
@@ -511,7 +504,7 @@ private fun createNextMemoRow(executeId: CreateNextMemoRow) {
             )
 
             if (executeId.memoRowInfo != null)
-                newMemoRow.addCheckBoxAndDot(executeId.memoRowInfo, executeId.executionType)
+                newMemoRow.addCheckBoxAndDotForExistMemo(executeId.memoRowInfo, executeId.executionType)
 
             formerMemoRowForExistMemo = newMemoRow
         }
@@ -662,7 +655,7 @@ private fun addCheckBox(executeId: AddCheckBox) {
                 memoContents.flatMap {
                     if (it.memoRowId.value == memoRow.id)
                         listOf(memoContents[indexOfMemoRow].copy(
-                                checkBoxId = CheckBoxId(Some(newCheckBox.id)),
+                                checkBoxId = CheckBoxId(newCheckBox.id),
                                 checkBoxState = CheckBoxState(false)
                             )).k()
                     else listOf(it).k()
@@ -691,7 +684,7 @@ private fun deleteCheckBox(executeId: DeleteCheckBox) {
         memoContents.flatMap {
             if (it.memoRowId.value == executeId.memoRow.id)
                 listOf(memoContents[indexOfMemoRow].copy(
-                    checkBoxId = CheckBoxId(None),
+                    checkBoxId = CheckBoxId(null),
                     checkBoxState = CheckBoxState(false)
                 )).k()
             else listOf(it).k()
@@ -743,7 +736,7 @@ private fun addDot(executeId: AddDot) {
 
                 memoContents.flatMap {
                     if (it.memoRowId.value == executeId.memoRow.id)
-                        listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(Some(newDot.id)))).k()
+                        listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(newDot.id))).k()
                     else listOf(it).k()
                 }
             }
@@ -769,7 +762,7 @@ private fun deleteDot(executeId: DeleteDot) {
 
         memoContents.flatMap {
             if (it.memoRowId.value == executeId.memoRow.id)
-                listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(None))).k()
+                listOf(memoContents[indexOfMemoRow].copy(dotId = DotId(null))).k()
             else listOf(it).k()
         }
     }

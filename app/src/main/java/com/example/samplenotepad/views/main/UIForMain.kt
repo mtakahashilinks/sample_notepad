@@ -6,7 +6,6 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import arrow.core.Some
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
@@ -274,10 +273,10 @@ internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoEditFrag
     Log.d("場所:removeBulletsViewFromLayout [before remove view]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 
     when {
-        bulletsViewId is CheckBoxId && bulletsViewId.value is Some ->
-            this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value.t))
-        bulletsViewId is DotId && bulletsViewId.value is Some ->
-            this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value.t))
+        bulletsViewId is CheckBoxId && bulletsViewId.value != null ->
+            this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value))
+        bulletsViewId is DotId && bulletsViewId.value != null ->
+            this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value))
     }
 
     targetMemoRow.setTextColor(resources.getColor(R.color.colorBlack, fragment.activity?.theme))

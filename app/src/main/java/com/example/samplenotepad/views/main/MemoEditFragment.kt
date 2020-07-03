@@ -19,6 +19,7 @@ import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -58,7 +59,7 @@ class MemoEditFragment : Fragment() {
         editViewModel = MainActivity.editViewModel
         memoContainer = memoContentsContainerLayout
 
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.LAZY) {
             getShowMassageForSavedFlow().collect { fragmentType ->
                 if (fragmentType is EditFragment)
                     this@MemoEditFragment.showSnackbarForSavedMassageAtEditMemo()
@@ -67,7 +68,7 @@ class MemoEditFragment : Fragment() {
             }
         }
 
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.LAZY) {
             editViewModel.getClearAllFocusInMemoContainerFlow().collect { flag ->
                 if (flag) memoContentsContainerLayout.clearFocus()
 

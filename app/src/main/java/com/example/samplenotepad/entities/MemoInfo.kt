@@ -11,13 +11,12 @@ data class MemoInfo(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "memoId")
     val rowid: Long,
-    val createdDateTime: Long,
+    val createdDateTime: String,
     val title: String,
     val category: String,
     val contents: String, //MemoContentsをシリアライズしたもの
     val contentsText: String, //中身の検索用(MemoContentsの全てのTextを繋げてシリアライズしたもの)
-    val reminderDate: Int?, //この値がSetされていればリマインダーが設定されている
-    val reminderTime: Int?,
-    val preAlarmTime: Int,
-    val postAlarmTime: Int
+    val reminderDateTime: String, //この値が空ならリマインダーが設定されていない
+    val preAlarm: Int,
+    val postAlarm: Int
 ) { companion object }

@@ -71,7 +71,7 @@ interface MemoInfoDao {
 
 
     @Query("""
-        SELECT memoId, createdDateTime, title, category, contentsText, reminderDate
+        SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime
         FROM MemoInfoTable
         WHERE category LIKE :category
         ORDER BY createdDateTime DESC
@@ -79,7 +79,7 @@ interface MemoInfoDao {
     suspend fun getDataSetForMemoList(category: String): List<DataSetForMemoList>
 
     @Query("""
-        SELECT memoId, createdDateTime, title, category, contentsText, reminderDate 
+        SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime 
         FROM memoInfoTable 
         WHERE title LIKE :word OR category LIKE :word OR contentsText LIKE :word
         ORDER BY createdDateTime DESC
@@ -87,7 +87,7 @@ interface MemoInfoDao {
     suspend fun searchMemoInfoForSearchTop(word: String): List<DataSetForMemoList>
 
     @Query("""
-        SELECT memoId, createdDateTime, title, category, contentsText, reminderDate 
+        SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime 
         FROM memoInfoTable 
         WHERE category LIKE :category AND (title LIKE :word OR contentsText LIKE :word)
         ORDER BY createdDateTime DESC

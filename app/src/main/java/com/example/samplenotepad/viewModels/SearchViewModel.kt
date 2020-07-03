@@ -17,7 +17,7 @@ class SearchViewModel : ViewModel() {
 
     private val dataSetForCategoryList = AtomicRefW(listOf<DataSetForCategoryList>())
     private val dataSetForMemoList = AtomicRefW(listOf<DataSetForMemoList>())
-    private val memoInfo = AtomicRefW(MemoInfo(-1, -1, "", "", "", "", -1, -1, -1, -1))
+    private val memoInfo = AtomicRefW(MemoInfo(-1, "", "", "", "", "", "", -1, -1))
     private val memoContents = AtomicRefW(MemoContents(listOf<MemoRowInfo>().k()))
     private val memoContentsAtSavePoint = AtomicRefW(listOf<MemoRowInfo>().k())
     private val searchWord = AtomicRefW("")
