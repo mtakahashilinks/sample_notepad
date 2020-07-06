@@ -7,7 +7,6 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import arrow.core.extensions.list.semigroup.plus
-import arrow.core.getOrElse
 import arrow.core.k
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
@@ -17,7 +16,6 @@ import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -26,54 +24,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-private val showMassageForSavedFlow = MutableStateFlow<WhichFragment>(NoneOfThem)
-
-internal fun getShowMassageForSavedFlow() = showMassageForSavedFlow
-
-internal fun resetValueOfShowMassageForSavedFlow() {
-    showMassageForSavedFlow.value = NoneOfThem
-}
-
-//Database挿入時のシリアライズ処理
-//internal fun MemoContents.serializeMemoContents(): String {
-//    val stBuilder = StringBuilder()
-//
-//    this.map { stBuilder.append(
-//        ":${it.memoRowId.value},${it.text.value},${it.checkBoxId.value}," +
-//                "${it.checkBoxState.value},${it.dotId.value}"
-//    ) }
-//
-//    //完成したstBuilderから最初の「:」をdropして返す
-//    return stBuilder.drop(1).toString()
-//}
-//
-////Databaseから取得する時のデシリアライズ処理
-//internal fun String.deserializeMemoContents(): MemoContents {
-//    //StringをmemoRowInfo(List<String>)ごとのListにする
-//    val stringListOfList: List<List<String>> = this.split(":").map { it.split(",") }
-//
-//    return stringListOfList.flatMap { stringList ->
-//        mutableListOf<MemoRowInfo>().apply { add(MemoRowInfo(
-//            MemoRowId(stringList[0].toInt()),
-//            Text(stringList[1]),
-//            CheckBoxId(stringList[2].toIntOrNull()),
-//            CheckBoxState(stringList[3].toBoolean()),
-//            DotId(stringList[4].toIntOrNull())
-//        ) ) }
-//    }.k()
-//}
-
 private fun MemoContents.createContentsText(): String {
     val builder = StringBuilder("")
 
     this.toList().onEach { memoRowInfo ->
-        builder.append(memoRowInfo.text.value + '\u21B5')
+        builder.append(memoRowInfo.memoText.value + '\u21B5')
     }
 
     return builder.toString()
 }
 
-internal fun MemoInfo.cancelAlarmOnMemoInfo() {
+internal fun MemoInfo.cancelAlarmOnMemoInfoIO() {
 
 }
 
@@ -145,104 +106,90 @@ private fun MemoInfo.saveMemoInfoToDatabaseAsync(viewModel: ViewModel) = runBloc
                 val rowId = memoInfoDao.insertMemoInfo(this@saveMemoInfoToDatabaseAsync)
                 Log.d("場所:saveMemoInfo#挿入", "NewMemoId=${rowId} MemoContents=${Json.parse(MemoRowInfo.serializer().list, memoInfoDao.getMemoInfoById(rowId).contents)}")
 
-                updateMemoInfoAndMemoContentsAtSavePointInViewModel(viewModel, rowId)?.setAlarm()
+                updateMemoInfoInViewModel(viewModel, rowId)?.setAlarm()
             }
             else -> {
                 //databaseに編集したmemoInfoをアップデート
                 memoInfoDao.updateMemoInfo(this@saveMemoInfoToDatabaseAsync)
                 Log.d("場所:saveMemoInfo#アップデート", "MemoId=${this@saveMemoInfoToDatabaseAsync.rowid} MemoContents=${Json.parse(MemoRowInfo.serializer().list, memoInfoDao.getMemoInfoById(this@saveMemoInfoToDatabaseAsync.rowid).contents)}")
 
-                updateMemoInfoAndMemoContentsAtSavePointInViewModel(viewModel, null)?.setAlarm()
+                updateMemoInfoInViewModel(viewModel, null)?.setAlarm()
             }
         }
     }
 }
 
-private fun MemoInfo.updateMemoInfoAndMemoContentsAtSavePointInViewModel(
+private fun MemoInfo.updateMemoInfoInViewModel(
     viewModel: ViewModel,
     memoId: Long?
 ) = when (viewModel) {
-    is MemoEditViewModel -> {
-        val modifiedMemoInfo = viewModel.updateMemoInfo { memoId?.let { this.copy(rowid = it) } ?: this }
-        viewModel.updateMemoContentsAtSavePoint()
-
-        modifiedMemoInfo
+        is MemoEditViewModel -> viewModel.updateMemoInfo { memoId?.let { this.copy(rowid = it) } ?: this }
+        is SearchViewModel -> viewModel.updateMemoInfo { this }
+        else -> null
     }
-    is SearchViewModel -> {
-        val modifiedMemoInfo = viewModel.updateMemoInfo { memoId?.let { this.copy(rowid = it) } ?: this }
-        viewModel.updateMemoContentsAtSavePoint()
 
-        modifiedMemoInfo
-    }
-    else -> null
-}
+private fun MemoInfo?.createNewMemoInfo(
+    title: String?,
+    category: String?,
+    stringMemoContents: String,
+    contentsTextForSearch: String,
+    reminderDateTime: String?,
+    preAlarmPosition: Int?,
+    postAlarmPosition: Int?
+) = MemoInfo(
+        this?.rowid ?: 0,
+        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            .format(Timestamp(System.currentTimeMillis())),
+        title ?: SampleMemoApplication.instance.getString(R.string.memo_title_default_value),
+        category ?: SampleMemoApplication.instance.getString(R.string.memo_category_default_value),
+        stringMemoContents,
+        contentsTextForSearch,
+        reminderDateTime ?: "",
+        preAlarmPosition ?: 0,
+        postAlarmPosition ?: 0
+    )
 
-internal fun MemoInfo?.saveMemoInfo(
-    executionType: WhichMemoExecution,
-    viewModel: ViewModel,
-    memoContents: MemoContents
-) = runBlocking {
+internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoContents) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")
 
     val stringMemoContents =
-        async(Dispatchers.Default) { Json.stringify(MemoRowInfo.serializer().list, memoContents.toList()) }
-    val contentsText = async(Dispatchers.Default) { memoContents.createContentsText() }
-    val optionValues = MemoOptionFragment.getOptionValuesForSave()
+        async(Dispatchers.Default) { Json.stringify(MemoRowInfo.serializer().list, memoContents) }
+    val contentsTextForSearch = async(Dispatchers.Default) { memoContents.createContentsText() }
 
-    Log.d("saveMemoInfo", "optionValues=${optionValues}")
+    val newMemoInfo = when (viewModel) {
+        is MemoEditViewModel -> {
+            val optionValues = MemoOptionFragment.getOptionValuesForSave()
 
-    val newMemoInfo = MemoInfo(
-        this@saveMemoInfo?.rowid ?: 0,
-        SimpleDateFormat(
-            "yyyy-MM-dd HH:mm", Locale.getDefault()).format(Timestamp(System.currentTimeMillis())
-        ),
-        optionValues.title.getOrElse {
-            SampleMemoApplication.instance.getString(R.string.memo_title_default_value)
-        },
-        optionValues.category.getOrElse {
-            SampleMemoApplication.instance.getString(R.string.memo_category_default_value)
-        },
-        stringMemoContents.await(),
-        contentsText.await(),
-        optionValues.targetDateTime.getOrElse { "" },
-        optionValues.preAlarm.getOrElse { 0 },
-        optionValues.postAlarm.getOrElse { 0 }
-    )
+            this@saveMemoInfoIO.createNewMemoInfo(
+                optionValues?.title,
+                optionValues?.category,
+                stringMemoContents.await(),
+                contentsTextForSearch.await(),
+                optionValues?.targetDateTime,
+                optionValues?.preAlarm,
+                optionValues?.postAlarm
+            )
+        }
+        else -> {
+            this@saveMemoInfoIO.createNewMemoInfo(
+                this@saveMemoInfoIO?.title,
+                this@saveMemoInfoIO?.category,
+                stringMemoContents.await(),
+                contentsTextForSearch.await(),
+                this@saveMemoInfoIO?.reminderDateTime,
+                this@saveMemoInfoIO?.preAlarm,
+                this@saveMemoInfoIO?.postAlarm
+            )
+        }
+    }
 
-    Log.d("場所:saveMemoInfo#NewMemoInfo", "MemoId=${newMemoInfo.rowid} MemoContents=${Json.parse(MemoRowInfo.serializer().list, newMemoInfo.contents)}")
+    Log.d("saveMemoInfo", "NewMemoInfo=$newMemoInfo")
 
     newMemoInfo.saveMemoInfoToDatabaseAsync(viewModel).join()
-
-    when (executionType) {
-        is DisplayExistMemo -> showMassageForSavedFlow.value = DisplayFragment
-        else -> showMassageForSavedFlow.value = EditFragment
-    }
 }
 
-internal fun updateMemoContentsInDatabase(
-    executionType: WhichMemoExecution,
-    memoId: Long,
-    memoContents: MemoContents
-) = runBlocking {
-     launch(Dispatchers.IO) {
-        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val newContents = Json.stringify(MemoRowInfo.serializer().list, memoContents.toList())
-        val newContentsText = memoContents.createContentsText()
-        val timeStamp = System.currentTimeMillis()
-        Log.d("場所:updateMemoContentsInDatabase#Update前", "MemoId=$memoId MemoContents=$memoContents")
 
-        memoInfoDao.updateContents(memoId, timeStamp, newContents, newContentsText)
-
-        when (executionType) {
-            is CreateNewMemo -> showMassageForSavedFlow.value = EditFragment
-            is DisplayExistMemo -> showMassageForSavedFlow.value = DisplayFragment
-        }
-
-        Log.d("場所:updateMemoContentsInDatabase#Update後", "MemoId=$memoId MemoContents=${Json.parse(MemoRowInfo.serializer().list, loadMemoInfoFromDatabase(memoId).contents)}")
-    }
-}
-
-internal fun saveTemplateNameListToFile(templateNameList: List<String>) = runBlocking {
+internal fun saveTemplateNameListToFileIO(templateNameList: List<String>) = runBlocking {
     val stringData = templateNameList.joinToString(separator = ",")
 
     launch(Dispatchers.IO) {
@@ -252,7 +199,7 @@ internal fun saveTemplateNameListToFile(templateNameList: List<String>) = runBlo
     }
 }
 
-internal fun loadTemplateNameListFromFile(): List<String> = runBlocking {
+internal fun loadTemplateNameListFromFileIO(): List<String> = runBlocking {
     val file = SampleMemoApplication.instance.getFileStreamPath(MEMO_TEMPLATE_NAME_LIST_FILE)
 
     withContext(Dispatchers.IO) {
@@ -264,7 +211,7 @@ internal fun loadTemplateNameListFromFile(): List<String> = runBlocking {
     }
 }
 
-internal fun saveTemplateToFile(
+internal fun saveTemplateToFileIO(
     templateName: String,
     template: MemoContents
 ) = runBlocking {
@@ -277,7 +224,7 @@ internal fun saveTemplateToFile(
     }
 }
 
-internal fun loadTemplateFromFile(templateName: String): MemoContents = runBlocking {
+internal fun loadTemplateFromFileIO(templateName: String): MemoContents = runBlocking {
     val file = SampleMemoApplication.instance.getFileStreamPath(MEMO_TEMPLATE_FILE + templateName)
 
     withContext(Dispatchers.IO) {
@@ -291,13 +238,13 @@ internal fun loadTemplateFromFile(templateName: String): MemoContents = runBlock
     }
 }
 
-internal fun deleteTemplateFile(templateName: String) {
+internal fun deleteTemplateFileIO(templateName: String) {
     val file = SampleMemoApplication.instance.getFileStreamPath(MEMO_TEMPLATE_FILE + templateName)
 
     file.delete()
 }
 
-internal fun renameTemplateFile(oldTemplateName: String, newTemplateName: String) {
+internal fun renameTemplateFileIO(oldTemplateName: String, newTemplateName: String) {
     val application = SampleMemoApplication.instance
     val from = File(application.filesDir, MEMO_TEMPLATE_FILE + oldTemplateName)
     val to = File(application.filesDir, MEMO_TEMPLATE_FILE + newTemplateName)
@@ -305,7 +252,7 @@ internal fun renameTemplateFile(oldTemplateName: String, newTemplateName: String
     from.renameTo(to)
 }
 
-internal fun searchMemoInfoForSearchTopInDatabase(
+internal fun searchingMemoInfoWithAWordIO(
     word: String
 ): List<DataSetForMemoList> = runBlocking {
     withContext(Dispatchers.IO) {
@@ -316,7 +263,7 @@ internal fun searchMemoInfoForSearchTopInDatabase(
     }
 }
 
-internal fun searchMemoInfoForSearchInACategoryInDatabase(
+internal fun searchingMemoInfoWithAWordAndCategoryIO(
     category: String,
     word: String
 ): List<DataSetForMemoList> = runBlocking {
@@ -328,7 +275,7 @@ internal fun searchMemoInfoForSearchInACategoryInDatabase(
     }
 }
 
-internal fun loadMemoInfoFromDatabase(memoInfoId: Long): MemoInfo = runBlocking {
+internal fun loadMemoInfoIO(memoInfoId: Long): MemoInfo = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
@@ -336,7 +283,7 @@ internal fun loadMemoInfoFromDatabase(memoInfoId: Long): MemoInfo = runBlocking 
     }
 }
 
-internal fun loadCategoryListFromDatabase(): List<String> = runBlocking {
+internal fun loadCategoryListIO(): List<String> = runBlocking {
     val categoryList = withContext(Dispatchers.IO) {
         AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao().getCategoryList()
     }
@@ -358,7 +305,7 @@ internal fun loadCategoryListFromDatabase(): List<String> = runBlocking {
 }
 
 //categoryとその中に含まれるメモの数のタプルのリスト
-internal fun loadDataSetForCategoryListFromDatabase(): List<DataSetForCategoryList> = runBlocking {
+internal fun loadDataSetForCategoryListIO(): List<DataSetForCategoryList> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
         val defaultCategoryName =
@@ -385,7 +332,7 @@ internal fun loadDataSetForCategoryListFromDatabase(): List<DataSetForCategoryLi
     }
 }
 
-internal fun loadDataSetForMemoListFromDatabase(
+internal fun loadDataSetForMemoListIO(
     category: String
 ): List<DataSetForMemoList> = runBlocking {
     withContext(Dispatchers.IO) {
@@ -395,20 +342,20 @@ internal fun loadDataSetForMemoListFromDatabase(
     }
 }
 
-internal fun renameCategory(oldCategoryName: String, newCategoryName: String) = runBlocking {
+internal fun renameCategoryIO(oldCategoryName: String, newCategoryName: String) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
     launch(Dispatchers.IO) { memoInfoDao.renameCategory(oldCategoryName, newCategoryName) }
 }
 
 
-internal fun deleteMemoByCategoryFromDatabase(category: String) = runBlocking {
+internal fun deleteMemoByCategoryIO(category: String) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
     launch(Dispatchers.IO) { memoInfoDao.deleteByCategory(category) }
 }
 
-internal fun deleteMemoByIdFromDatabase(id: Long) = runBlocking {
+internal fun deleteMemoByIdIO(id: Long) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
     launch(Dispatchers.IO) { memoInfoDao.deleteById(id) }

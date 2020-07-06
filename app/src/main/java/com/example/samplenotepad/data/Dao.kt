@@ -33,13 +33,6 @@ interface MemoInfoDao {
 
     @Query("""
         UPDATE memoInfoTable
-        SET createdDateTime = :timeStamp, contents = :newContents, contentsText = :newContentsText
-        WHERE memoId == :id
-    """)
-    suspend fun updateContents(id: Long, timeStamp: Long, newContents: String, newContentsText: String)
-
-    @Query("""
-        UPDATE memoInfoTable
         SET category = :newCategoryName
         WHERE category == :oldCategoryName
     """)

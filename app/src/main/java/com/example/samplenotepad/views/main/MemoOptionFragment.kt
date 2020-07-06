@@ -3,15 +3,13 @@ package com.example.samplenotepad.views.main
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.ListPopupWindow
-import arrow.core.None
-import arrow.core.Option
-import arrow.core.Some
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.MemoInfo
 import com.example.samplenotepad.entities.ValuesOfOptionSetting
@@ -39,18 +37,18 @@ class MemoOptionFragment : Fragment() {
         internal fun isInstance() = instance != null
 
 
-        internal fun getOptionValuesForSave(): ValuesOfOptionSetting {
+        internal fun getOptionValuesForSave(): ValuesOfOptionSetting? {
             return when (MemoOptionFragment.isInstance()) {
                 true -> {
                     val optionFragment = MemoOptionFragment.getInstanceOrCreateNew()
                     val reminderSwitch = optionFragment.reminderOnOffSwitchView
                     val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
-                        true -> None
-                        false -> Some(optionFragment.titleBodyTextView.text.toString())
+                        true -> null
+                        false -> optionFragment.titleBodyTextView.text.toString()
                     }
                     val category = when (optionFragment.categoryTextView.text.isEmpty()) {
-                        true -> None
-                        false -> Some(optionFragment.categoryTextView.text.toString())
+                        true -> null
+                        false -> optionFragment.categoryTextView.text.toString()
                     }
                     val targetDateTime = optionFragment.getTargetDateTimeParams(reminderSwitch)
                     val preAlarm =
@@ -60,25 +58,25 @@ class MemoOptionFragment : Fragment() {
 
                     ValuesOfOptionSetting(title, category, targetDateTime, preAlarm, postAlarm)
                 }
-                false -> ValuesOfOptionSetting(None, None, None, None, None)
+                false -> null
             }
         }
 
-        private fun MemoOptionFragment.getTargetDateTimeParams(switchView: Switch): Option<String> =
+        private fun MemoOptionFragment.getTargetDateTimeParams(switchView: Switch): String? =
             when (switchView.isChecked) {
                 true -> {
                     val reminderDate = this.reminderDateView.text.toString().replace('/', '-')
                     val reminderTime = this.reminderTimeView.text.toString().replace(" ", "")
 
-                    Some("$reminderDate $reminderTime")
+                    "$reminderDate $reminderTime"
                 }
-                false -> None
+                false -> null
             }
 
-        private fun Spinner.getPreAndPostAlarmParams(switchView: Switch): Option<Int> =
+        private fun Spinner.getPreAndPostAlarmParams(switchView: Switch): Int? =
             when (switchView.isChecked) {
-                true -> Some(this.selectedItemPosition)
-                false -> None
+                true -> this.selectedItemPosition
+                false -> null
             }
     }
 
@@ -162,12 +160,10 @@ class MemoOptionFragment : Fragment() {
 
 
     private fun MemoInfo?.initValueOfAllViewWithMemoInfo() {
-        val memoInfo = this
-
         titleBodyTextView.setCounterText (titleCounterView, 15) //TitleのViewに文字数カウンターをセット
         categoryTextView.setCounterText(categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
-
-        memoInfo?.setViewsProperties() ?: setCurrentValueInReminderDateTimeView()
+        Log.d("MemoOptionFragment#initValueOfAllViewWithMemoInfo", "MemoInfo=$this")
+        this?.setViewsProperties() ?: setCurrentValueInReminderDateTimeView()
     }
 
     private fun MemoInfo.setViewsProperties() {
@@ -175,6 +171,7 @@ class MemoOptionFragment : Fragment() {
             true -> this.apply {
                 setTitleTextWithMemoInfo()
                 setCategoryTextWithMemoInfo()
+                setCurrentValueInReminderDateTimeView()
             }
             false -> {
                 this.setReminderSwitchOnForExistMemo(this@setViewsProperties.reminderDateTime.split(" "))

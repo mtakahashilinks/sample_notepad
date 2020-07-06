@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.deleteMemoByIdFromDatabase
+import com.example.samplenotepad.data.deleteMemoByIdIO
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 
@@ -59,7 +59,7 @@ internal fun RecyclerView.getCallbackForItemTouchHelper(
             val targetMemoId = targetDataSet.memoInfoId
             val targetCategory = targetDataSet.memoCategory
 
-            deleteMemoByIdFromDatabase(targetMemoId)
+            deleteMemoByIdIO(targetMemoId)
 
             searchViewModel.updateDataSetForMemoList { dataSetList ->
                 dataSetList.filterNot { dataSet -> dataSet.memoInfoId == targetMemoId }

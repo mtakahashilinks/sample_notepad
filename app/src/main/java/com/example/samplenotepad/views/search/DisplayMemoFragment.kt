@@ -2,24 +2,24 @@ package com.example.samplenotepad.views.search
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.getShowMassageForSavedFlow
-import com.example.samplenotepad.data.resetValueOfShowMassageForSavedFlow
 import com.example.samplenotepad.entities.DisplayExistMemo
 import com.example.samplenotepad.entities.DisplayFragment
 import com.example.samplenotepad.entities.MEMO_Id
+import com.example.samplenotepad.usecases.getShowMassageForSavedLiveData
 import com.example.samplenotepad.usecases.initMemoContentsOperation
+import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveData
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.main.MainActivity
 import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -50,13 +50,13 @@ class DisplayMemoFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
-        CoroutineScope(Dispatchers.Main).launch {
-            getShowMassageForSavedFlow().collect { fragmentType ->
-                if (fragmentType is DisplayFragment)
+        lifecycleScope.launch {
+            getShowMassageForSavedLiveData().observe(viewLifecycleOwner, Observer { typeOfFragment ->
+                if (typeOfFragment is DisplayFragment)
                     this@DisplayMemoFragment.showSnackbarForSavedMassageAtDisplayMemo()
 
-                resetValueOfShowMassageForSavedFlow()
-            }
+                resetValueOfShowMassageForSavedLiveData()
+            })
         }
 
         if (searchViewModel.getMemoInfo().reminderDateTime.isNotEmpty())
@@ -79,17 +79,17 @@ class DisplayMemoFragment : Fragment() {
         }
 
         displayToEditImgBtn.setOnClickListener {
-            when (searchViewModel.compareMemoContentsWithSavePoint()) {
+            when (searchViewModel.isSavedAlready()) {
                 true -> moveToMainActivityForEditMemo()
                 false -> {
-                    searchViewModel.updateMemoContentsInDatabaseAndSavePoint(DisplayExistMemo)
+                    searchViewModel.updateMemoInfoDatabase()
                     moveToMainActivityForEditMemo()
                 }
             }
         }
 
         displaySaveImgBtn.setOnClickListener {
-            searchViewModel.updateMemoContentsInDatabaseAndSavePoint(DisplayExistMemo)
+            searchViewModel.updateMemoInfoDatabase()
         }
     }
 
@@ -99,8 +99,6 @@ class DisplayMemoFragment : Fragment() {
         initMemoContentsOperation(
             this, searchViewModel, displayMemoContentsContainerLayout, DisplayExistMemo
         )
-        Log.d("場所:DisplayMemoFragment#initMemoContentsOperation後#fromVM", "memoId=${searchViewModel.getMemoInfo().rowid} memoContents=${searchViewModel.getMemoContents()}")
-
     }
 
     override fun onResume() {
@@ -118,8 +116,6 @@ class DisplayMemoFragment : Fragment() {
 
 
     private fun moveToMainActivityForEditMemo() {
-        Log.d("場所:DisplayMemoFragment#moveToMainActivityForEditMemo#fromVM", "memoId=${searchViewModel.getMemoInfo().rowid} memoContents=${searchViewModel.getMemoContents()}")
-
         val intent = Intent(this.requireActivity(), MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(MEMO_Id, searchViewModel.getMemoInfo().rowid)

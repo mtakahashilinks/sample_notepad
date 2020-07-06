@@ -3,7 +3,7 @@ package com.example.samplenotepad.usecases.searchTopListRecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.deleteMemoByCategoryFromDatabase
+import com.example.samplenotepad.data.deleteMemoByCategoryIO
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.search.SearchTopFragment
@@ -78,7 +78,7 @@ internal fun SearchViewModel.getItemTouchHelperCallback(
         fun SearchTopListAdapter.deleteItemFromDataSetForCategoryList(adapterPosition: Int) {
             val targetCategory = getDataSetForCategoryList()[adapterPosition].name
 
-            deleteMemoByCategoryFromDatabase(targetCategory)
+            deleteMemoByCategoryIO(targetCategory)
 
             //リストから削除されたCategoryを除去。ただし先頭(DefaultCategory)の場合はlistSizeを0に変更するだけ
             when (adapterPosition == 0) {

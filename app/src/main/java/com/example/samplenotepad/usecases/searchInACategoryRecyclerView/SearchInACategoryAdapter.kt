@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import arrow.core.k
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.MemoRowInfo
+import com.example.samplenotepad.entities.SetMemoContents
+import com.example.samplenotepad.usecases.getMemoContentsExecuteActor
 import com.example.samplenotepad.viewModels.SearchViewModel
 import kotlinx.android.synthetic.main.search_in_a_category_list_row.view.*
 import kotlinx.android.synthetic.main.search_in_a_category_list_row.view.titleBodyTextView
+import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 
@@ -43,8 +47,10 @@ class SearchInACategoryAdapter(
             Log.d("場所:SearchEachMemoListAdapter", "memoId=${memoInfo.rowid} memoContents=${memoContents}")
 
             searchViewModel.apply {
-                updateMemoContents { memoContents }
-                updateMemoContentsAtSavePoint()
+                viewModelScope.launch {
+                    getMemoContentsExecuteActor().send(SetMemoContents(memoContents))
+                    updateSavePointOfMemoContents()
+                }
             }
 
             clickedAction()

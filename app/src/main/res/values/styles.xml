@@ -1,5 +1,4 @@
 <resources>
-
     <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -15,12 +14,12 @@
         <item name="android:theme">?attr/actionBarTheme</item>
     </style>
 
-    <style name="MemoRowViewStyle">
+    <style name="MemoEditTextStyle">
         <item name="android:padding">4dp</item>
         <item name="android:background">#00000000</item>
         <item name="android:ems">10</item>
-        <item name="android:focusableInTouchMode">true</item>
         <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
         <item name="android:inputType">textMultiLine</item>
     </style>
 

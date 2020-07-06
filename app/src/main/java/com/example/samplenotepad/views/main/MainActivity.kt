@@ -10,7 +10,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import arrow.core.k
 import com.example.samplenotepad.*
 import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.*
@@ -22,12 +21,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
 import com.example.samplenotepad.usecases.*
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -64,6 +57,11 @@ class MainActivity : AppCompatActivity() {
 
         val existMemoId = intent.getLongExtra(MEMO_Id, -1L)
 
+        editViewModel.createNewMemoContentsExecuteActor()
+
+        if (existMemoId != -1L)
+            editViewModel.initViewModelForExistMemo(existMemoId)
+
         //Pagerの設定
         memoPager.apply {
             adapter = MemoPagerAdapter(this@MainActivity)
@@ -85,9 +83,6 @@ class MainActivity : AppCompatActivity() {
                 1 -> tab.text = getText(R.string.tab_title_for_option_fragment)
             }
         }.attach()
-
-        if (existMemoId != -1L)
-            editViewModel.initViewModelForExistMemo(existMemoId)
     }
 
 
@@ -95,6 +90,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         viewModelStore.clear()
+
         AppDatabase.apply {
             getDatabase(this@MainActivity).close()
             clearDBInstanceFlag()
@@ -112,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.createNewMemo -> {
-                when (editViewModel.compareMemoContentsWithSavePoint()) {
+                when (editViewModel.isSavedAlready()) {
                     true -> {
                         editViewModel.resetEditStatesForCreateNewMemo()
                         resetOptionStatesForCreateNewMemo()
@@ -125,7 +121,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             R.id.toSearchTop -> {
-                when (editViewModel.compareMemoContentsWithSavePoint()) {
+                when (editViewModel.isSavedAlready()) {
                     true -> {
                         moveToMemoSearchActivity()
                         true
@@ -143,7 +139,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         when (memoPager.currentItem) {
             0 -> {
-                when (editViewModel.compareMemoContentsWithSavePoint()) {
+                when (editViewModel.isSavedAlready()) {
                     true -> {
                         viewModelStore.clear()
                         finish()
@@ -224,4 +220,7 @@ class MainActivity : AppCompatActivity() {
             }
         ).show(supportFragmentManager, "reboot_and_create_new_memo_dialog")
     }
+}
+
+fun main() = {
 }

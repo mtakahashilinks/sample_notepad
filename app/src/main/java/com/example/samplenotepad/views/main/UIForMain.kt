@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.views.MemoEditText
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 
@@ -50,9 +51,9 @@ internal fun View.hideSoftwareKeyBoard(context: Context){
     }
 }
 
-internal fun MemoRow.setFocus() = this.requestFocus()
+internal fun MemoEditText.setFocus() = this.requestFocus()
 
-internal fun MemoRow.setFocusAndTextAndCursorPosition(
+internal fun MemoEditText.setFocusAndTextAndCursorPosition(
     editViewModel: MemoEditViewModel,
     text: Text,
     selection: Int = 0
@@ -80,197 +81,197 @@ internal fun MemoEditFragment.showSnackbarForSavedMassageAtEditMemo() {
 }
 
 
-internal fun ConstraintLayout.setConstraintForFirstMemoRow(targetMemoRow: MemoRow) {
-    Log.d("場所:setConstraintForFirstMemoRow", "Constraintのセットに入った")
+internal fun ConstraintLayout.setConstraintForFirstMemoEditText(targetMemoEditText: MemoEditText) {
+    Log.d("場所:setConstraintForFirstMemoEditText", "Constraintのセットに入った")
     constraintSet = ConstraintSet()
 
-    this.addView(targetMemoRow)
+    this.addView(targetMemoEditText)
 
     constraintSet.apply {
-        clone(this@setConstraintForFirstMemoRow)
-        connect(targetMemoRow.id, ConstraintSet.TOP,
-            this@setConstraintForFirstMemoRow.id, ConstraintSet.TOP, 0)
-        connect(targetMemoRow.id, ConstraintSet.START,
-            this@setConstraintForFirstMemoRow.id, ConstraintSet.START, 0)
-        connect(targetMemoRow.id, ConstraintSet.END,
-            this@setConstraintForFirstMemoRow.id, ConstraintSet.END, 0)
-        applyTo(this@setConstraintForFirstMemoRow)
+        clone(this@setConstraintForFirstMemoEditText)
+        connect(targetMemoEditText.id, ConstraintSet.TOP,
+            this@setConstraintForFirstMemoEditText.id, ConstraintSet.TOP, 0)
+        connect(targetMemoEditText.id, ConstraintSet.START,
+            this@setConstraintForFirstMemoEditText.id, ConstraintSet.START, 0)
+        connect(targetMemoEditText.id, ConstraintSet.END,
+            this@setConstraintForFirstMemoEditText.id, ConstraintSet.END, 0)
+        applyTo(this@setConstraintForFirstMemoEditText)
     }
 
-    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:setConstraintForFirstMemoRow [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    val targetParam = targetMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForFirstMemoEditText [after set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.setConstraintForNextMemoRowWithNoBelow(
-    newMemoRow: MemoRow,
-    formerMemoRowId: MemoRowId,
+internal fun ConstraintLayout.setConstraintForNextMemoEditTextWithNoBelow(
+    newMemoEditText: MemoEditText,
+    formerMemoEditTextId: MemoEditTextId,
     editViewModel: MemoEditViewModel,
     text: Text
 ) {
-    Log.d("場所:setConstraintForNextMemoRowWithNoBelow", "Constraintのセットに入った")
-    val targetParam = newMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val formerParam = this.findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:setConstraintForNextMemoRowWithNoBelow [before set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
-    Log.d("場所:setConstraintForNextMemoRowWithNoBelow [before set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToTop} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithNoBelow", "Constraintのセットに入った")
+    val targetParam = newMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    val formerParam = this.findViewById<MemoEditText>(formerMemoEditTextId.value).layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForNextMemoEditTextWithNoBelow [before set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithNoBelow [before set]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToTop} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 
-    this.addView(newMemoRow)
+    this.addView(newMemoEditText)
 
     constraintSet.apply {
-        clone(this@setConstraintForNextMemoRowWithNoBelow)
-        connect(newMemoRow.id, ConstraintSet.TOP,
-            formerMemoRowId.value, ConstraintSet.BOTTOM, 0)
-        connect(newMemoRow.id, ConstraintSet.START,
-            this@setConstraintForNextMemoRowWithNoBelow.id, ConstraintSet.START, 0)
-        connect(newMemoRow.id, ConstraintSet.END,
-            this@setConstraintForNextMemoRowWithNoBelow.id, ConstraintSet.END, 0)
-        applyTo(this@setConstraintForNextMemoRowWithNoBelow)
+        clone(this@setConstraintForNextMemoEditTextWithNoBelow)
+        connect(newMemoEditText.id, ConstraintSet.TOP,
+            formerMemoEditTextId.value, ConstraintSet.BOTTOM, 0)
+        connect(newMemoEditText.id, ConstraintSet.START,
+            this@setConstraintForNextMemoEditTextWithNoBelow.id, ConstraintSet.START, 0)
+        connect(newMemoEditText.id, ConstraintSet.END,
+            this@setConstraintForNextMemoEditTextWithNoBelow.id, ConstraintSet.END, 0)
+        applyTo(this@setConstraintForNextMemoEditTextWithNoBelow)
     }
 
-    newMemoRow.setFocusAndTextAndCursorPosition(editViewModel, text)
+    newMemoEditText.setFocusAndTextAndCursorPosition(editViewModel, text)
 
-    Log.d("場所:setConstraintForNextMemoRowWithNoBelow [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
-    Log.d("場所:setConstraintForNextMemoRowWithNoBelow [after set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToTop} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithNoBelow [after set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToTop} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithNoBelow [after set]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToTop} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.setConstraintForNextMemoRowWithBelow(
-    newMemoRow: MemoRow,
-    formerMemoRowId: MemoRowId,
-    nextMemoRowId: MemoRowId,
+internal fun ConstraintLayout.setConstraintForNextMemoEditTextWithBelow(
+    newMemoEditText: MemoEditText,
+    formerMemoEditTextId: MemoEditTextId,
+    nextMemoEditTextId: MemoEditTextId,
     editViewModel: MemoEditViewModel,
     text: Text
 ) {
-    Log.d("場所:setConstraintForNextMemoRowWithBelow", "Constraintのセットに入った")
-    val targetParam = newMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val formerParam = this.findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    val nextParam = this.findViewById<MemoRow>(nextMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:setConstraintForNextMemoRowWithBelow [before set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
-    Log.d("場所:setConstraintForNextMemoRowWithBelow [before set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
-    Log.d("場所:setConstraintForNextMemoRowWithBelow [before set]", "nextMemoRow: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow", "Constraintのセットに入った")
+    val targetParam = newMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    val formerParam = this.findViewById<MemoEditText>(formerMemoEditTextId.value).layoutParams as ConstraintLayout.LayoutParams
+    val nextParam = this.findViewById<MemoEditText>(nextMemoEditTextId.value).layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow [before set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow [before set]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow [before set]", "nextMemoEditText: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
 
-    this.addView(newMemoRow)
+    this.addView(newMemoEditText)
 
     constraintSet.apply {
-        clone(this@setConstraintForNextMemoRowWithBelow)
-        clear(nextMemoRowId.value, ConstraintSet.TOP)
-        connect(newMemoRow.id, ConstraintSet.TOP,
-            formerMemoRowId.value, ConstraintSet.BOTTOM, 0)
-        connect(newMemoRow.id, ConstraintSet.START,
-            this@setConstraintForNextMemoRowWithBelow.id, ConstraintSet.START, 0)
-        connect(newMemoRow.id, ConstraintSet.END,
-            this@setConstraintForNextMemoRowWithBelow.id, ConstraintSet.END, 0)
-        connect(nextMemoRowId.value, ConstraintSet.TOP,
-            newMemoRow.id, ConstraintSet.BOTTOM, 0)
-        applyTo(this@setConstraintForNextMemoRowWithBelow)
+        clone(this@setConstraintForNextMemoEditTextWithBelow)
+        clear(nextMemoEditTextId.value, ConstraintSet.TOP)
+        connect(newMemoEditText.id, ConstraintSet.TOP,
+            formerMemoEditTextId.value, ConstraintSet.BOTTOM, 0)
+        connect(newMemoEditText.id, ConstraintSet.START,
+            this@setConstraintForNextMemoEditTextWithBelow.id, ConstraintSet.START, 0)
+        connect(newMemoEditText.id, ConstraintSet.END,
+            this@setConstraintForNextMemoEditTextWithBelow.id, ConstraintSet.END, 0)
+        connect(nextMemoEditTextId.value, ConstraintSet.TOP,
+            newMemoEditText.id, ConstraintSet.BOTTOM, 0)
+        applyTo(this@setConstraintForNextMemoEditTextWithBelow)
     }
 
-    newMemoRow.setFocusAndTextAndCursorPosition(editViewModel, text)
+    newMemoEditText.setFocusAndTextAndCursorPosition(editViewModel, text)
 
-    Log.d("場所:setConstraintForNextMemoRowWithBelow [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
-    Log.d("場所:setConstraintForNextMemoRowWithBelow [after set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
-    Log.d("場所:setConstraintForNextMemoRowWithBelow [after set]", "nextMemoRow: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow [after set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow [after set]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:setConstraintForNextMemoEditTextWithBelow [after set]", "nextMemoEditText: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
 }
 
-internal fun ConstraintLayout.setConstraintForDeleteMemoRow(targetMemoRow: MemoRow,
-                                                            formerMemoRowId: MemoRowId,
-                                                            nextMemoRowId: MemoRowId
+internal fun ConstraintLayout.setConstraintForDeleteMemoRow(targetMemoEditText: MemoEditText,
+                                                            formerMemoEditTextId: MemoEditTextId,
+                                                            nextMemoEditTextId: MemoEditTextId
 ) {
     Log.d("場所:setConstraintForDeleteMemoRow", "Constraintのセットに入った")
-    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val formerParam = this.findViewById<MemoRow>(formerMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    val nextParam = this.findViewById<MemoRow>(nextMemoRowId.value).layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:setConstraintForDeleteMemoRow [before set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
-    Log.d("場所:setConstraintForDeleteMemoRow [before set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
-    Log.d("場所:setConstraintForDeleteMemoRow [before set]", "nextMemoRow: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
+    val targetParam = targetMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    val formerParam = this.findViewById<MemoEditText>(formerMemoEditTextId.value).layoutParams as ConstraintLayout.LayoutParams
+    val nextParam = this.findViewById<MemoEditText>(nextMemoEditTextId.value).layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForDeleteMemoRow [before set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForDeleteMemoRow [before set]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:setConstraintForDeleteMemoRow [before set]", "nextMemoEditText: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
 
     constraintSet.apply {
         clone(this@setConstraintForDeleteMemoRow)
-        clear(nextMemoRowId.value, ConstraintSet.TOP)
-        clear(targetMemoRow.id, ConstraintSet.TOP)
-        connect(nextMemoRowId.value, ConstraintSet.TOP, formerMemoRowId.value, ConstraintSet.BOTTOM, 0)
+        clear(nextMemoEditTextId.value, ConstraintSet.TOP)
+        clear(targetMemoEditText.id, ConstraintSet.TOP)
+        connect(nextMemoEditTextId.value, ConstraintSet.TOP, formerMemoEditTextId.value, ConstraintSet.BOTTOM, 0)
         applyTo(this@setConstraintForDeleteMemoRow)
     }
 
-    Log.d("場所:setConstraintForDeleteMemoRow [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
-    Log.d("場所:setConstraintForDeleteMemoRow [after set]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
-    Log.d("場所:setConstraintForDeleteMemoRow [after set]", "nextMemoRow: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
+    Log.d("場所:setConstraintForDeleteMemoRow [after set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForDeleteMemoRow [after set]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:setConstraintForDeleteMemoRow [after set]", "nextMemoEditText: start=${nextParam.startToStart} top=${nextParam.topToBottom} end=${nextParam.endToEnd} bottom=${nextParam.bottomToTop}" )
 }
 
 internal fun ConstraintLayout.removeMemoRowFromLayout(
-    targetMemoRow: MemoRow,
-    formerMemoRow: MemoRow,
+    targetMemoEditText: MemoEditText,
+    formerMemoEditText: MemoEditText,
     editViewModel: MemoEditViewModel
 ) {
     Log.d("場所:removeMemoRowFromLayout", "リムーブ処理に入った")
-    val formerParam = formerMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    val textOfFormerMemoRow = formerMemoRow.text.toString()
+    val formerParam = formerMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    val textOfFormerMemoEditText = formerMemoEditText.text.toString()
 
-    Log.d("場所:removeMemoRowFromLayout [before remove view]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:removeMemoRowFromLayout [before remove view]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 
-    this.removeView(targetMemoRow)
+    this.removeView(targetMemoEditText)
 
-    formerMemoRow.apply {
+    formerMemoEditText.apply {
         setFocusAndTextAndCursorPosition(
             editViewModel,
-            Text(textOfFormerMemoRow + targetMemoRow.text.toString()),
-            textOfFormerMemoRow.length
+            Text(textOfFormerMemoEditText + targetMemoEditText.text.toString()),
+            textOfFormerMemoEditText.length
         )
     }
 
-    Log.d("場所:removeMemoRowFromLayout [after remove view]", "formerMemoRow: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
+    Log.d("場所:removeMemoRowFromLayout [after remove view]", "formerMemoEditText: start=${formerParam.startToStart} top=${formerParam.topToBottom} end=${formerParam.endToEnd} bottom=${formerParam.bottomToTop}" )
 }
 
 internal fun ConstraintLayout.setConstraintForBulletsView(
-    targetMemoRow: MemoRow,
+    targetMemoEditText: MemoEditText,
     newBulletsView: View,
-    MemoRowMargin: Int,
+    MemoEditTextMargin: Int,
     bulletsViewMargin: Int = 0
 ) {
     Log.d("場所:setConstraintForBulletsView", "Constraintのセットに入った")
-    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
+    val targetParam = targetMemoEditText.layoutParams as ConstraintLayout.LayoutParams
     val bulletParam = newBulletsView.layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:setConstraintForBulletsView [before set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForBulletsView [before set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 
     this.addView(newBulletsView)
 
     constraintSet.apply {
         clone(this@setConstraintForBulletsView)
-        clear(targetMemoRow.id, ConstraintSet.START)
+        clear(targetMemoEditText.id, ConstraintSet.START)
         connect(newBulletsView.id, ConstraintSet.START,
             this@setConstraintForBulletsView.id, ConstraintSet.START, bulletsViewMargin)
-        connect(newBulletsView.id, ConstraintSet.TOP, targetMemoRow.id, ConstraintSet.TOP, 0)
+        connect(newBulletsView.id, ConstraintSet.TOP, targetMemoEditText.id, ConstraintSet.TOP, 0)
         setVerticalBias(newBulletsView.id, 0f)
-        connect(newBulletsView.id, ConstraintSet.BOTTOM, targetMemoRow.id, ConstraintSet.BOTTOM, 0)
-        connect(targetMemoRow.id, ConstraintSet.START, newBulletsView.id, ConstraintSet.END, MemoRowMargin)
+        connect(newBulletsView.id, ConstraintSet.BOTTOM, targetMemoEditText.id, ConstraintSet.BOTTOM, 0)
+        connect(targetMemoEditText.id, ConstraintSet.START, newBulletsView.id, ConstraintSet.END, MemoEditTextMargin)
         applyTo(this@setConstraintForBulletsView)
     }
 
-    Log.d("場所:setConstraintForBulletsView [after set]", "targetMemoRow: start=${targetParam.startToEnd} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForBulletsView [after set]", "targetMemoEditText: start=${targetParam.startToEnd} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
     Log.d("場所:setConstraintForBulletsView [after set]", "bulletView: start=${bulletParam.startToStart} top=${bulletParam.topToTop} end=${bulletParam.endToStart} bottom=${bulletParam.bottomToBottom}" )
 }
 
-internal fun ConstraintLayout.setConstraintForDeleteBulletsView(targetMemoRow: MemoRow) {
+internal fun ConstraintLayout.setConstraintForDeleteBulletsView(targetMemoEditText: MemoEditText) {
     Log.d("場所:setConstraintForDeleteBulletsView", "Constraintのセットに入った")
-    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:setConstraintForDeleteBulletsView [before set]", "targetMemoRow: start=${targetParam.startToEnd} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    val targetParam = targetMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:setConstraintForDeleteBulletsView [before set]", "targetMemoEditText: start=${targetParam.startToEnd} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 
     constraintSet.apply {
         clone(this@setConstraintForDeleteBulletsView)
-        clear(targetMemoRow.id, ConstraintSet.START)
-        connect(targetMemoRow.id, ConstraintSet.START,
+        clear(targetMemoEditText.id, ConstraintSet.START)
+        connect(targetMemoEditText.id, ConstraintSet.START,
             this@setConstraintForDeleteBulletsView.id, ConstraintSet.START, 0)
         applyTo(this@setConstraintForDeleteBulletsView)
     }
 
-    Log.d("場所:setConstraintForDeleteBulletsView [after set]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:setConstraintForDeleteBulletsView [after set]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 }
 
 internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoEditFragment,
-                                                          targetMemoRow: MemoRow,
+                                                          targetMemoEditText: MemoEditText,
                                                           bulletsViewId: TypeForMemoRowInfo
 ) {
     Log.d("場所:removeBulletsViewFromLayout", "リムーブ処理に入った")
-    val targetParam = targetMemoRow.layoutParams as ConstraintLayout.LayoutParams
-    Log.d("場所:removeBulletsViewFromLayout [before remove view]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    val targetParam = targetMemoEditText.layoutParams as ConstraintLayout.LayoutParams
+    Log.d("場所:removeBulletsViewFromLayout [before remove view]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 
     when {
         bulletsViewId is CheckBoxId && bulletsViewId.value != null ->
@@ -279,7 +280,7 @@ internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoEditFrag
             this.removeView(fragment.requireActivity().findViewById(bulletsViewId.value))
     }
 
-    targetMemoRow.setTextColor(resources.getColor(R.color.colorBlack, fragment.activity?.theme))
+    targetMemoEditText.setTextColor(resources.getColor(R.color.colorBlack, fragment.activity?.theme))
 
-    Log.d("場所:removeBulletsViewFromLayout [after remove view]", "targetMemoRow: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
+    Log.d("場所:removeBulletsViewFromLayout [after remove view]", "targetMemoEditText: start=${targetParam.startToStart} top=${targetParam.topToBottom} end=${targetParam.endToEnd} bottom=${targetParam.bottomToTop}" )
 }

@@ -50,7 +50,7 @@ class SearchTopFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchMemoInfoAndSetWordAndResultForSearchTop(query)
+                    searchViewModel.searchingMemoInfoAndSetValueInViewModel(query)
                     moveToSearchResult()
                     true
                 }
@@ -94,7 +94,7 @@ class SearchTopFragment : Fragment() {
 
 
     internal fun moveToSearchInACategory(selectedCategory: String) {
-        searchViewModel.loadDataSetForMemoListAndSetPropertyInViewModel(selectedCategory)
+        searchViewModel.loadDataSetForMemoListAndSetInViewModel(selectedCategory)
 
         Log.d("場所:SearchTopFragment", "selectedCategoryをセット category=$selectedCategory viewModel=$searchViewModel")
 

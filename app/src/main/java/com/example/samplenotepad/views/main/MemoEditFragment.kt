@@ -7,21 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.example.samplenotepad.*
-import com.example.samplenotepad.data.getShowMassageForSavedFlow
-import com.example.samplenotepad.data.resetValueOfShowMassageForSavedFlow
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
-import com.example.samplenotepad.usecases.checkBoxOperation
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
+import com.example.samplenotepad.views.MemoEditText
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 
@@ -59,21 +58,24 @@ class MemoEditFragment : Fragment() {
         editViewModel = MainActivity.editViewModel
         memoContainer = memoContentsContainerLayout
 
-        CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.LAZY) {
-            getShowMassageForSavedFlow().collect { fragmentType ->
-                if (fragmentType is EditFragment)
+        lifecycleScope.launch {
+            getShowMassageForSavedLiveData().observe(viewLifecycleOwner, Observer { typeOfFragment ->
+                if (typeOfFragment is EditFragment)
                     this@MemoEditFragment.showSnackbarForSavedMassageAtEditMemo()
 
-                resetValueOfShowMassageForSavedFlow()
-            }
+                resetValueOfShowMassageForSavedLiveData()
+            })
         }
 
-        CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.LAZY) {
-            editViewModel.getClearAllFocusInMemoContainerFlow().collect { flag ->
-                if (flag) memoContentsContainerLayout.clearFocus()
+        lifecycleScope.launch {
+            editViewModel.getClearAllFocusInMemoContainerLiveData().observe(
+                viewLifecycleOwner,
+                Observer { flag ->
+                    if (flag) memoContentsContainerLayout.clearFocus()
 
-                editViewModel.resetValueOfClearAllFocusInMemoContainerFlow()
-            }
+                    editViewModel.resetValueOfClearAllFocusInMemoContainerLiveData()
+                }
+            )
         }
 
         editViewModel.initEditViewModel()
@@ -103,17 +105,17 @@ class MemoEditFragment : Fragment() {
 
         checkBoxImgBtn.setOnClickListener {
             if (memoContainer.findFocus() != null) {
-                val targetMemoRow = memoContainer.findFocus()
-                Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-                if (targetMemoRow is MemoRow) targetMemoRow.checkBoxOperation()
+                val targetMemoEditText = memoContainer.findFocus()
+                Log.d("場所:checkBoxImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoEditText.id}")
+                if (targetMemoEditText is MemoEditText) targetMemoEditText.checkBoxOperation()
             }
         }
 
         bulletListImgBtn.setOnClickListener {
             if (memoContainer.findFocus() != null) {
-                val targetMemoRow = memoContainer.findFocus()
-                Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoRow.id}")
-                if (targetMemoRow is MemoRow) targetMemoRow.dotOperation()
+                val targetMemoEditText = memoContainer.findFocus()
+                Log.d("場所:bulletListImgBtn.setOnClickListener", "targetMemoRowのId=${targetMemoEditText.id}")
+                if (targetMemoEditText is MemoEditText) targetMemoEditText.dotOperation()
             }
         }
 
@@ -142,7 +144,7 @@ class MemoEditFragment : Fragment() {
         activity?.title = getString(R.string.appbar_title_for_edit_fragment)
 
         //ViewPagerとTabでFragmentを切り替えたときにFocusが外れるので取得しなおす
-        if (memoContainer.focusedChild == null) firstMemoRow.requestFocus()
+        if (memoContainer.focusedChild == null) firstMemoEditText.requestFocus()
     }
 
     override fun onDetach() {

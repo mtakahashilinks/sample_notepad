@@ -30,7 +30,10 @@ class MemoSearchActivity : AppCompatActivity() {
         instanceOfActivity = this
         searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
 
-        searchViewModel.loadDataSetForCategoryListAndSetPropertyInViewModel()
+        searchViewModel.apply {
+            loadDataSetForCategoryListAndSetInViewModel()
+            createNewMemoContentsExecuteActor()
+        }
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())
@@ -41,6 +44,7 @@ class MemoSearchActivity : AppCompatActivity() {
         super.onDestroy()
 
         viewModelStore.clear()
+
         AppDatabase.apply {
             getDatabase(this@MemoSearchActivity).close()
             clearDBInstanceFlag()

@@ -2,6 +2,7 @@ package com.example.samplenotepad.views
 
 import android.app.Application
 import android.util.Log
+import com.example.samplenotepad.entities.MemoContents
 
 
 class SampleMemoApplication : Application(){
@@ -15,6 +16,7 @@ class SampleMemoApplication : Application(){
         Log.d("場所:SampleMemoApp#onCreate", "AppのonCreateが呼ばれた")
 
         instance = this
+
     }
 
     override fun onTerminate() {

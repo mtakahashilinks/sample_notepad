@@ -1,59 +1,54 @@
 package com.example.samplenotepad.viewModels
 
 
-import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import arrow.core.internal.AtomicBooleanW
-import arrow.core.internal.AtomicRefW
 import arrow.core.k
 import com.example.samplenotepad.data.*
-import com.example.samplenotepad.data.loadCategoryListFromDatabase
-import com.example.samplenotepad.data.loadTemplateFromFile
-import com.example.samplenotepad.data.loadTemplateNameListFromFile
-import com.example.samplenotepad.data.renameTemplateFile
-import com.example.samplenotepad.data.saveTemplateNameListToFile
-import com.example.samplenotepad.usecases.closeMemoContentsOperation
+import com.example.samplenotepad.data.loadCategoryListIO
+import com.example.samplenotepad.data.loadTemplateFromFileIO
+import com.example.samplenotepad.data.loadTemplateNameListFromFileIO
+import com.example.samplenotepad.data.renameTemplateFileIO
+import com.example.samplenotepad.data.saveTemplateNameListToFileIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.clearAll
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.samplenotepad.usecases.createMemoContentsExecuteActor
+import com.example.samplenotepad.usecases.getMemoContentsExecuteActor
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 
 
 class MemoEditViewModel : ViewModel() {
 
-    private val memoInfo: AtomicRefW<MemoInfo?> = AtomicRefW(null)
-    private val memoContents = AtomicRefW(listOf<MemoRowInfo>().k())
-    private val memoContentsAtSavePoint = AtomicRefW(listOf<MemoRowInfo>().k())
+    private var memoInfo: MemoInfo? = null
+    private var savePointOfMemoContents = listOf<MemoRowInfo>().k()
     private val ifAtFirstInText = AtomicBooleanW(false) //DelKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
-    private val categoryList = AtomicRefW(listOf<String>(""))
-    private val templateNameList = AtomicRefW(listOf<String>())
-    private val clearAllFocusInMemoContainerFlow = MutableStateFlow(false)
+    private var categoryList = listOf<String>()
+    private var templateNameList = listOf<String>()
+    private val clearAllFocusInMemoContainerLiveData = MutableLiveData<Boolean>(false)
 
-    internal fun getMemoInfo() = memoInfo.value
+    internal fun getMemoInfo() = memoInfo
 
-    internal fun updateMemoInfo(newValue: (MemoInfo?) -> MemoInfo?) =
-        memoInfo.updateAndGet { newValue(memoInfo.value) }
+    internal fun updateMemoInfo(newValue: (MemoInfo?) -> MemoInfo?): MemoInfo? =
+        newValue(memoInfo).apply { memoInfo = this }
 
+    internal fun updateSavePointOfMemoContents() = runBlocking {
+        val memoContentsDefer = CompletableDeferred<MemoContents>()
+        getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
 
-    internal fun getMemoContents() = memoContents.value
-
-    internal fun updateMemoContents(newValue: (MemoContents) -> MemoContents) =
-        memoContents.updateAndGet { newValue(memoContents.value) }
-
-
-    internal fun updateMemoContentsAtSavePoint() {
-        Log.d("場所:updateMemoContentsAtSavePoint#1", "MemoContents=${memoContents.value}")
-        memoContentsAtSavePoint.updateAndGet { memoContents.value }
-        Log.d("場所:updateMemoContentsAtSavePoint#2", "SavePoint=${memoContents.value}")
+        savePointOfMemoContents = memoContentsDefer.await()
     }
 
-    internal fun compareMemoContentsWithSavePoint(): Boolean {
+    internal fun isSavedAlready(): Boolean = runBlocking {
         //まずFocusを外してmemoContentsのTextを更新してから比較する
-        clearAllFocusInMemoContainerFlow.value = true
-        Log.d("場所:compareMemoContentsWithSavePoint#1", "MemoContents=${memoContents.value}")
-        Log.d("場所:compareMemoContentsWithSavePoint#2", "SavePoint=${memoContentsAtSavePoint.value}")
-        return memoContents.value == memoContentsAtSavePoint.value
+        clearAllFocusInMemoContainerLiveData.postValue(true)
+        val memoContentsDefer = CompletableDeferred<MemoContents>()
+        getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
+
+        return@runBlocking memoContentsDefer.await() == savePointOfMemoContents
     }
 
 
@@ -63,71 +58,75 @@ class MemoEditViewModel : ViewModel() {
         ifAtFirstInText.compareAndSet(expect = !newValue, update = newValue)
 
 
-    internal fun getCategoryList() = categoryList.value
+    internal fun getCategoryList() = categoryList
 
     internal fun updateCategoryList(newValue: (List<String>) -> List<String>) =
-        categoryList.updateAndGet { newValue(categoryList.value) }
+        newValue(categoryList).apply { categoryList = this }
 
-    private fun loadAndSetCategoryList() =
-        categoryList.updateAndGet { loadCategoryListFromDatabase() }
+    private fun loadAndSetCategoryList() = loadCategoryListIO().apply { categoryList = this }
 
 
-    internal fun loadTemplateAndUpdateMemoContents(templateName: String) {
-        updateMemoContents { loadTemplateFromFile(templateName) }
-        updateMemoContentsAtSavePoint()
+    internal fun loadTemplateAndUpdateMemoContents(templateName: String) = runBlocking {
+        getMemoContentsExecuteActor().send(SetMemoContents(loadTemplateFromFileIO(templateName)))
+        updateSavePointOfMemoContents()
     }
 
 
-    internal fun getTemplateNameList() = templateNameList.value
+    internal fun getTemplateNameList() = templateNameList
 
     internal fun updateTemplateNameList(newValue: (List<String>) -> List<String>) =
-        templateNameList.updateAndGet { newValue(templateNameList.value) }
+        newValue(templateNameList).apply { templateNameList = this }
 
-    internal fun addItemInTemplateNameListAndSaveTemplateFile(templateName: String) {
+    internal fun addItemInTemplateNameListAndSaveTemplateFile(templateName: String) = runBlocking {
+        val memoContentsDefer = CompletableDeferred<MemoContents>()
+        getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
         val templateNameList = updateTemplateNameList { list -> list.plus(templateName) }
-        saveTemplateNameListToFile(templateNameList)
-        saveTemplateToFile(templateName, getMemoContents())
+
+        saveTemplateNameListToFileIO(templateNameList)
+        saveTemplateToFileIO(templateName, memoContentsDefer.await())
     }
 
     internal fun renameItemInTemplateNameListAndTemplateFilesName(
         oldTemplateName: String,
         newTemplateName: String
     ) {
-        val newTemplateList = templateNameList.updateAndGet { list ->
+        val newTemplateList = updateTemplateNameList { list ->
             list.map { if (it == oldTemplateName) newTemplateName else it }
         }
 
-        saveTemplateNameListToFile(newTemplateList)
-        renameTemplateFile(oldTemplateName, newTemplateName)
+        saveTemplateNameListToFileIO(newTemplateList)
+        renameTemplateFileIO(oldTemplateName, newTemplateName)
     }
 
     private fun loadAndSetTemplateNameList() =
-        templateNameList.updateAndGet { loadTemplateNameListFromFile() }
+        updateTemplateNameList { loadTemplateNameListFromFileIO() }
 
-    internal fun getClearAllFocusInMemoContainerFlow() = clearAllFocusInMemoContainerFlow
+    internal fun getClearAllFocusInMemoContainerLiveData() = clearAllFocusInMemoContainerLiveData
 
-    internal fun resetValueOfClearAllFocusInMemoContainerFlow() {
-        clearAllFocusInMemoContainerFlow.value = false
+    internal fun resetValueOfClearAllFocusInMemoContainerLiveData() {
+        clearAllFocusInMemoContainerLiveData.postValue(false)
     }
+
+    internal fun createNewMemoContentsExecuteActor() = createMemoContentsExecuteActor(this)
 
     internal fun initEditViewModel() {
         loadAndSetCategoryList()
         loadAndSetTemplateNameList()
     }
 
-    internal fun initViewModelForExistMemo(memoId: Long): MemoInfo {
-        val mMemoInfo = loadMemoInfoFromDatabase(memoId)
-        val mMemoContents = Json.parse(MemoRowInfo.serializer().list, mMemoInfo.contents).k()
+    internal fun initViewModelForExistMemo(memoId: Long): MemoInfo = runBlocking {
+        val mMemoInfo = loadMemoInfoIO(memoId)
+        val memoContents = Json.parse(MemoRowInfo.serializer().list, mMemoInfo.contents).k()
 
-        memoInfo.updateAndGet { mMemoInfo }
-        memoContents.updateAndGet { mMemoContents }
+        memoInfo = mMemoInfo
+        getMemoContentsExecuteActor().send(SetMemoContents(memoContents))
 
-        return mMemoInfo
+        return@runBlocking mMemoInfo
     }
 
     internal fun resetEditStatesForCreateNewMemo() {
         clearAll()
-        memoInfo.updateAndGet { null }
+        memoInfo = null
         loadAndSetCategoryList()
     }
 
@@ -135,7 +134,5 @@ class MemoEditViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         //ここに終了処理を書く
-
-        closeMemoContentsOperation()
     }
 }
