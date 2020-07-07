@@ -221,6 +221,3 @@ class MainActivity : AppCompatActivity() {
         ).show(supportFragmentManager, "reboot_and_create_new_memo_dialog")
     }
 }
-
-fun main() = {
-}

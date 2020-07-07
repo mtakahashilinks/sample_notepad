@@ -56,20 +56,19 @@ class SearchResultFragment : Fragment() {
             noMatchResultTextView.visibility = View.VISIBLE
 
         //RecyclerViewの設定
-        val searchEachMemoListAdapter = SearchInACategoryAdapter(searchViewModel) { moveToDisplayMemo() }
+        val searchInACategoryAdapter = SearchInACategoryAdapter(searchViewModel) { moveToDisplayMemo() }
 
         searchResultRecyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@SearchResultFragment.context)
-            adapter = searchEachMemoListAdapter
+            adapter = searchInACategoryAdapter
             addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
 
             //スワイプでリストItemを削除する為の処理
             ItemTouchHelper(
-                getCallbackForItemTouchHelper(
+                searchInACategoryAdapter.getCallbackForItemTouchHelper(
                     this@SearchResultFragment.requireActivity(),
-                    searchViewModel,
-                    searchEachMemoListAdapter
+                    searchViewModel
                 )
             ).attachToRecyclerView(this)
         }
@@ -82,7 +81,7 @@ class SearchResultFragment : Fragment() {
                 true -> false
                 false -> {
                     searchViewModel.searchingMemoInfoAndSetValueInViewModel(query)
-                    searchEachMemoListAdapter.searchAgainAndShowResult()
+                    searchInACategoryAdapter.searchAgainAndShowResult()
                     true
                 }
             }

@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import arrow.core.extensions.list.semigroup.plus
-import arrow.core.k
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.ReminderBroadcastReceiver
@@ -232,7 +230,7 @@ internal fun loadTemplateFromFileIO(templateName: String): MemoContents = runBlo
             true -> Json.parse(
                 MemoRowInfo.serializer().list,
                 SampleMemoApplication.instance.openFileInput(MEMO_TEMPLATE_FILE + templateName)
-                    .bufferedReader().readLine()).k()
+                    .bufferedReader().readLine())
             false -> throw(IllegalArgumentException("File does not exist for「$templateName」"))
         }
     }

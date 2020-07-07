@@ -18,9 +18,6 @@ import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.MemoEditText
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 

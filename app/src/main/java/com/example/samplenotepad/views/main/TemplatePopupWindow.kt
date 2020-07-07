@@ -71,10 +71,10 @@ private fun View.setRecyclerViewOnPopupWindow(
 ) {
     this.apply {
         templateRecyclerView.apply {
-            val mAdapter = MemoTemplateAdapter(fragment, viewModel)
+            val memoTemplateAdapter = MemoTemplateAdapter(fragment, viewModel)
 
             layoutManager = LinearLayoutManager(fragment.requireContext())
-            adapter = mAdapter
+            adapter = memoTemplateAdapter
             setHasFixedSize(true)
             addItemDecoration(
                 DividerItemDecoration(
@@ -83,7 +83,7 @@ private fun View.setRecyclerViewOnPopupWindow(
             )
 
             //スワイプでリストItemを削除する為の処理
-            ItemTouchHelper(getItemTouchHelperCallback(fragment, viewModel, mAdapter))
+            ItemTouchHelper(memoTemplateAdapter.getItemTouchHelperCallback(fragment, viewModel))
                 .attachToRecyclerView(this)
         }
     }

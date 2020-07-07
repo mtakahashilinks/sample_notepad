@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
-import arrow.core.k
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.MemoRowInfo
 import com.example.samplenotepad.entities.SetMemoContents
@@ -43,7 +42,7 @@ class SearchInACategoryAdapter(
             val memoInfoId =
                 searchViewModel.getDataSetForMemoList()[viewHolder.adapterPosition].memoInfoId
             val memoInfo = searchViewModel.loadMemoInfoAndUpdateInViewModel(memoInfoId)
-            val memoContents = Json.parse(MemoRowInfo.serializer().list, memoInfo.contents).k()
+            val memoContents = Json.parse(MemoRowInfo.serializer().list, memoInfo.contents)
             Log.d("場所:SearchEachMemoListAdapter", "memoId=${memoInfo.rowid} memoContents=${memoContents}")
 
             searchViewModel.apply {

@@ -3,8 +3,6 @@ package com.example.samplenotepad.viewModels
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import arrow.core.internal.AtomicBooleanW
-import arrow.core.k
 import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadCategoryListIO
 import com.example.samplenotepad.data.loadTemplateFromFileIO
@@ -24,8 +22,7 @@ import kotlinx.serialization.json.Json
 class MemoEditViewModel : ViewModel() {
 
     private var memoInfo: MemoInfo? = null
-    private var savePointOfMemoContents = listOf<MemoRowInfo>().k()
-    private val ifAtFirstInText = AtomicBooleanW(false) //DelKeyが押された時にMemoRowの削除処理に入るかどうかの判断基準
+    private var savePointOfMemoContents = listOf<MemoRowInfo>()
     private var categoryList = listOf<String>()
     private var templateNameList = listOf<String>()
     private val clearAllFocusInMemoContainerLiveData = MutableLiveData<Boolean>(false)
@@ -50,12 +47,6 @@ class MemoEditViewModel : ViewModel() {
 
         return@runBlocking memoContentsDefer.await() == savePointOfMemoContents
     }
-
-
-    internal fun getIfAtFirstInText() = ifAtFirstInText.value
-
-    internal fun updateIfAtFirstInText(newValue: Boolean) =
-        ifAtFirstInText.compareAndSet(expect = !newValue, update = newValue)
 
 
     internal fun getCategoryList() = categoryList
@@ -116,7 +107,7 @@ class MemoEditViewModel : ViewModel() {
 
     internal fun initViewModelForExistMemo(memoId: Long): MemoInfo = runBlocking {
         val mMemoInfo = loadMemoInfoIO(memoId)
-        val memoContents = Json.parse(MemoRowInfo.serializer().list, mMemoInfo.contents).k()
+        val memoContents = Json.parse(MemoRowInfo.serializer().list, mMemoInfo.contents)
 
         memoInfo = mMemoInfo
         getMemoContentsExecuteActor().send(SetMemoContents(memoContents))

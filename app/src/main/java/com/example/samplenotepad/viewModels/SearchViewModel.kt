@@ -2,7 +2,6 @@ package com.example.samplenotepad.viewModels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import arrow.core.k
 import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadDataSetForMemoListIO
 import com.example.samplenotepad.data.loadMemoInfoIO
@@ -20,7 +19,7 @@ class SearchViewModel : ViewModel() {
     private var dataSetForCategoryList = listOf<DataSetForCategoryList>()
     private var dataSetForMemoList = listOf<DataSetForMemoList>()
     private var memoInfo = MemoInfo(-1, "", "", "", "", "", "", -1, -1)
-    private var savePointOfMemoContents = listOf<MemoRowInfo>().k()
+    private var savePointOfMemoContents = listOf<MemoRowInfo>()
     private var searchWord = ""
 
     internal fun getDataSetForCategoryList() = dataSetForCategoryList

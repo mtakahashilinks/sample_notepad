@@ -10,10 +10,9 @@ import com.example.samplenotepad.views.MemoAlertDialog
 
 
 //SwipeでリストのItemを削除するためのCallback
-internal fun RecyclerView.getCallbackForItemTouchHelper(
+internal fun SearchInACategoryAdapter.getCallbackForItemTouchHelper(
     activity: FragmentActivity,
-    searchViewModel: SearchViewModel,
-    adapter: SearchInACategoryAdapter
+    searchViewModel: SearchViewModel
 ) =
     object : ItemTouchHelper.Callback() {
         override fun getMovementFlags(
@@ -41,12 +40,12 @@ internal fun RecyclerView.getCallbackForItemTouchHelper(
                 R.string.dialog_search_each_memo_swipe_delete_positive_button,
                 R.string.dialog_search_each_memo_swipe_delete_negative_button,
                 { dialog, id ->
-                    adapter.apply {
+                    this@getCallbackForItemTouchHelper.apply {
                         deleteSelectedItemFromDataSetList(viewHolder.adapterPosition)
                         notifyDataSetChanged()
                     }
                 },
-                { dialog, id -> adapter.notifyDataSetChanged() }
+                { dialog, id -> this@getCallbackForItemTouchHelper.notifyDataSetChanged() }
             ).show(
                 activity.supportFragmentManager,
                 "search_each_memo_swipe_delete_dialog"

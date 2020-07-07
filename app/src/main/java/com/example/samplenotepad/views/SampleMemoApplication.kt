@@ -2,7 +2,6 @@ package com.example.samplenotepad.views
 
 import android.app.Application
 import android.util.Log
-import com.example.samplenotepad.entities.MemoContents
 
 
 class SampleMemoApplication : Application(){

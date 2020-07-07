@@ -73,19 +73,18 @@ class SearchInACategoryFragment : Fragment() {
 
         //RecyclerViewの設定
         searchInACategoryRecyclerView.apply {
-            val searchMemoListAdapter =
+            val searchInACategoryAdapter =
                 SearchInACategoryAdapter(searchViewModel) { moveToDisplayMemo() }
 
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@SearchInACategoryFragment.context)
-            adapter = searchMemoListAdapter
+            adapter = searchInACategoryAdapter
             addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
 
             //スワイプでリストItemを削除する為の処理
-            ItemTouchHelper(getCallbackForItemTouchHelper(
+            ItemTouchHelper(searchInACategoryAdapter.getCallbackForItemTouchHelper(
                 this@SearchInACategoryFragment.requireActivity(),
-                searchViewModel,
-                searchMemoListAdapter
+                searchViewModel
             )).attachToRecyclerView(this)
         }
     }
