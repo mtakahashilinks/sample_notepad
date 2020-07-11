@@ -81,7 +81,7 @@ private fun getPostAlarmTextFromPosition(position: Int) = when (position) {
 private fun TextView.setTargetDateTimeTextView(targetDateTimeList: List<String>) {
     val targetDate = targetDateTimeList[0].replace('-', '/')
     val targetTime = targetDateTimeList[1].replace(":", " : ")
-    val targetDateTime = "$targetDate $targetTime"
+    val targetDateTime = "$targetDate  $targetTime"
 
     this.text = targetDateTime
 }

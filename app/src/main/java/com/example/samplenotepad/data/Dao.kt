@@ -36,8 +36,14 @@ interface MemoInfoDao {
         SET category = :newCategoryName
         WHERE category == :oldCategoryName
     """)
-    suspend fun renameCategory(oldCategoryName: String, newCategoryName: String)
+    suspend fun updateCategory(oldCategoryName: String, newCategoryName: String)
 
+    @Query("""
+        UPDATE memoInfoTable
+        SET reminderDateTime = "", preAlarm = 0, postAlarm = 0
+        WHERE memoId == :id
+    """)
+    suspend fun clearReminderValuesById(id: Long)
 
     @Query("""
         SELECT * 

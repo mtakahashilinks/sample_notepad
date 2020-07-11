@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.samplenotepad">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".views.SampleMemoApplication"
@@ -17,23 +16,35 @@
         android:theme="@style/AppTheme"
         tools:ignore="LockedOrientationActivity">
 
+        <receiver
+            android:name=".usecases.ReminderNotificationReceiver"
+            android:enabled="true"
+            android:exported="true">
+        </receiver>
+
         <activity
             android:name=".views.main.MainActivity"
             android:launchMode="singleTop"
             android:screenOrientation="sensorPortrait"
             android:windowSoftInputMode="stateVisible|adjustResize">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity
             android:name=".views.search.MemoSearchActivity"
             android:launchMode="singleTop"
             android:screenOrientation="sensorPortrait">
+        </activity>
+
+        <activity
+            android:name=".views.reminder.ReminderActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="">
         </activity>
 
     </application>
