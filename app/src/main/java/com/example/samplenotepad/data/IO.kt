@@ -36,6 +36,22 @@ internal fun MemoInfo.cancelAlarmOnMemoInfoIO() {
 
 }
 
+//returnがnull以外ならAlarmはセットされている
+internal fun RequestCode.confirmIfAlarmExist(context: Context): PendingIntent? {
+    val intent = Intent(context, ReminderNotificationReceiver::class.java)
+
+    return PendingIntent.getBroadcast(context, this, intent, PendingIntent.FLAG_NO_CREATE)
+}
+
+//MemoInfoのReminder関係の値を初期値に戻す
+internal fun MemoInfoId.clearReminderValuesInMemoInfoIO() = runBlocking {
+    withContext(Dispatchers.IO) {
+        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+
+        memoInfoDao.clearReminderValuesById(this@clearReminderValuesInMemoInfoIO)
+    }
+}
+
 private fun Calendar.registerAlarm(
     requestCode: Int,
     memoTitle: String,
@@ -55,13 +71,6 @@ private fun Calendar.registerAlarm(
     )
 }
 
-internal fun MemoInfoId.clearReminderValuesInMemoInfoIO() = runBlocking {
-    withContext(Dispatchers.IO) {
-        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-
-        memoInfoDao.clearReminderValuesById(this@clearReminderValuesInMemoInfoIO)
-    }
-}
 
 //TargetDateTime,PreAlarm,PostAlarm、それぞれ値があればアラームをセットする
 private fun MemoInfo.setAlarm() {
@@ -94,7 +103,7 @@ private fun MemoInfo.setAlarm() {
 }
 
 private fun MemoInfo.getRequestCodeForAlarm(reminderType: Int): Int =
-    (this.rowid * 10).toInt() + reminderType
+    this.rowid.toInt() * 10 + reminderType
 
 private fun Calendar.getPreAlarmTime(position: Int): Calendar = when (position) {
     PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1) }
