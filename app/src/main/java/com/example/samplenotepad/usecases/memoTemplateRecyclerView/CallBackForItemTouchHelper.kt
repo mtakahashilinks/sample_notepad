@@ -3,8 +3,8 @@ package com.example.samplenotepad.usecases.memoTemplateRecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.deleteTemplateFileIO
-import com.example.samplenotepad.data.saveTemplateNameListToFileIO
+import com.example.samplenotepad.data.deleteTemplateIO
+import com.example.samplenotepad.data.saveTemplateNameListIO
 import com.example.samplenotepad.entities.AdapterPosition
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
@@ -52,9 +52,9 @@ internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
             val modifiedTemplateList = templateNameList.take(this)
                 .plus(templateNameList.drop(this + 1))
 
-            deleteTemplateFileIO(targetTemplateName)
+            deleteTemplateIO(targetTemplateName)
 
-            saveTemplateNameListToFileIO(modifiedTemplateList)
+            saveTemplateNameListIO(modifiedTemplateList)
             editViewModel.updateTemplateNameList { modifiedTemplateList }
         }
     }

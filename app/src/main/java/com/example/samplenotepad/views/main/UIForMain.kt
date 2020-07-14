@@ -243,7 +243,7 @@ internal fun ConstraintLayout.setConstraintForDeleteBulletsView(targetMemoEditTe
 
 internal fun ConstraintLayout.removeBulletsViewFromLayout(fragment: MemoEditFragment,
                                                           targetMemoEditText: MemoEditText,
-                                                          bulletsViewId: TypeForMemoRowInfo
+                                                          bulletsViewId: ValueTypeOfMemoRowInfo
 ) {
     Log.d("場所:removeBulletsViewFromLayout", "リムーブ処理に入った")
 

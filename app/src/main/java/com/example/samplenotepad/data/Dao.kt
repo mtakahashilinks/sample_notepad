@@ -9,48 +9,48 @@ import com.example.samplenotepad.entities.MemoInfo
 @Dao
 interface MemoInfoDao {
     @Insert(entity = MemoInfo::class)
-    suspend fun insertMemoInfo(memoInfo: MemoInfo): Long
+    suspend fun insertMemoInfoDao(memoInfo: MemoInfo): Long
 
     @Update(entity = MemoInfo::class)
-    suspend fun updateMemoInfo(memoInfo: MemoInfo)
+    suspend fun updateMemoInfoDao(memoInfo: MemoInfo)
 
     @Delete(entity = MemoInfo::class)
-    suspend fun deleteMemoInfo(memoInfo: MemoInfo)
+    suspend fun deleteMemoInfoDao(memoInfo: MemoInfo)
 
     @Query("""
         DELETE
         FROM memoInfoTable
         WHERE memoId == :id
     """)
-    suspend fun deleteById(id: Long)
+    suspend fun deleteByIdDao(id: Long)
 
     @Query("""
         DELETE
         FROM memoInfoTable
         WHERE category == :category
     """)
-    suspend fun deleteByCategory(category: String)
+    suspend fun deleteByCategoryDao(category: String)
 
     @Query("""
         UPDATE memoInfoTable
         SET category = :newCategoryName
         WHERE category == :oldCategoryName
     """)
-    suspend fun updateCategory(oldCategoryName: String, newCategoryName: String)
+    suspend fun updateCategoryDao(oldCategoryName: String, newCategoryName: String)
 
     @Query("""
         UPDATE memoInfoTable
         SET reminderDateTime = "", preAlarm = 0, postAlarm = 0
         WHERE memoId == :id
     """)
-    suspend fun clearReminderValuesById(id: Long)
+    suspend fun clearReminderValuesByIdDao(id: Long)
 
     @Query("""
         SELECT * 
         FROM memoInfoTable 
         WHERE memoId == :id
         """)
-    suspend fun getMemoInfoById(id: Long): MemoInfo
+    suspend fun getMemoInfoByIdDao(id: Long): MemoInfo
 
     @Query("""
         SELECT category
@@ -58,7 +58,7 @@ interface MemoInfoDao {
         GROUP BY category
         ORDER BY category ASC
         """)
-    suspend fun getCategoryList(): List<String>
+    suspend fun getCategoryListDao(): List<String>
 
     @Query("""
         SELECT category, COUNT(*)
@@ -66,7 +66,7 @@ interface MemoInfoDao {
         GROUP BY category
         ORDER BY category ASC
         """)
-    suspend fun getDataSetForCategoryList(): List<DataSetForCategoryList>
+    suspend fun getDataSetForCategoryListDao(): List<DataSetForCategoryList>
 
 
     @Query("""
@@ -75,7 +75,7 @@ interface MemoInfoDao {
         WHERE category LIKE :category
         ORDER BY createdDateTime DESC
         """)
-    suspend fun getDataSetForMemoList(category: String): List<DataSetForMemoList>
+    suspend fun getDataSetForMemoListDao(category: String): List<DataSetForMemoList>
 
     @Query("""
         SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime 
@@ -83,7 +83,7 @@ interface MemoInfoDao {
         WHERE title LIKE :word OR category LIKE :word OR contentsText LIKE :word
         ORDER BY createdDateTime DESC
         """)
-    suspend fun searchMemoInfoForSearchTop(word: String): List<DataSetForMemoList>
+    suspend fun searchMemoByASearchWordDao(word: String): List<DataSetForMemoList>
 
     @Query("""
         SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime 
@@ -91,14 +91,8 @@ interface MemoInfoDao {
         WHERE category LIKE :category AND (title LIKE :word OR contentsText LIKE :word)
         ORDER BY createdDateTime DESC
         """)
-    suspend fun searchMemoInfoForSearchInACategory(category: String, word: String): List<DataSetForMemoList>
-
-
-//      @Query("""
-//          SELECT *
-//          FROM MemoInfoTable
-//          WHERE contentsText LIKE :word
-//          ORDER BY createdDateTime ASC
-//          """)
-//      suspend fun searchMemoInfoByText(word: String): MemoInfo //wildcardはwordに"%ab_c%"のようなものを渡す
+    suspend fun searchMemoByASearchWordAndCategoryDao(
+        category: String,
+        word: String
+    ): List<DataSetForMemoList>
 }

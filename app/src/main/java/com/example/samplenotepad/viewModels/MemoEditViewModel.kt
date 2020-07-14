@@ -5,10 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadCategoryListIO
-import com.example.samplenotepad.data.loadTemplateFromFileIO
-import com.example.samplenotepad.data.loadTemplateNameListFromFileIO
-import com.example.samplenotepad.data.renameTemplateFileIO
-import com.example.samplenotepad.data.saveTemplateNameListToFileIO
+import com.example.samplenotepad.data.loadTemplateBodyIO
+import com.example.samplenotepad.data.loadTemplateNameListIO
+import com.example.samplenotepad.data.renameTemplateIO
+import com.example.samplenotepad.data.saveTemplateNameListIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.createMemoContentsExecuteActor
@@ -58,7 +58,7 @@ class MemoEditViewModel : ViewModel() {
 
 
     internal fun loadTemplateAndUpdateMemoContents(templateName: String) = runBlocking {
-        getMemoContentsExecuteActor().send(SetMemoContents(loadTemplateFromFileIO(templateName)))
+        getMemoContentsExecuteActor().send(SetMemoContents(loadTemplateBodyIO(templateName)))
         updateSavePointOfMemoContents()
     }
 
@@ -73,8 +73,8 @@ class MemoEditViewModel : ViewModel() {
         getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
         val templateNameList = updateTemplateNameList { list -> list.plus(templateName) }
 
-        saveTemplateNameListToFileIO(templateNameList)
-        saveTemplateToFileIO(templateName, memoContentsDefer.await())
+        saveTemplateNameListIO(templateNameList)
+        saveTemplateBodyIO(templateName, memoContentsDefer.await())
     }
 
     internal fun renameItemInTemplateNameListAndTemplateFilesName(
@@ -85,12 +85,12 @@ class MemoEditViewModel : ViewModel() {
             list.map { if (it == oldTemplateName) newTemplateName else it }
         }
 
-        saveTemplateNameListToFileIO(newTemplateList)
-        renameTemplateFileIO(oldTemplateName, newTemplateName)
+        saveTemplateNameListIO(newTemplateList)
+        renameTemplateIO(oldTemplateName, newTemplateName)
     }
 
     private fun loadAndSetTemplateNameList() =
-        updateTemplateNameList { loadTemplateNameListFromFileIO() }
+        updateTemplateNameList { loadTemplateNameListIO() }
 
     internal fun getClearAllFocusInMemoContainerLiveData() = clearAllFocusInMemoContainerLiveData
 

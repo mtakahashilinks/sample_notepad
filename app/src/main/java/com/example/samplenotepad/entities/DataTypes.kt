@@ -68,17 +68,17 @@ data class GetMemoContents(
 ) : TypeOfMemoContentsOperation() { companion object }
 
 
-sealed class TypeForMemoRowInfo
+sealed class ValueTypeOfMemoRowInfo
 @Serializable
-data class MemoEditTextId(val value: Int) : TypeForMemoRowInfo() { companion object }
+data class MemoEditTextId(val value: Int) : ValueTypeOfMemoRowInfo() { companion object }
 @Serializable
-data class Text(val value: String) : TypeForMemoRowInfo() { companion object }
+data class Text(val value: String) : ValueTypeOfMemoRowInfo() { companion object }
 @Serializable
-data class CheckBoxId(val value: Int?) : TypeForMemoRowInfo() { companion object }
+data class CheckBoxId(val value: Int?) : ValueTypeOfMemoRowInfo() { companion object }
 @Serializable
-data class CheckBoxState(val value: Boolean) : TypeForMemoRowInfo() { companion object }
+data class CheckBoxState(val value: Boolean) : ValueTypeOfMemoRowInfo() { companion object }
 @Serializable
-data class DotId(val value: Int?) : TypeForMemoRowInfo() { companion object }
+data class DotId(val value: Int?) : ValueTypeOfMemoRowInfo() { companion object }
 
 //メモの中の各行(View)の情報
 @Serializable
