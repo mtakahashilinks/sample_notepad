@@ -50,7 +50,7 @@ class SearchTopFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchingMemoInfoAndSetValueInViewModel(query)
+                    searchViewModel.searchMemoAndSetValueInViewModel(query)
                     moveToSearchResult()
                     true
                 }

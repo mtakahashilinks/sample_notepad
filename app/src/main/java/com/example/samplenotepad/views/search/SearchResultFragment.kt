@@ -80,7 +80,7 @@ class SearchResultFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchingMemoInfoAndSetValueInViewModel(query)
+                    searchViewModel.searchMemoAndSetValueInViewModel(query)
                     searchInACategoryAdapter.searchAgainAndShowResult()
                     true
                 }

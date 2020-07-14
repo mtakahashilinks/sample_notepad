@@ -83,13 +83,13 @@ class SearchViewModel : ViewModel() {
     }
 
 
-    internal fun searchingMemoInfoAndSetValueInViewModel(searchWord: String): List<DataSetForMemoList> {
+    internal fun searchMemoAndSetValueInViewModel(searchWord: String): List<DataSetForMemoList> {
         this.searchWord = searchWord
 
         return updateDataSetForMemoList { searchMemoByASearchWordIO(searchWord) }
     }
 
-    internal fun searchingMemoInfoAndSetValueInViewModel(
+    internal fun searchMemoAndSetValueInViewModel(
         category: String,
         searchWord: String
     ): List<DataSetForMemoList> {

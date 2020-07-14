@@ -60,7 +60,7 @@ class SearchInACategoryFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchingMemoInfoAndSetValueInViewModel(category, query)
+                    searchViewModel.searchMemoAndSetValueInViewModel(category, query)
                     moveToSearchResult()
                     true
                 }
