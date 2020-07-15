@@ -12,8 +12,9 @@
         android:id="@+id/templateNameErrorTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
         android:textColor="@color/design_default_color_error"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintStart_toStartOf="@+id/templateNameEditText"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="@string/error_not_input_new_name" />

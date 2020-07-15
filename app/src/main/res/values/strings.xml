@@ -8,9 +8,9 @@
     <string name="appbar_menu_to_search_top">メモ検索へ</string>
     <string name="memo_title_default_value">(no title)</string>
     <string name="memo_category_default_value">no category</string>
-    <string name="template_add_error_max_amount">※テンプレートは最大5個までです</string>
-    <string name="error_not_input_new_name">※テンプレート名を入力してください</string>
-    <string name="error_already_has_same_name">※その名前はすでに存在しています</string>
+    <string name="template_add_error_max_amount">テンプレートは最大5個までです</string>
+    <string name="error_not_input_new_name">テンプレート名を入力してください</string>
+    <string name="error_already_has_same_name">その名前はすでに存在しています</string>
     <string name="template_list_title">テンプレートリスト</string>
     <string name="dialog_template_name_edit_text_hint">追加するテンプレート名を入力</string>
     <string name="dialog_memo_template_swipe_delete_title">このテンプレートを削除します</string>
