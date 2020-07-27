@@ -18,24 +18,21 @@ import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.display.MemoDisplayActivity
 import kotlinx.android.synthetic.main.fragment_search_result.*
 
-
-class SearchResultFragment : Fragment() {
+class SearchWithReminderFragment : Fragment() {
 
     companion object {
-        private var instance: SearchResultFragment? = null
+        private var instance: SearchWithReminderFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchResultFragment =
-            instance ?: SearchResultFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): SearchWithReminderFragment =
+            instance ?: SearchWithReminderFragment().apply { if (instance == null) instance = this }
 
-        internal fun clearSearchResultFragmentInstanceFlag() {
+        internal fun clearSearchWithReminderFragmentInstanceFlag() {
             instance = null
         }
     }
 
 
     private lateinit var searchViewModel: SearchViewModel
-    private lateinit var searchWord: String
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,8 +58,8 @@ class SearchResultFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchByWordThenUpdateDataSetForMemoList(query)
-                    searchMemoListAdapter.searchAgainAndShowResult()
+                    searchViewModel.searchByWordWithReminderThenUpdateDataSetForMemoList(query)
+                    moveToSearchResult()
                     true
                 }
             }
@@ -75,22 +72,25 @@ class SearchResultFragment : Fragment() {
         //RecyclerViewの設定
         searchResultRecyclerView.apply {
             setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@SearchResultFragment.context)
+            layoutManager = LinearLayoutManager(this@SearchWithReminderFragment.context)
             adapter = searchMemoListAdapter
-            addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
+            addItemDecoration(
+                DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
+            )
 
             //スワイプでリストItemを削除する為の処理
             ItemTouchHelper(
                 searchMemoListAdapter.getCallbackForItemTouchHelper(
-                    this@SearchResultFragment.requireActivity(),
+                    this@SearchWithReminderFragment.requireActivity(),
                     searchViewModel
                 )
             ).attachToRecyclerView(this)
         }
 
-        setSearchWordText()
+        //必要ないのでtextViewを非表示にする
+        searchWordTextView.visibility = View.GONE
 
-        //検索ワードに合うものが無い場合に表示する
+        //リマインダー付きMemoが無い場合に表示する
         if (searchViewModel.getDataSetForMemoList().isEmpty())
             noMatchResultTextView.visibility = View.VISIBLE
     }
@@ -103,13 +103,13 @@ class SearchResultFragment : Fragment() {
         super.onResume()
 
         //アプリバーのタイトルをセット
-        activity?.title = getString(R.string.appbar_title_search_result)
+        activity?.title = getString(R.string.appbar_title_search_with_reminder)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        clearSearchResultFragmentInstanceFlag()
+        clearSearchWithReminderFragmentInstanceFlag()
     }
 
 
@@ -123,20 +123,10 @@ class SearchResultFragment : Fragment() {
         startActivity(intent)
     }
 
-    //新しいFragmentで検索結果を表示
-    private fun SearchMemoListAdapter.searchAgainAndShowResult() {
-        when (searchViewModel.getDataSetForMemoList().isEmpty()) {
-            true -> noMatchResultTextView.visibility = View.VISIBLE
-            false -> noMatchResultTextView.visibility = View.GONE
-        }
-
-        setSearchWordText()
-        this.notifyDataSetChanged()
-    }
-
-    private fun setSearchWordText() {
-        searchWord = searchViewModel.getSearchWord()
-        memoSearchView.setQuery(searchWord, false)
-        searchWordTextView.text = getString(R.string.search_word_text, searchWord)
+    private fun moveToSearchResult() {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .addToBackStack(null)
+            .replace(R.id.searchContainer, SearchResultFragment.getInstanceOrCreateNew())
+            .commit()
     }
 }

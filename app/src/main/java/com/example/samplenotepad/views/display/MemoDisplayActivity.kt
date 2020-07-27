@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views.search
+package com.example.samplenotepad.views.display
 
 import android.app.Activity
 import android.content.Intent
@@ -9,37 +9,41 @@ import android.view.MenuItem
 import androidx.lifecycle.ViewModelProvider
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.AppDatabase
+import com.example.samplenotepad.entities.ConstValForMemo
+import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.main.MainActivity
-import kotlinx.android.synthetic.main.activity_memo_search.*
+import com.example.samplenotepad.views.search.MemoSearchActivity
+import kotlinx.android.synthetic.main.activity_memo_display.*
 
-
-class MemoSearchActivity : AppCompatActivity() {
+class MemoDisplayActivity : AppCompatActivity() {
 
     companion object {
         lateinit var instanceOfActivity: Activity private set
-        lateinit var searchViewModel: SearchViewModel private set
+        lateinit var displayViewModel: MemoDisplayViewModel private set
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_memo_search)
-        setSupportActionBar(searchToolbar)
+        setContentView(R.layout.activity_memo_display)
+        setSupportActionBar(displayToolbar)
 
         instanceOfActivity = this
 
-        searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java).apply {
-            createMemoContentsOperationActor()
+        displayViewModel = ViewModelProvider(this).get(MemoDisplayViewModel::class.java)
+
+        displayViewModel.createNewMemoContentsExecuteActor()
+
+        if (intent != null) {
+            displayViewModel.loadMemoInfoAndUpdate(
+                intent.getLongExtra(ConstValForMemo.MEMO_Id, -1)
+            )
+
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.displayContainer, MemoDisplayFragment.getInstanceOrCreateNew())
+                .commit()
         }
-
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())
-            .commit()
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
     }
 
     override fun onDestroy() {
@@ -48,10 +52,11 @@ class MemoSearchActivity : AppCompatActivity() {
         viewModelStore.clear()
 
         AppDatabase.apply {
-            getDatabase(this@MemoSearchActivity).close()
+            getDatabase(this@MemoDisplayActivity).close()
             clearDBInstanceFlag()
         }
     }
+
 
     override fun onBackPressed() {
         super.onBackPressed()
@@ -82,3 +87,9 @@ class MemoSearchActivity : AppCompatActivity() {
         }
     }
 }
+
+//val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+//    putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+//    putExtra(Settings.EXTRA_CHANNEL_ID, myNotificationChannel.getId())
+//}
+//startActivity(intent)

@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views.search
+package com.example.samplenotepad.views.display
 
 import android.view.View
 import android.view.ViewGroup
@@ -6,6 +6,7 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
+import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.android.synthetic.main.reminder_states_popup_window.view.*
 
 
@@ -18,19 +19,34 @@ internal fun clearReminderStatesPopupWindowFlag() {
     popupWindow = null
 }
 
-internal fun PopupWindow.dismissReminderStatesPopupWindow(fragment: DisplayMemoFragment) {
+internal fun PopupWindow.dismissReminderStatesPopupWindow() {
     this.dismiss()
     clearReminderStatesPopupWindowFlag()
-    fragment.setIsShowingPopupWindow(false)
+    MemoDisplayFragment.getInstanceOrCreateNew().setIsShowingPopupWindow(false)
 }
 
 private fun createPopupWindow(): PopupWindow {
-    val displayFragment = DisplayMemoFragment.getInstanceOrCreateNew()
+    val displayFragment = MemoDisplayFragment.getInstanceOrCreateNew()
     val layoutView = displayFragment.requireActivity().layoutInflater.inflate(
         R.layout.reminder_states_popup_window, null, false
-    ).apply { setTextForReminderPopupWindow() }
+    ).apply {
+        setTextForReminderPopupWindow()
 
-    layoutView.setTextForReminderPopupWindow()
+        //deleteBtnの押下でリマインダーを削除する
+        this.deleteBtn.setOnClickListener {
+            displayFragment.reminderStatesImgBtn.visibility = View.INVISIBLE
+
+            MemoDisplayActivity.displayViewModel.apply {
+                updateMemoInfo { memoInfo ->
+                    memoInfo.copy(reminderDateTime = "", preAlarm = 0, postAlarm = 0)
+                }.cancelAllAlarm()
+
+                saveMemoInfo()
+            }
+
+            popupWindow?.dismissReminderStatesPopupWindow()
+        }
+    }
 
     return PopupWindow(displayFragment.context).apply {
         width = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -51,7 +67,7 @@ private fun createPopupWindow(): PopupWindow {
 }
 
 private fun View.setTextForReminderPopupWindow() {
-    val memoInfo = MemoSearchActivity.searchViewModel.getMemoInfo()
+    val memoInfo = MemoDisplayActivity.displayViewModel.getMemoInfo()
 
     if (memoInfo.reminderDateTime.isNotEmpty())
         targetDateTimeBodyTextView.setTargetDateTimeTextView(memoInfo.reminderDateTime.split(" "))
@@ -61,20 +77,20 @@ private fun View.setTextForReminderPopupWindow() {
 }
 
 private fun getPreAlarmTextFromPosition(position: Int) = when (position) {
-    PRE_POST_ALARM_NO_SET -> R.string.alarm_none
-    PRE_POST_ALARM_5M -> R.string.pre_alarm_5m
-    PRE_POST_ALARM_10M -> R.string.pre_alarm_10m
-    PRE_POST_ALARM_30M -> R.string.pre_alarm_30m
-    PRE_POST_ALARM_1H -> R.string.pre_alarm_1h
+    ConstValForAlarm.PRE_POST_ALARM_NO_SET -> R.string.alarm_none
+    ConstValForAlarm.PRE_POST_ALARM_5M -> R.string.pre_alarm_5m
+    ConstValForAlarm.PRE_POST_ALARM_10M -> R.string.pre_alarm_10m
+    ConstValForAlarm.PRE_POST_ALARM_30M -> R.string.pre_alarm_30m
+    ConstValForAlarm.PRE_POST_ALARM_1H -> R.string.pre_alarm_1h
     else -> R.string.pre_alarm_24h
 }
 
 private fun getPostAlarmTextFromPosition(position: Int) = when (position) {
-    PRE_POST_ALARM_NO_SET -> R.string.alarm_none
-    PRE_POST_ALARM_5M -> R.string.post_alarm_5m
-    PRE_POST_ALARM_10M -> R.string.post_alarm_10m
-    PRE_POST_ALARM_30M -> R.string.post_alarm_30m
-    PRE_POST_ALARM_1H -> R.string.post_alarm_1h
+    ConstValForAlarm.PRE_POST_ALARM_NO_SET -> R.string.alarm_none
+    ConstValForAlarm.PRE_POST_ALARM_5M -> R.string.post_alarm_5m
+    ConstValForAlarm.PRE_POST_ALARM_10M -> R.string.post_alarm_10m
+    ConstValForAlarm.PRE_POST_ALARM_30M -> R.string.post_alarm_30m
+    ConstValForAlarm.PRE_POST_ALARM_1H -> R.string.post_alarm_1h
     else -> R.string.post_alarm_24h
 }
 

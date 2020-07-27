@@ -1,4 +1,4 @@
-package com.example.samplenotepad.views.search
+package com.example.samplenotepad.views.display
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,28 +8,28 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import com.example.samplenotepad.R
-import com.example.samplenotepad.entities.DisplayExistMemo
-import com.example.samplenotepad.entities.DisplayFragment
-import com.example.samplenotepad.entities.MEMO_Id
+import com.example.samplenotepad.entities.*
+import com.example.samplenotepad.usecases.getMemoContentsOperationActor
 import com.example.samplenotepad.usecases.getShowMassageForSavedLiveData
 import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveData
-import com.example.samplenotepad.viewModels.SearchViewModel
+import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.views.main.MainActivity
 import kotlinx.android.synthetic.main.fragment_display_memo.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 
 
-class DisplayMemoFragment : Fragment() {
+class MemoDisplayFragment : Fragment() {
 
     companion object {
-        private var instance: DisplayMemoFragment? = null
+        private var instance: MemoDisplayFragment? = null
 
-        internal fun getInstanceOrCreateNew(): DisplayMemoFragment =
-            instance ?: DisplayMemoFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): MemoDisplayFragment =
+            instance ?: MemoDisplayFragment().apply { if (instance == null) instance = this }
 
         internal fun clearDisplayMemoFragmentInstanceFlag() {
             instance = null
@@ -37,7 +37,7 @@ class DisplayMemoFragment : Fragment() {
     }
 
 
-    private lateinit var searchViewModel: SearchViewModel
+    private lateinit var displayViewModel: MemoDisplayViewModel
     private var isShowingPopupWindow = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -48,18 +48,34 @@ class DisplayMemoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchViewModel = MemoSearchActivity.searchViewModel
+        displayViewModel = MemoDisplayActivity.displayViewModel
 
+        //メモの保存時にSnackbarを表示
         lifecycleScope.launch {
             getShowMassageForSavedLiveData().observe(viewLifecycleOwner, Observer { typeOfFragment ->
-                if (typeOfFragment is DisplayFragment)
-                    this@DisplayMemoFragment.showSnackbarForSavedMassageAtDisplayMemo()
+                if (typeOfFragment is DisplayFragment
+                    && reminderStatesImgBtn.visibility != View.INVISIBLE) {
+                    this@MemoDisplayFragment.showSnackbarForSavedMassageAtDisplayMemo()
+                }
 
                 resetValueOfShowMassageForSavedLiveData()
             })
         }
 
-        if (searchViewModel.getMemoInfo().reminderDateTime.isNotEmpty())
+        val memoInfo = displayViewModel.getMemoInfo()
+        val memoContents = Json.parse(MemoRowInfo.serializer().list, memoInfo.contents)
+
+        //
+        displayViewModel.apply {
+            viewModelScope.launch {
+                getMemoContentsOperationActor().send(SetMemoContents(memoContents))
+                updateSavePointOfMemoContents()
+            }
+        }
+
+
+        //リマインダーがあればボタンを表示
+        if (displayViewModel.getMemoInfo().reminderDateTime.isNotEmpty())
             reminderStatesImgBtn.visibility = View.VISIBLE
 
         //reminderの設定表示用のPopupWindowの設定
@@ -68,7 +84,7 @@ class DisplayMemoFragment : Fragment() {
 
             isShowingPopupWindow = when (isShowingPopupWindow) {
                 true -> {
-                    popupWindow.dismissReminderStatesPopupWindow(this)
+                    popupWindow.dismissReminderStatesPopupWindow()
                     false
                 }
                 false -> {
@@ -79,17 +95,17 @@ class DisplayMemoFragment : Fragment() {
         }
 
         displayToEditImgBtn.setOnClickListener {
-            when (searchViewModel.isSavedAlready()) {
+            when (displayViewModel.isSavedMemoContents()) {
                 true -> moveToMainActivityForEditMemo()
                 false -> {
-                    searchViewModel.updateMemoInfoDatabase()
+                    displayViewModel.saveMemoInfo()
                     moveToMainActivityForEditMemo()
                 }
             }
         }
 
         displaySaveImgBtn.setOnClickListener {
-            searchViewModel.updateMemoInfoDatabase()
+            displayViewModel.saveMemoInfo()
         }
     }
 
@@ -97,7 +113,7 @@ class DisplayMemoFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         initMemoContentsOperation(
-            this, searchViewModel, displayMemoContentsContainerLayout, DisplayExistMemo
+            this, displayViewModel, displayMemoContentsContainerLayout, DisplayExistMemo
         )
     }
 
@@ -118,7 +134,7 @@ class DisplayMemoFragment : Fragment() {
     private fun moveToMainActivityForEditMemo() {
         val intent = Intent(this.requireActivity(), MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(MEMO_Id, searchViewModel.getMemoInfo().rowid)
+            putExtra(ConstValForMemo.MEMO_Id, displayViewModel.getMemoInfo().rowid)
         }
 
         viewModelStore.clear()

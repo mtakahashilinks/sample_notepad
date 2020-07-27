@@ -100,27 +100,7 @@ class MemoOptionFragment : Fragment() {
         editViewModel.getMemoInfo().initValueOfAllViewWithMemoInfo()
 
         //カテゴリー選択リストの処理
-        categoryDropDownImgBtn.setOnClickListener {
-            ListPopupWindow(requireContext()).apply {
-                val data = editViewModel.getCategoryList().drop(1).toTypedArray()
-                val adapter = ArrayAdapter(requireContext(), R.layout.memo_category_list_row, data)
-
-                setAdapter(adapter)
-                anchorView = categoryTextView
-                isModal = true
-                width = ListPopupWindow.WRAP_CONTENT
-                height = 450
-
-                setOnItemClickListener { parent, view, position, id ->
-                    val selectedItem = adapter.getItem(position)
-                    categoryTextView.setText(selectedItem)
-                    dismiss()
-                }
-
-                show()
-            }
-        }
-
+        editViewModel.getCategoryList().drop(1).toTypedArray().setCategoryImageButton()
 
         //リマインダー登録スイッチのON・Off切り替えによる処理
         reminderOnOffSwitchView.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -208,6 +188,42 @@ class MemoOptionFragment : Fragment() {
         }
     }
 
+    private fun Array<String>.setCategoryImageButton() {
+        when (this.isEmpty()) {
+            true -> categoryDropDownImgBtn.visibility = View.GONE
+            false -> {
+                categoryDropDownImgBtn.apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener { this@setCategoryImageButton.showCategoryPopUpList() }
+                }
+            }
+        }
+    }
+
+    private fun Array<String>.showCategoryPopUpList() {
+        ListPopupWindow(requireContext()).apply {
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.memo_option_category_list_row,
+                this@showCategoryPopUpList
+            )
+
+            setAdapter(adapter)
+            anchorView = categoryTextView
+            isModal = true
+            width = ListPopupWindow.WRAP_CONTENT
+            height = 450
+
+            setOnItemClickListener { parent, view, position, id ->
+                val selectedItem = adapter.getItem(position)
+                categoryTextView.setText(selectedItem)
+                dismiss()
+            }
+
+            show()
+        }
+    }
+
     private fun List<String>.setReminderTargetDateTimeWithMemoInfo() {
         reminderDateView.text = this[0].replace('-', '/')
         reminderTimeView.text = this[1].replace(":", " : ")
@@ -218,9 +234,11 @@ class MemoOptionFragment : Fragment() {
         postAlarmSpinnerView.setSelection(this.postAlarm)
     }
 
-    internal fun resetValueOfAllView() {
+
+    internal fun resetValueOfAllView(viewModel: MemoEditViewModel) {
         titleBodyTextView.setText("")
         categoryTextView.setText("")
+        viewModel.getCategoryList().drop(1).toTypedArray().setCategoryImageButton()
         setCurrentValueInReminderDateTimeView()
         preAlarmSpinnerView.setSelection(0)
         postAlarmSpinnerView.setSelection(0)

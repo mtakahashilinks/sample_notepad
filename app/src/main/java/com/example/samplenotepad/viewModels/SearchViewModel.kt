@@ -4,27 +4,23 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadDataSetForMemoListIO
-import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.data.renameCategoryIO
 import com.example.samplenotepad.entities.*
-import com.example.samplenotepad.usecases.createMemoContentsExecuteActor
-import com.example.samplenotepad.usecases.getMemoContentsExecuteActor
-import com.example.samplenotepad.usecases.saveMemo
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.runBlocking
+import com.example.samplenotepad.views.SampleMemoApplication
+import com.example.samplenotepad.usecases.createMemoContentsOperationActor
 
 
 class SearchViewModel : ViewModel() {
 
     private var dataSetForCategoryList = listOf<DataSetForCategoryList>()
-    private var dataSetForMemoList = listOf<DataSetForMemoList>()
-    private var memoInfo = MemoInfo(-1, "", "", "", "", "", "", -1, -1)
-    private var savePointOfMemoContents = listOf<MemoRowInfo>()
+    private var dataSetForMemoList = listOf<MemoInfo>()
+    private var selectedCategoryOnSearchTop = ""
     private var searchWord = ""
 
-    internal fun getDataSetForCategoryList() = dataSetForCategoryList
+    internal fun createMemoContentsOperationActor() = createMemoContentsOperationActor(this)
 
-    internal fun createNewMemoContentsExecuteActor() = createMemoContentsExecuteActor(this)
+
+    internal fun getDataSetForCategoryList() = dataSetForCategoryList
 
     internal fun updateDataSetForCategoryList(
         newValue: (List<DataSetForCategoryList>) -> List<DataSetForCategoryList>
@@ -42,7 +38,7 @@ class SearchViewModel : ViewModel() {
         renameCategoryIO(oldCategoryName, newCategoryName)
     }
 
-    internal fun loadDataSetForCategoryListAndSetInViewModel() {
+    internal fun loadAndSetDataSetForCategoryList() {
         updateDataSetForCategoryList { loadDataSetForCategoryListIO() }
     }
 
@@ -50,57 +46,52 @@ class SearchViewModel : ViewModel() {
     internal fun getDataSetForMemoList() = dataSetForMemoList
 
     internal fun updateDataSetForMemoList(
-        newValue: (List<DataSetForMemoList>) -> List<DataSetForMemoList>
+        newValue: (List<MemoInfo>) -> List<MemoInfo>
     ) = newValue(dataSetForMemoList).apply { dataSetForMemoList = this }
 
-    internal fun loadDataSetForMemoListAndSetInViewModel(category: String) {
-        loadDataSetForMemoListIO(category).apply { dataSetForMemoList = this }
+    internal fun loadAndSetDataSetForMemoList() =
+        loadDataSetForMemoListIO(selectedCategoryOnSearchTop).apply {
+            dataSetForMemoList = this
+        }
+
+
+    internal fun getSelectedCategory() = selectedCategoryOnSearchTop
+
+    internal fun setSelectedCategory(value: String) {
+        selectedCategoryOnSearchTop = value
     }
 
 
-    internal fun getMemoInfo() = memoInfo
-
-    internal fun updateMemoInfo( newValue: (MemoInfo) -> MemoInfo) =
-        newValue(memoInfo).apply { memoInfo = this }
-
-    internal fun loadMemoInfoAndUpdateInViewModel(memoInfoId: Long): MemoInfo =
-        loadMemoInfoIO(memoInfoId).apply { memoInfo = this }
-
-    internal fun updateMemoInfoDatabase() = saveMemo(DisplayExistMemo)
-
-    internal fun updateSavePointOfMemoContents() = runBlocking {
-        val memoContentsDefer = CompletableDeferred<MemoContents>()
-        getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
-
-        savePointOfMemoContents = memoContentsDefer.await()
-    }
-
-    internal fun isSavedAlready(): Boolean = runBlocking {
-        val memoContentsDefer = CompletableDeferred<MemoContents>()
-        getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
-
-        return@runBlocking memoContentsDefer.await() == savePointOfMemoContents
-    }
-
-
-    internal fun searchMemoAndSetValueInViewModel(searchWord: String): List<DataSetForMemoList> {
+    internal fun searchByWordThenUpdateDataSetForMemoList(searchWord: String): List<MemoInfo> {
         this.searchWord = searchWord
 
-        return updateDataSetForMemoList { searchMemoByASearchWordIO(searchWord) }
+        return updateDataSetForMemoList { searchMemoByWordIO(searchWord) }
     }
 
-    internal fun searchMemoAndSetValueInViewModel(
+    internal fun searchByWordAndCategoryThenUpdateDataSetForMemoList(
         category: String,
         searchWord: String
-    ): List<DataSetForMemoList> {
+    ): List<MemoInfo> {
         this.searchWord = searchWord
 
-        return updateDataSetForMemoList { searchMemoByASearchWordAndCategoryIO(category, searchWord) }
+        return updateDataSetForMemoList { searchMemoByWordAndCategoryIO(category, searchWord) }
+    }
+
+    internal fun searchByWordWithReminderThenUpdateDataSetForMemoList(
+        searchWord: String
+    ): List<MemoInfo> {
+        this.searchWord = searchWord
+
+        return updateDataSetForMemoList { searchMemoByWordWithReminderIO(searchWord) }
     }
 
     internal fun getSearchWord() = searchWord
 
+    internal fun MemoInfo.cancelAllAlarm(): MemoInfo {
+        this.cancelAllAlarmIO(SampleMemoApplication.instance.baseContext)
 
+        return this
+    }
 
     override fun onCleared() {
         super.onCleared()

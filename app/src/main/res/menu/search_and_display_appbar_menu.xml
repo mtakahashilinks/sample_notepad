@@ -6,4 +6,10 @@
         android:id="@+id/createNewMemo"
         android:title="@string/appbar_menu_create_new_memo"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/toReminderList"
+        android:title="@string/appbar_menu_to_reminder_list"
+        app:showAsAction="never" />
+
 </menu>

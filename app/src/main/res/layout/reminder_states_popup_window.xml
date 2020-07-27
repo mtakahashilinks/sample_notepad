@@ -10,7 +10,7 @@
         android:id="@+id/targetDateTimeLabelTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="@string/target_date_label"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintStart_toStartOf="parent"
@@ -85,5 +85,18 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/deleteBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:elevation="8dp"
+        android:minWidth="48dip"
+        android:text="@string/popup_window_reminder_states_delete"
+        app:layout_constraintBottom_toBottomOf="@+id/reminderStatesTitleTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/reminderStatesTitleTextView"
+        app:layout_constraintTop_toTopOf="@+id/reminderStatesTitleTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -42,10 +42,8 @@ internal fun SearchViewModel.getItemTouchHelperCallback(
                         R.string.dialog_search_top_swipe_delete_others_positive_button,
                         R.string.dialog_search_top_swipe_delete_others_negative_button,
                         { dialog, id ->
-                            adapter.apply {
-                                deleteItemFromDataSetForCategoryList(viewHolder.adapterPosition)
-                                adapter.notifyDataSetChanged()
-                            }
+                            deleteItemFromDataSetForCategoryList(viewHolder.adapterPosition)
+                            adapter.notifyDataSetChanged()
                         },
                         { dialog, id -> adapter.notifyDataSetChanged() }
                     ).show(
@@ -60,10 +58,8 @@ internal fun SearchViewModel.getItemTouchHelperCallback(
                         R.string.dialog_search_top_swipe_delete_positive_button,
                         R.string.dialog_search_top_swipe_delete_negative_button,
                         { dialog, id ->
-                            adapter.apply {
-                                deleteItemFromDataSetForCategoryList(viewHolder.adapterPosition)
-                                notifyDataSetChanged()
-                            }
+                            deleteItemFromDataSetForCategoryList(viewHolder.adapterPosition)
+                            adapter.notifyDataSetChanged()
                         },
                         { dialog, id -> adapter.notifyDataSetChanged() }
                     ).show(
@@ -75,7 +71,7 @@ internal fun SearchViewModel.getItemTouchHelperCallback(
         }
 
 
-        fun SearchTopListAdapter.deleteItemFromDataSetForCategoryList(adapterPosition: Int) {
+        fun deleteItemFromDataSetForCategoryList(adapterPosition: Int) {
             val targetCategory = getDataSetForCategoryList()[adapterPosition].name
 
             deleteMemoByCategoryIO(targetCategory)

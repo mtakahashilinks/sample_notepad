@@ -2,7 +2,6 @@ package com.example.samplenotepad.data
 
 import androidx.room.*
 import com.example.samplenotepad.entities.DataSetForCategoryList
-import com.example.samplenotepad.entities.DataSetForMemoList
 import com.example.samplenotepad.entities.MemoInfo
 
 
@@ -22,14 +21,14 @@ interface MemoInfoDao {
         FROM memoInfoTable
         WHERE memoId == :id
     """)
-    suspend fun deleteByIdDao(id: Long)
+    suspend fun deleteMemoInfoByIdDao(id: Long)
 
     @Query("""
         DELETE
         FROM memoInfoTable
         WHERE category == :category
     """)
-    suspend fun deleteByCategoryDao(category: String)
+    suspend fun deleteMemoInfoByCategoryDao(category: String)
 
     @Query("""
         UPDATE memoInfoTable
@@ -53,6 +52,13 @@ interface MemoInfoDao {
     suspend fun getMemoInfoByIdDao(id: Long): MemoInfo
 
     @Query("""
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE category == :category
+        """)
+    suspend fun getMemoInfoListByCategoryDao(category: String): List<MemoInfo>
+
+    @Query("""
         SELECT category
         FROM MemoInfoTable
         GROUP BY category
@@ -69,30 +75,46 @@ interface MemoInfoDao {
     suspend fun getDataSetForCategoryListDao(): List<DataSetForCategoryList>
 
 
-    @Query("""
-        SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime
+    @Query(
+        """
+        SELECT *
         FROM MemoInfoTable
         WHERE category LIKE :category
         ORDER BY createdDateTime DESC
-        """)
-    suspend fun getDataSetForMemoListDao(category: String): List<DataSetForMemoList>
+        """
+    )
+    suspend fun getDataSetForMemoListDao(category: String): List<MemoInfo>
 
-    @Query("""
-        SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime 
+    @Query(
+        """
+        SELECT * 
         FROM memoInfoTable 
-        WHERE title LIKE :word OR category LIKE :word OR contentsText LIKE :word
+        WHERE title LIKE :word OR category LIKE :word OR contentsForSearchByWord LIKE :word
         ORDER BY createdDateTime DESC
-        """)
-    suspend fun searchMemoByASearchWordDao(word: String): List<DataSetForMemoList>
+        """
+    )
+    suspend fun searchMemoByWordDao(word: String): List<MemoInfo>
 
-    @Query("""
-        SELECT memoId, createdDateTime, title, category, contentsText, reminderDateTime 
+    @Query(
+        """
+        SELECT * 
         FROM memoInfoTable 
-        WHERE category LIKE :category AND (title LIKE :word OR contentsText LIKE :word)
+        WHERE category LIKE :category AND (title LIKE :word OR contentsForSearchByWord LIKE :word)
         ORDER BY createdDateTime DESC
-        """)
-    suspend fun searchMemoByASearchWordAndCategoryDao(
+        """
+    )
+    suspend fun searchMemoByWordAndCategoryDao(
         category: String,
         word: String
-    ): List<DataSetForMemoList>
+    ): List<MemoInfo>
+
+    @Query(
+        """
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE reminderDateTime != "" AND (title LIKE :word OR category LIKE :word OR contentsForSearchByWord LIKE :word)
+        ORDER BY createdDateTime DESC
+        """
+    )
+    suspend fun searchMemoByWordWithReminderDao(word: String): List<MemoInfo>
 }

@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         editViewModel = ViewModelProvider(this).get(MemoEditViewModel::class.java)
         optionViewModel = ViewModelProvider(this).get(MemoOptionViewModel::class.java)
 
-        val existMemoId = intent.getLongExtra(MEMO_Id, -1L)
+        val existMemoId = intent.getLongExtra(ConstValForMemo.MEMO_Id, -1L)
 
         editViewModel.createNewMemoContentsExecuteActor()
 
@@ -108,10 +108,9 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.createNewMemo -> {
-                when (editViewModel.isSavedAlready()) {
+                when (editViewModel.isSavedMemoContents()) {
                     true -> {
-                        editViewModel.resetEditStatesForCreateNewMemo()
-                        resetOptionStatesForCreateNewMemo()
+                        editViewModel.resetViewsAndStatesForCreateNewMemo()
                         true
                     }
                     false -> {
@@ -121,7 +120,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             R.id.toSearchTop -> {
-                when (editViewModel.isSavedAlready()) {
+                when (editViewModel.isSavedMemoContents()) {
                     true -> {
                         moveToMemoSearchActivity()
                         true
@@ -139,7 +138,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         when (memoPager.currentItem) {
             0 -> {
-                when (editViewModel.isSavedAlready()) {
+                when (editViewModel.isSavedMemoContents()) {
                     true -> {
                         viewModelStore.clear()
                         finish()
@@ -162,12 +161,6 @@ class MainActivity : AppCompatActivity() {
         viewModelStore.clear()
         finish()
     }
-
-    private fun resetOptionStatesForCreateNewMemo() {
-        if (MemoOptionFragment.isInstance())
-            MemoOptionFragment.getInstanceOrCreateNew().resetValueOfAllView()
-    }
-
 
     private fun showAlertDialogToSearchTop() {
         MemoAlertDialog(
@@ -211,12 +204,10 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_reboot_and_create_new_memo_negative_button,
             { dialog, id ->
                 saveMemo(CreateNewMemo)
-                editViewModel.resetEditStatesForCreateNewMemo()
-                resetOptionStatesForCreateNewMemo()
+                editViewModel.resetViewsAndStatesForCreateNewMemo()
             },
             { dialog, id ->
-                editViewModel.resetEditStatesForCreateNewMemo()
-                resetOptionStatesForCreateNewMemo()
+                editViewModel.resetViewsAndStatesForCreateNewMemo()
             }
         ).show(supportFragmentManager, "reboot_and_create_new_memo_dialog")
     }

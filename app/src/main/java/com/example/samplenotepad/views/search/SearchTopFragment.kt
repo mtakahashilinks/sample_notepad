@@ -1,7 +1,6 @@
 package com.example.samplenotepad.views.search
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,7 @@ import com.example.samplenotepad.R
 import com.example.samplenotepad.usecases.searchTopListRecyclerView.SearchTopListAdapter
 import com.example.samplenotepad.usecases.searchTopListRecyclerView.getItemTouchHelperCallback
 import com.example.samplenotepad.viewModels.SearchViewModel
-import kotlinx.android.synthetic.main.search_top_fragment.*
+import kotlinx.android.synthetic.main.fragment_search_top.*
 import kotlinx.coroutines.runBlocking
 
 
@@ -36,7 +35,7 @@ class SearchTopFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.search_top_fragment, container, false)
+        return inflater.inflate(R.layout.fragment_search_top, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = runBlocking<Unit> {
@@ -44,13 +43,15 @@ class SearchTopFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
+        searchViewModel.loadAndSetDataSetForCategoryList()
+
         //SearchViewの設定
         memoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
             android.widget.SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchMemoAndSetValueInViewModel(query)
+                    searchViewModel.searchByWordThenUpdateDataSetForMemoList(query)
                     moveToSearchResult()
                     true
                 }
@@ -94,13 +95,11 @@ class SearchTopFragment : Fragment() {
 
 
     internal fun moveToSearchInACategory(selectedCategory: String) {
-        searchViewModel.loadDataSetForMemoListAndSetInViewModel(selectedCategory)
-
-        Log.d("場所:SearchTopFragment", "selectedCategoryをセット category=$selectedCategory viewModel=$searchViewModel")
+        searchViewModel.setSelectedCategory(selectedCategory)
 
         requireActivity().supportFragmentManager.beginTransaction()
             .addToBackStack(null)
-            .replace(R.id.searchContainer, SearchInACategoryFragment.getInstanceOrCreateNew())
+            .replace(R.id.searchContainer, SearchInCategoryFragment.getInstanceOrCreateNew())
             .commit()
     }
 

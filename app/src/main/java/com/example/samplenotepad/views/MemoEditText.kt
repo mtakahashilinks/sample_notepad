@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.firstMemoEditText
-import com.example.samplenotepad.usecases.getMemoContentsExecuteActor
+import com.example.samplenotepad.usecases.getMemoContentsOperationActor
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
@@ -38,7 +38,7 @@ class MemoEditText(
 
                     viewModel.viewModelScope.launch {
                         val memoContentsDefer = CompletableDeferred<MemoContents>()
-                        getMemoContentsExecuteActor().send(GetMemoContents(memoContentsDefer))
+                        getMemoContentsOperationActor().send(GetMemoContents(memoContentsDefer))
 
                         val memoContents = memoContentsDefer.await()
                         val memoRowInfo =

@@ -11,17 +11,17 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.clearReminderValuesInMemoInfoIO
-import com.example.samplenotepad.data.confirmIfAlarmExist
+import com.example.samplenotepad.data.isAlarmExist
 import com.example.samplenotepad.entities.*
-import com.example.samplenotepad.views.reminder.ReminderActivity
+import com.example.samplenotepad.views.search.MemoSearchActivity
 
 class ReminderNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val requestCodeForAlarm = intent.getIntExtra(REQUEST_CODE_FOR_ALARM, -1)
-        val memoTitle = intent.getStringExtra(MEMO_TITLE_FOR_ALARM)
+        val requestCodeForAlarm = intent.getIntExtra(ConstValForAlarm.REQUEST_CODE, -1)
+        val memoTitle = intent.getStringExtra(ConstValForAlarm.MEMO_TITLE)
             ?: context.resources.getString(R.string.memo_title_default_value)
-        val alarmPosition = intent.getIntExtra(ALARM_POSITION, -1)
+        val alarmPosition = intent.getIntExtra(ConstValForAlarm.ALARM_POSITION, -1)
         val alarmType = requestCodeForAlarm % 10
         val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -32,26 +32,33 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
             val channelName = context.resources.getString(R.string.channel_name)
             val descriptionText = context.resources.getString(R.string.channel_description)
             val importance = NotificationManager.IMPORTANCE_HIGH
-            val mChannel = NotificationChannel(CHANNEL_ID, channelName, importance).apply {
+            val mChannel = NotificationChannel(ConstValForAlarm.CHANNEL_ID, channelName, importance).apply {
                 description = descriptionText
             }
 
             notificationManager.createNotificationChannel(mChannel)
         }
 
-        buildNotification(context, requestCodeForAlarm, memoTitle, alarmType, alarmPosition)
+        buildNotification(
+            context,
+            requestCodeForAlarm / 10,
+            requestCodeForAlarm,
+            memoTitle,
+            alarmType,
+            alarmPosition
+        )
 
         //通知が全て終わったらデータベースのMemoInfoのReminder関係の値を初期地に戻す
         when (alarmType) {
-            TARGET_DATE_TIME ->  {
+            ConstValForAlarm.TARGET_DATE_TIME ->  {
                 val intMemoInfoId = requestCodeForAlarm / 10
-                val requestCodeForPostAlarm = intMemoInfoId * 10 + POST_ALARM
+                val requestCodeForPostAlarm = intMemoInfoId * 10 + ConstValForAlarm.POST_ALARM
 
                 //postAlarmがセットされていれば発火しない
-                if (requestCodeForPostAlarm.confirmIfAlarmExist(context) == null)
+                if (requestCodeForPostAlarm.isAlarmExist(context) == null)
                     intMemoInfoId.toLong().clearReminderValuesInMemoInfoIO()
             }
-            POST_ALARM ->
+            ConstValForAlarm.POST_ALARM ->
                 (requestCodeForAlarm / 10).toLong().clearReminderValuesInMemoInfoIO()
         }
     }
@@ -59,23 +66,25 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
 
     private fun buildNotification(
         context: Context,
+        memoId: Int,
         notificationId: Int,
         notifyText: String,
         alarmType: Int,
         alarmPosition: Int
     ) {
-        val notifyIntent = Intent(context, ReminderActivity::class.java).apply {
+        val notifyIntent = Intent(context, MemoSearchActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(ConstValForMemo.MEMO_Id, memoId.toLong())
         }
         val notifyPendingIntent = PendingIntent.getActivity(
             context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         //SDKのVersionが25以下の場合はチャンネルIDは無視される
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID).apply {
+        val builder = NotificationCompat.Builder(context, ConstValForAlarm.CHANNEL_ID).apply {
             val notifyTitle = when (alarmType) {
-                TARGET_DATE_TIME -> context.resources.getString(R.string.notification_title_target)
-                PRE_ALARM -> context.resources.getString(
+                ConstValForAlarm.TARGET_DATE_TIME -> context.resources.getString(R.string.notification_title_target)
+                ConstValForAlarm.PRE_ALARM -> context.resources.getString(
                     R.string.notification_title_pre_post,
                     context.resources.getString(R.string.reminder_pre_alarm_label),
                     context.getTitleForPreAlarm(alarmPosition))
@@ -97,18 +106,18 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
     }
 
     private fun Context.getTitleForPreAlarm(position: Int): String = when (position) {
-        PRE_POST_ALARM_5M -> this.resources.getString(R.string.pre_alarm_5m)
-        PRE_POST_ALARM_10M -> this.resources.getString(R.string.pre_alarm_10m)
-        PRE_POST_ALARM_30M -> this.resources.getString(R.string.pre_alarm_30m)
-        PRE_POST_ALARM_1H -> this.resources.getString(R.string.pre_alarm_1h)
+        ConstValForAlarm.PRE_POST_ALARM_5M -> this.resources.getString(R.string.pre_alarm_5m)
+        ConstValForAlarm.PRE_POST_ALARM_10M -> this.resources.getString(R.string.pre_alarm_10m)
+        ConstValForAlarm.PRE_POST_ALARM_30M -> this.resources.getString(R.string.pre_alarm_30m)
+        ConstValForAlarm.PRE_POST_ALARM_1H -> this.resources.getString(R.string.pre_alarm_1h)
         else -> this.resources.getString(R.string.pre_alarm_24h)
     }
 
     private fun Context.getTitleForPostAlarm(position: Int): String = when (position) {
-        PRE_POST_ALARM_5M -> this.resources.getString(R.string.post_alarm_5m)
-        PRE_POST_ALARM_10M -> this.resources.getString(R.string.post_alarm_10m)
-        PRE_POST_ALARM_30M -> this.resources.getString(R.string.post_alarm_30m)
-        PRE_POST_ALARM_1H -> this.resources.getString(R.string.post_alarm_1h)
+        ConstValForAlarm.PRE_POST_ALARM_5M -> this.resources.getString(R.string.post_alarm_5m)
+        ConstValForAlarm.PRE_POST_ALARM_10M -> this.resources.getString(R.string.post_alarm_10m)
+        ConstValForAlarm.PRE_POST_ALARM_30M -> this.resources.getString(R.string.post_alarm_30m)
+        ConstValForAlarm.PRE_POST_ALARM_1H -> this.resources.getString(R.string.post_alarm_1h)
         else -> this.resources.getString(R.string.post_alarm_24h)
     }
 }

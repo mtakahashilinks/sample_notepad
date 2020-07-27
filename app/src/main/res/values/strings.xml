@@ -1,11 +1,15 @@
 <resources>
     <string name="app_name">Sample Notepad</string>
+
+    <!-- OptionMenu -->
+    <string name="appbar_menu_create_new_memo">新規メモの作成</string>
+    <string name="appbar_menu_to_search_top">メモ検索へ</string>
+    <string name="appbar_menu_to_reminder_list">リマインダーリスト</string>
+
     <!-- MemoEditFragment -->
     <string name="appbar_title_for_edit_fragment">Sample Notepad - メモ作成</string>
     <string name="tab_title_for_edit_fragment">メモ本文</string>
     <string name="tab_title_for_option_fragment">オプション設定</string>
-    <string name="appbar_menu_create_new_memo">新規メモの作成</string>
-    <string name="appbar_menu_to_search_top">メモ検索へ</string>
     <string name="memo_title_default_value">(no title)</string>
     <string name="memo_category_default_value">no category</string>
     <string name="template_add_error_max_amount">テンプレートは最大5個までです</string>
@@ -86,21 +90,22 @@
     <string name="dialog_search_top_swipe_delete_negative_button">キャンセル</string>
     <string name="search_view_hint_search_top">メモの検索</string>
 
-    <!-- SearchInACategoryFragment -->
-    <string name="appbar_title_search_each_memo">Sample Notepad - メモ検索</string>
-    <string name="search_each_memo_category_name_text">カテゴリー：「%1s」</string>
-    <string name="search_each_memo_title_label_text">タイトル：</string>
-    <string name="search_each_memo_body_label_text">本文：</string>
-    <string name="dialog_search_each_memo_swipe_delete_title">このメモを削除します</string>
-    <string name="dialog_search_each_memo_swipe_delete_message">よろしいですか？</string>
-    <string name="dialog_search_each_memo_swipe_delete_positive_button">削除する</string>
-    <string name="dialog_search_each_memo_swipe_delete_negative_button">キャンセル</string>
+    <!-- SearchInCategoryFragment -->
+    <string name="appbar_title_search_in_category">Sample Notepad - メモ検索</string>
+    <string name="search_in_category_category_name_text">カテゴリー：「%1s」</string>
+    <string name="search_in_category_title_label_text">タイトル：</string>
+    <string name="search_in_category_body_label_text">本文：</string>
+    <string name="dialog_search_in_category_swipe_delete_title">このメモを削除します</string>
+    <string name="dialog_search_in_category_swipe_delete_message">よろしいですか？</string>
+    <string name="dialog_search_in_category_swipe_delete_positive_button">削除する</string>
+    <string name="dialog_search_in_category_swipe_delete_negative_button">キャンセル</string>
 
     <string name="contents_edit_btn_description">メモの編集</string>
 
     <!-- DisplayMemoFragment -->
     <string name="appbar_title_display_memo">Sample Notepad - メモの表示</string>
     <string name="popup_window_reminder_states_title">リマインダー設定</string>
+    <string name="popup_window_reminder_states_delete">削除</string>
     <string name="target_date_label">設定日時：</string>
     <string name="pre_alarm_label">事前通知：</string>
     <string name="post_alarm_label">事後通知：</string>
@@ -128,5 +133,8 @@
     <string name="notification_title_target">予定の時間になりました</string>
     <string name="notification_title_pre_post">[%1s] 予定の%2sです</string>
     <string name="notification_text">タイトル：%s</string>
+
+    <!-- SearchWithReminderFragment -->
+    <string name="appbar_title_search_with_reminder">Sample Notepad - Reminder List</string>
 
 </resources>

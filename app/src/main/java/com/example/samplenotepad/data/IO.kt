@@ -9,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.ReminderNotificationReceiver
+import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.viewModels.MemoEditViewModel
-import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.*
@@ -32,12 +32,30 @@ private fun MemoContents.createContentsText(): String {
     return builder.toString()
 }
 
-internal fun MemoInfo.cancelAlarmOnMemoInfoIO() {
+private fun RequestCode.cancelAlarm(context: Context) {
+    val application = SampleMemoApplication.instance
+    val pendingIntent = this.isAlarmExist(context)
 
+    if (pendingIntent != null) {
+        val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.cancel(pendingIntent)
+    }
+}
+
+internal fun MemoInfo.cancelAllAlarmIO(context: Context) {
+    if (this.reminderDateTime.isNotEmpty())
+        this.getRequestCodeForAlarm(ConstValForAlarm.TARGET_DATE_TIME).cancelAlarm(context)
+
+    if (this.preAlarm != 0)
+        this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM).cancelAlarm(context)
+
+    if (this.postAlarm != 0)
+        this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM).cancelAlarm(context)
 }
 
 //returnがnull以外ならAlarmはセットされている
-internal fun RequestCode.confirmIfAlarmExist(context: Context): PendingIntent? {
+internal fun RequestCode.isAlarmExist(context: Context): PendingIntent? {
     val intent = Intent(context, ReminderNotificationReceiver::class.java)
 
     return PendingIntent.getBroadcast(context, this, intent, PendingIntent.FLAG_NO_CREATE)
@@ -60,9 +78,9 @@ private fun Calendar.registerAlarm(
     val application = SampleMemoApplication.instance
     val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(application.baseContext, ReminderNotificationReceiver::class.java).apply {
-        putExtra(REQUEST_CODE_FOR_ALARM, requestCode)
-        putExtra(MEMO_TITLE_FOR_ALARM, memoTitle)
-        putExtra(ALARM_POSITION, alarmPosition)
+        putExtra(ConstValForAlarm.REQUEST_CODE, requestCode)
+        putExtra(ConstValForAlarm.MEMO_TITLE, memoTitle)
+        putExtra(ConstValForAlarm.ALARM_POSITION, alarmPosition)
     }
     val pendingIntent = PendingIntent.getBroadcast(application.baseContext, requestCode, intent, 0)
 
@@ -74,50 +92,68 @@ private fun Calendar.registerAlarm(
 
 //TargetDateTime,PreAlarm,PostAlarm、それぞれ値があればアラームをセットする
 private fun MemoInfo.setAlarm() {
-   if (this.reminderDateTime.isNotEmpty()) {
-       val calendarOfTargetDateTime = Calendar.getInstance().apply {
-           val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("ja","JP","JP"))
+    val context = SampleMemoApplication.instance.baseContext
+    val requestCodeForTargetDataTime = this.getRequestCodeForAlarm(ConstValForAlarm.TARGET_DATE_TIME)
+    val requestCodeForPreAlarm = this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM)
+    val requestCodeForPostAlarm = this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM)
 
-           formatter.parse(this@setAlarm.reminderDateTime)?.let { time = it }
+    when (this.reminderDateTime.isNotEmpty()) {
+       true -> {
+           val calendarOfTargetDateTime = Calendar.getInstance().apply {
+               val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("ja", "JP", "JP"))
+
+               formatter.parse(this@setAlarm.reminderDateTime)?.let { time = it }
+           }
+
+           //preAlarmがあればアラームをセット
+           when (this.preAlarm != 0) {
+               true -> {
+                   val preAlarmTime =
+                       (calendarOfTargetDateTime.clone() as Calendar).getPreAlarmTime(this.preAlarm)
+
+                   preAlarmTime.registerAlarm(requestCodeForPreAlarm, this.title, this.preAlarm)
+               }
+               false -> requestCodeForPreAlarm.cancelAlarm(context)
+           }
+
+           //postAlarmがあればアラームをセット
+           when (this.postAlarm != 0) {
+               true -> {
+                   val postAlarmTime =
+                       (calendarOfTargetDateTime.clone() as Calendar).getPostAlarmTime(this.postAlarm)
+
+                   postAlarmTime.registerAlarm(requestCodeForPostAlarm, this.title, this.postAlarm)
+               }
+               false -> requestCodeForPostAlarm.cancelAlarm(context)
+           }
+
+           //targetDateTimeのアラームをセット
+           calendarOfTargetDateTime.registerAlarm(requestCodeForTargetDataTime, this.title)
        }
-
-       //preAlarmがあればアラームをセット
-       if (this.preAlarm != 0) {
-           val preAlarmTime =
-               (calendarOfTargetDateTime.clone() as Calendar).getPreAlarmTime(this.preAlarm)
-
-           preAlarmTime.registerAlarm(this.getRequestCodeForAlarm(PRE_ALARM), this.title, this.preAlarm)
+       false -> {
+           requestCodeForTargetDataTime.cancelAlarm(context)
+           requestCodeForPreAlarm.cancelAlarm(context)
+           requestCodeForPostAlarm.cancelAlarm(context)
        }
-
-       //postAlarmがあればアラームをセット
-       if (this.postAlarm != 0) {
-           val postAlarmTime =
-               (calendarOfTargetDateTime.clone() as Calendar).getPostAlarmTime(this.postAlarm)
-
-           postAlarmTime.registerAlarm(this.getRequestCodeForAlarm(POST_ALARM), this.title, this.postAlarm)
-       }
-
-       //targetDateTimeのアラームをセット
-       calendarOfTargetDateTime.registerAlarm(this.getRequestCodeForAlarm(TARGET_DATE_TIME), this.title)
    }
 }
 
-private fun MemoInfo.getRequestCodeForAlarm(reminderType: Int): Int =
+internal fun MemoInfo.getRequestCodeForAlarm(reminderType: Int): Int =
     this.rowid.toInt() * 10 + reminderType
 
 private fun Calendar.getPreAlarmTime(position: Int): Calendar = when (position) {
-    PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1) }
-    PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, -10) }
-    PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, -30) }
-    PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, -1) }
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1) }
+    ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, -10) }
+    ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, -30) }
+    ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, -1) }
     else -> this.apply { add(Calendar.DATE, -1) }
 }
 
 private fun Calendar.getPostAlarmTime(position: Int) = when (position) {
-    PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 1) }
-    PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, 10) }
-    PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, 30) }
-    PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, 1) }
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 1) }
+    ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, 10) }
+    ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, 30) }
+    ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, 1) }
     else -> this.apply { add(Calendar.DATE, 1) }
 }
 
@@ -150,7 +186,7 @@ private fun MemoInfo.updateMemoInfoInViewModel(
     memoId: Long?
 ) = when (viewModel) {
         is MemoEditViewModel -> viewModel.updateMemoInfo { memoId?.let { this.copy(rowid = it) } ?: this }
-        is SearchViewModel -> viewModel.updateMemoInfo { this }
+        is MemoDisplayViewModel -> viewModel.updateMemoInfo { this }
         else -> null
     }
 
@@ -220,17 +256,17 @@ internal fun saveTemplateNameListIO(templateNameList: List<String>) = runBlockin
 
     launch(Dispatchers.IO) {
         SampleMemoApplication.instance.openFileOutput(
-            MEMO_TEMPLATE_NAME_LIST_FILE, Context.MODE_PRIVATE
+            ConstValForMemo.TEMPLATE_NAME_LIST_FILE, Context.MODE_PRIVATE
         ).use { it.write(stringData.toByteArray()) }
     }
 }
 
 internal fun loadTemplateNameListIO(): List<String> = runBlocking {
-    val file = SampleMemoApplication.instance.getFileStreamPath(MEMO_TEMPLATE_NAME_LIST_FILE)
+    val file = SampleMemoApplication.instance.getFileStreamPath(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
 
     withContext(Dispatchers.IO) {
         when (file.exists()) {
-            true -> SampleMemoApplication.instance.openFileInput(MEMO_TEMPLATE_NAME_LIST_FILE)
+            true -> SampleMemoApplication.instance.openFileInput(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
                 .bufferedReader().readLine().split(",")
             false -> listOf<String>()
         }
@@ -245,19 +281,19 @@ internal fun saveTemplateBodyIO(
 
     launch(Dispatchers.IO) {
         SampleMemoApplication.instance.openFileOutput(
-            MEMO_TEMPLATE_FILE + templateName, Context.MODE_PRIVATE
+            ConstValForMemo.TEMPLATE_FILE + templateName, Context.MODE_PRIVATE
         ).use { it.write(stringData.toByteArray()) }
     }
 }
 
 internal fun loadTemplateBodyIO(templateName: String): MemoContents = runBlocking {
-    val file = SampleMemoApplication.instance.getFileStreamPath(MEMO_TEMPLATE_FILE + templateName)
+    val file = SampleMemoApplication.instance.getFileStreamPath(ConstValForMemo.TEMPLATE_FILE + templateName)
 
     withContext(Dispatchers.IO) {
         when (file.exists()) {
             true -> Json.parse(
                 MemoRowInfo.serializer().list,
-                SampleMemoApplication.instance.openFileInput(MEMO_TEMPLATE_FILE + templateName)
+                SampleMemoApplication.instance.openFileInput(ConstValForMemo.TEMPLATE_FILE + templateName)
                     .bufferedReader().readLine())
             false -> throw(IllegalArgumentException("File does not exist for「$templateName」"))
         }
@@ -265,39 +301,50 @@ internal fun loadTemplateBodyIO(templateName: String): MemoContents = runBlockin
 }
 
 internal fun deleteTemplateIO(templateName: String) {
-    val file = SampleMemoApplication.instance.getFileStreamPath(MEMO_TEMPLATE_FILE + templateName)
+    val file = SampleMemoApplication.instance.getFileStreamPath(ConstValForMemo.TEMPLATE_FILE + templateName)
 
     file.delete()
 }
 
 internal fun renameTemplateIO(oldTemplateName: String, newTemplateName: String) {
     val application = SampleMemoApplication.instance
-    val from = File(application.filesDir, MEMO_TEMPLATE_FILE + oldTemplateName)
-    val to = File(application.filesDir, MEMO_TEMPLATE_FILE + newTemplateName)
+    val from = File(application.filesDir, ConstValForMemo.TEMPLATE_FILE + oldTemplateName)
+    val to = File(application.filesDir, ConstValForMemo.TEMPLATE_FILE + newTemplateName)
 
     from.renameTo(to)
 }
 
-internal fun searchMemoByASearchWordIO(
+internal fun searchMemoByWordIO(
     word: String
-): List<DataSetForMemoList> = runBlocking {
+): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
         val searchWord = "%$word%"
 
-        memoInfoDao.searchMemoByASearchWordDao(searchWord)
+        memoInfoDao.searchMemoByWordDao(searchWord)
     }
 }
 
-internal fun searchMemoByASearchWordAndCategoryIO(
+internal fun searchMemoByWordAndCategoryIO(
     category: String,
     word: String
-): List<DataSetForMemoList> = runBlocking {
+): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
         val searchWord = "%$word%"
 
-        memoInfoDao.searchMemoByASearchWordAndCategoryDao(category, searchWord)
+        memoInfoDao.searchMemoByWordAndCategoryDao(category, searchWord)
+    }
+}
+
+internal fun searchMemoByWordWithReminderIO(
+    word: String
+): List<MemoInfo> = runBlocking {
+    withContext(Dispatchers.IO) {
+        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+        val searchWord = "%$word%"
+
+        memoInfoDao.searchMemoByWordWithReminderDao(searchWord)
     }
 }
 
@@ -360,7 +407,7 @@ internal fun loadDataSetForCategoryListIO(): List<DataSetForCategoryList> = runB
 
 internal fun loadDataSetForMemoListIO(
     category: String
-): List<DataSetForMemoList> = runBlocking {
+): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
@@ -378,11 +425,20 @@ internal fun renameCategoryIO(oldCategoryName: String, newCategoryName: String) 
 internal fun deleteMemoByCategoryIO(category: String) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
-    launch(Dispatchers.IO) { memoInfoDao.deleteByCategoryDao(category) }
+    launch(Dispatchers.IO) {
+        memoInfoDao.apply {
+            //削除する前にMemoInfoにAlarmがセットされていたらcancelする
+            getMemoInfoListByCategoryDao(category).onEach { memoInfo ->
+                memoInfo.cancelAllAlarmIO(SampleMemoApplication.instance.baseContext)
+            }
+
+            deleteMemoInfoByCategoryDao(category)
+        }
+    }
 }
 
 internal fun deleteMemoByIdIO(id: Long) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
-    launch(Dispatchers.IO) { memoInfoDao.deleteByIdDao(id) }
+    launch(Dispatchers.IO) { memoInfoDao.deleteMemoInfoByIdDao(id) }
 }
