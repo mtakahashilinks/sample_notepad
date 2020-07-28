@@ -34,6 +34,7 @@ class SearchResultFragment : Fragment() {
 
 
     private lateinit var searchViewModel: SearchViewModel
+    private lateinit var listAdapter: SearchMemoListAdapter
     private lateinit var searchWord: String
 
 
@@ -52,7 +53,7 @@ class SearchResultFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
-        val searchMemoListAdapter =
+        listAdapter =
             SearchMemoListAdapter(searchViewModel) { memoInfoId -> moveToMemoDisplay(memoInfoId) }
 
         //SearchViewの設定
@@ -61,8 +62,8 @@ class SearchResultFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchByWordThenUpdateDataSetForMemoList(query)
-                    searchMemoListAdapter.searchAgainAndShowResult()
+                    searchViewModel.loadAndSetDataSetForMemoListFindBySearchWord(query)
+                    listAdapter.searchAgainAndShowResult()
                     true
                 }
             }
@@ -76,12 +77,14 @@ class SearchResultFragment : Fragment() {
         searchResultRecyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@SearchResultFragment.context)
-            adapter = searchMemoListAdapter
-            addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
+            adapter = listAdapter
+            addItemDecoration(
+                DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
+            )
 
             //スワイプでリストItemを削除する為の処理
             ItemTouchHelper(
-                searchMemoListAdapter.getCallbackForItemTouchHelper(
+                listAdapter.getCallbackForItemTouchHelper(
                     this@SearchResultFragment.requireActivity(),
                     searchViewModel
                 )
@@ -89,10 +92,6 @@ class SearchResultFragment : Fragment() {
         }
 
         setSearchWordText()
-
-        //検索ワードに合うものが無い場合に表示する
-        if (searchViewModel.getDataSetForMemoList().isEmpty())
-            noMatchResultTextView.visibility = View.VISIBLE
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -104,6 +103,18 @@ class SearchResultFragment : Fragment() {
 
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_result)
+
+        //DataSetForMemoListを更新してからlistAdapterも更新
+        val dataSetForMemoList = searchViewModel.loadAndSetDataSetForMemoListFindBySearchWord(
+            searchViewModel.getSearchWord()
+        )
+        listAdapter.notifyDataSetChanged()
+
+        //検索ワードに合うものが無い場合に表示する
+        when (dataSetForMemoList.isEmpty()) {
+            true -> noMatchResultTextView.visibility = View.VISIBLE
+            false -> noMatchResultTextView.visibility = View.GONE
+        }
     }
 
     override fun onDestroy() {

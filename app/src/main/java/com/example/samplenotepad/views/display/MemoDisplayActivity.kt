@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.ViewModelProvider
@@ -48,6 +49,7 @@ class MemoDisplayActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("場所:MemoDisplayActivity", "onDestroyが呼ばれた activity=$this")
 
         viewModelStore.clear()
 

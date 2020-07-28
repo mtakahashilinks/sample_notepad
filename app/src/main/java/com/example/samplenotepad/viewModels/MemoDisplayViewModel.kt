@@ -1,5 +1,6 @@
 package com.example.samplenotepad.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.cancelAllAlarmIO
 import com.example.samplenotepad.data.loadMemoInfoIO
@@ -52,5 +53,6 @@ class MemoDisplayViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
+        Log.d("場所:MemoDisplayViewModel", "onClearedが呼ばれた viewModel=$this")
     }
 }

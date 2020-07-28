@@ -3,18 +3,19 @@ package com.example.samplenotepad.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.*
-import com.example.samplenotepad.data.loadDataSetForMemoListIO
+import com.example.samplenotepad.data.loadDataSetForMemoListByCategoryIO
 import com.example.samplenotepad.data.renameCategoryIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.usecases.createMemoContentsOperationActor
+import com.example.samplenotepad.views.search.SearchTopFragment
 
 
 class SearchViewModel : ViewModel() {
 
     private var dataSetForCategoryList = listOf<DataSetForCategoryList>()
     private var dataSetForMemoList = listOf<MemoInfo>()
-    private var selectedCategoryOnSearchTop = ""
+    private var selectedCategoryInSearchTop = ""
     private var searchWord = ""
 
     internal fun createMemoContentsOperationActor() = createMemoContentsOperationActor(this)
@@ -49,43 +50,46 @@ class SearchViewModel : ViewModel() {
         newValue: (List<MemoInfo>) -> List<MemoInfo>
     ) = newValue(dataSetForMemoList).apply { dataSetForMemoList = this }
 
-    internal fun loadAndSetDataSetForMemoList() =
-        loadDataSetForMemoListIO(selectedCategoryOnSearchTop).apply {
+    internal fun loadAndSetDataSetForMemoListFindByCategory() =
+        loadDataSetForMemoListByCategoryIO(selectedCategoryInSearchTop).apply {
             dataSetForMemoList = this
         }
 
 
-    internal fun getSelectedCategory() = selectedCategoryOnSearchTop
-
-    internal fun setSelectedCategory(value: String) {
-        selectedCategoryOnSearchTop = value
-    }
-
-
-    internal fun searchByWordThenUpdateDataSetForMemoList(searchWord: String): List<MemoInfo> {
-        this.searchWord = searchWord
-
-        return updateDataSetForMemoList { searchMemoByWordIO(searchWord) }
-    }
-
-    internal fun searchByWordAndCategoryThenUpdateDataSetForMemoList(
-        category: String,
+    internal fun loadAndSetDataSetForMemoListFindBySearchWord(
         searchWord: String
     ): List<MemoInfo> {
         this.searchWord = searchWord
 
-        return updateDataSetForMemoList { searchMemoByWordAndCategoryIO(category, searchWord) }
+        return updateDataSetForMemoList { loadMemoInfoListBySearchWordIO(searchWord) }
     }
 
-    internal fun searchByWordWithReminderThenUpdateDataSetForMemoList(
+    internal fun loadAndSetDataSetForMemoListFindBySearchWordAndCategory(
         searchWord: String
     ): List<MemoInfo> {
         this.searchWord = searchWord
 
-        return updateDataSetForMemoList { searchMemoByWordWithReminderIO(searchWord) }
+        return updateDataSetForMemoList {
+            loadMemoInfoListBySearchWordAndCategoryIO(selectedCategoryInSearchTop, searchWord)
+        }
+    }
+
+    internal fun loadAndSetDataSetForMemoListFindByWithReminder(): List<MemoInfo> =
+        updateDataSetForMemoList { loadMemoInfoListWithReminderIO() }
+
+    internal fun loadAndSetDataSetForMemoListFindBySearchWordWithReminder(
+        searchWord: String
+    ): List<MemoInfo> {
+        this.searchWord = searchWord
+
+        return updateDataSetForMemoList { loadMemoInfoListBySearchWordWithReminderIO(searchWord) }
     }
 
     internal fun getSearchWord() = searchWord
+
+    internal fun SearchTopFragment.setSelectedCategory(category: String) {
+        selectedCategoryInSearchTop = category
+    }
 
     internal fun MemoInfo.cancelAllAlarm(): MemoInfo {
         this.cancelAllAlarmIO(SampleMemoApplication.instance.baseContext)

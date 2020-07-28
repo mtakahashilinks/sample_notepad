@@ -51,28 +51,15 @@ class SearchInCategoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchViewModel = MemoSearchActivity.searchViewModel
+        searchViewModel = MemoSearchActivity.searchViewModel.apply {
+            category = getSearchWord()
+        }
 
         listAdapter =
             SearchMemoListAdapter(searchViewModel) { memoInfoId -> moveToMemoDisplay(memoInfoId) }
 
-
-        searchViewModel.loadAndSetDataSetForMemoList().apply {
-            //選択されたカテゴリーをViewのTextにセット
-            when (this.isEmpty()) {
-                true -> {
-                    category = getString(R.string.memo_category_default_value)
-                    searchWordTextView.text =
-                        getString(R.string.search_in_category_category_name_text, category)
-                }
-                false -> {
-                    category = searchViewModel.getSelectedCategory()
-                    searchWordTextView.text =
-                        getString(R.string.search_in_category_category_name_text, category)
-                }
-            }
-
-        }
+        //選択されたカテゴリーをViewのTextにセット
+        searchWordTextView.text = category
 
         //SearchViewの設定
         memoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
@@ -80,7 +67,8 @@ class SearchInCategoryFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchByWordAndCategoryThenUpdateDataSetForMemoList(category, query)
+                    searchViewModel
+                        .loadAndSetDataSetForMemoListFindBySearchWordAndCategory(query)
                     moveToSearchResult()
                     true
                 }
@@ -96,7 +84,9 @@ class SearchInCategoryFragment : Fragment() {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@SearchInCategoryFragment.context)
             adapter = listAdapter
-            addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
+            addItemDecoration(
+                DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
+            )
 
             //スワイプでリストItemを削除する為の処理
             ItemTouchHelper(listAdapter.getCallbackForItemTouchHelper(
@@ -116,7 +106,8 @@ class SearchInCategoryFragment : Fragment() {
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_in_category)
 
-        searchViewModel.loadAndSetDataSetForMemoList()
+        //DataSetForMemoListを更新してからlistAdapterも更新
+        searchViewModel.loadAndSetDataSetForMemoListFindByCategory()
         listAdapter.notifyDataSetChanged()
     }
 

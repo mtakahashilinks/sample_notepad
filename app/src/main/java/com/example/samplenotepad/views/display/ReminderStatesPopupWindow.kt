@@ -1,11 +1,13 @@
 package com.example.samplenotepad.views.display
 
+import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
+import com.example.samplenotepad.views.MemoAlertDialog
 import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.android.synthetic.main.reminder_states_popup_window.view.*
 
@@ -34,17 +36,7 @@ private fun createPopupWindow(): PopupWindow {
 
         //deleteBtnの押下でリマインダーを削除する
         this.deleteBtn.setOnClickListener {
-            displayFragment.reminderStatesImgBtn.visibility = View.INVISIBLE
-
-            MemoDisplayActivity.displayViewModel.apply {
-                updateMemoInfo { memoInfo ->
-                    memoInfo.copy(reminderDateTime = "", preAlarm = 0, postAlarm = 0)
-                }.cancelAllAlarm()
-
-                saveMemoInfo()
-            }
-
-            popupWindow?.dismissReminderStatesPopupWindow()
+            displayFragment.showAlertDialogForDeleteReminder()
         }
     }
 
@@ -100,4 +92,27 @@ private fun TextView.setTargetDateTimeTextView(targetDateTimeList: List<String>)
     val targetDateTime = "$targetDate  $targetTime"
 
     this.text = targetDateTime
+}
+
+private fun MemoDisplayFragment.showAlertDialogForDeleteReminder() {
+    MemoAlertDialog(
+        R.string.dialog_delete_reminder_title,
+        R.string.dialog_delete_reminder_message,
+        R.string.dialog_delete_reminder_positive_button,
+        R.string.dialog_delete_reminder_negative_button,
+        { dialog, id ->
+            this.reminderStatesImgBtn.visibility = View.INVISIBLE
+
+            MemoDisplayActivity.displayViewModel.apply {
+                updateMemoInfo { memoInfo ->
+                    memoInfo.copy(reminderDateTime = "", preAlarm = 0, postAlarm = 0)
+                }.cancelAllAlarm()
+
+                saveMemoInfo()
+            }
+
+            popupWindow?.dismissReminderStatesPopupWindow()
+        },
+        { dialog, id -> dialog.dismiss() }
+    ).show(this.requireActivity().supportFragmentManager, "delete_reminder_dialog")
 }

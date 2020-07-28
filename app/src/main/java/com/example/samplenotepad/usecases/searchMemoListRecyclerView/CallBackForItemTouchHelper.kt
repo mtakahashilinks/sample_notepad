@@ -68,9 +68,12 @@ internal fun SearchMemoListAdapter.getCallbackForItemTouchHelper(
                     dataSetList.filterNot { memoInfo -> memoInfo.rowid == targetMemoId }
                 }
 
-                //SearchTopの表示のためにDataSetForCategoryListを更新
+                //DataSetForCategoryListを更新。
+                //DataSetForCategoryListはSearchTopの表示のためだけにあるので現在ではここで更新する
+                //必要はなく今後のアプリ変更のために念のためここで更新している。
                 updateDataSetForCategoryList { dataSetList ->
-                    val targetIndex = dataSetList.indexOf(dataSetList.find { it.name == targetCategory })
+                    val targetIndex =
+                        dataSetList.indexOf(dataSetList.find { it.name == targetCategory })
                     val targetListSize = dataSetList[targetIndex].listSize
                     val updatedTarget = dataSetList[targetIndex].copy(listSize = targetListSize - 1)
 

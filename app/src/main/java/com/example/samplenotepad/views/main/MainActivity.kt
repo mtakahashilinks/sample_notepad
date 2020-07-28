@@ -3,6 +3,7 @@ package com.example.samplenotepad.views.main
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
@@ -88,6 +89,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("場所:MainActivity", "onDestroyが呼ばれた activity=$this")
 
         viewModelStore.clear()
 

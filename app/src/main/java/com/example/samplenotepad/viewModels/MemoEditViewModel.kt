@@ -1,6 +1,7 @@
 package com.example.samplenotepad.viewModels
 
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.*
@@ -126,6 +127,6 @@ class MemoEditViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        //ここに終了処理を書く
+        Log.d("場所:MemoEditViewModel", "onClearedが呼ばれた viewModel=$this")
     }
 }

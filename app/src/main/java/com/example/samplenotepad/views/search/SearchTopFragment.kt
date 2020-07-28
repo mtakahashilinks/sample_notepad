@@ -31,6 +31,8 @@ class SearchTopFragment : Fragment() {
 
 
     private lateinit var searchViewModel: SearchViewModel
+    private lateinit var listAdapter: SearchTopListAdapter
+
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -43,7 +45,7 @@ class SearchTopFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
-        searchViewModel.loadAndSetDataSetForCategoryList()
+        listAdapter = SearchTopListAdapter(this@SearchTopFragment, searchViewModel)
 
         //SearchViewの設定
         memoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
@@ -51,7 +53,7 @@ class SearchTopFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchByWordThenUpdateDataSetForMemoList(query)
+                    searchViewModel.loadAndSetDataSetForMemoListFindBySearchWord(query)
                     moveToSearchResult()
                     true
                 }
@@ -64,15 +66,14 @@ class SearchTopFragment : Fragment() {
 
         //RecyclerViewの設定
         searchTopRecyclerView.apply {
-            val mAdapter = SearchTopListAdapter(this@SearchTopFragment, searchViewModel)
-
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@SearchTopFragment.context)
-            adapter = mAdapter
+            adapter = listAdapter
 
             //スワイプでリストItemを削除する為の処理
-            ItemTouchHelper(searchViewModel.getItemTouchHelperCallback(this@SearchTopFragment, mAdapter))
-                .attachToRecyclerView(this)
+            ItemTouchHelper(
+                searchViewModel.getItemTouchHelperCallback(this@SearchTopFragment, listAdapter)
+            ).attachToRecyclerView(this)
         }
     }
 
@@ -85,6 +86,10 @@ class SearchTopFragment : Fragment() {
 
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_top)
+
+        //DataSetForCategoryListを更新してからlistAdapterも更新
+        searchViewModel.loadAndSetDataSetForCategoryList()
+        listAdapter.notifyDataSetChanged()
     }
 
     override fun onDestroy() {
@@ -95,7 +100,7 @@ class SearchTopFragment : Fragment() {
 
 
     internal fun moveToSearchInACategory(selectedCategory: String) {
-        searchViewModel.setSelectedCategory(selectedCategory)
+        searchViewModel.apply { this@SearchTopFragment.setSelectedCategory(selectedCategory) }
 
         requireActivity().supportFragmentManager.beginTransaction()
             .addToBackStack(null)

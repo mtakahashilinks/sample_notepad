@@ -314,37 +314,45 @@ internal fun renameTemplateIO(oldTemplateName: String, newTemplateName: String) 
     from.renameTo(to)
 }
 
-internal fun searchMemoByWordIO(
-    word: String
+internal fun loadMemoInfoListBySearchWordIO(
+    searchWord: String
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val searchWord = "%$word%"
+        val searchWord = "%$searchWord%"
 
-        memoInfoDao.searchMemoByWordDao(searchWord)
+        memoInfoDao.getMemoInfoListBySearchWordDao(searchWord)
     }
 }
 
-internal fun searchMemoByWordAndCategoryIO(
+internal fun loadMemoInfoListBySearchWordAndCategoryIO(
     category: String,
-    word: String
+    searchWord: String
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val searchWord = "%$word%"
+        val searchWord = "%$searchWord%"
 
-        memoInfoDao.searchMemoByWordAndCategoryDao(category, searchWord)
+        memoInfoDao.getMemoInfoListBySearchWordAndCategoryDao(category, searchWord)
     }
 }
 
-internal fun searchMemoByWordWithReminderIO(
-    word: String
+internal fun loadMemoInfoListWithReminderIO(): List<MemoInfo> = runBlocking {
+    withContext(Dispatchers.IO) {
+        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+
+        memoInfoDao.getMemoInfoListWithReminderDao()
+    }
+}
+
+internal fun loadMemoInfoListBySearchWordWithReminderIO(
+    searchWord: String
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val searchWord = "%$word%"
+        val searchWord = "%$searchWord%"
 
-        memoInfoDao.searchMemoByWordWithReminderDao(searchWord)
+        memoInfoDao.getMemoInfoListBySearchWordWithReminderDao(searchWord)
     }
 }
 
@@ -405,13 +413,13 @@ internal fun loadDataSetForCategoryListIO(): List<DataSetForCategoryList> = runB
     }
 }
 
-internal fun loadDataSetForMemoListIO(
+internal fun loadDataSetForMemoListByCategoryIO(
     category: String
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
-        memoInfoDao.getDataSetForMemoListDao(category)
+        memoInfoDao.getMemoInfoListByCategoryDao(category)
     }
 }
 

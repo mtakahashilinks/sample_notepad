@@ -54,9 +54,54 @@ interface MemoInfoDao {
     @Query("""
         SELECT * 
         FROM memoInfoTable 
-        WHERE category == :category
+        WHERE category == :category 
+        ORDER BY createdDateTime DESC
         """)
     suspend fun getMemoInfoListByCategoryDao(category: String): List<MemoInfo>
+
+
+    @Query(
+        """
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord
+        ORDER BY createdDateTime DESC
+        """
+    )
+    suspend fun getMemoInfoListBySearchWordDao(searchWord: String): List<MemoInfo>
+
+    @Query(
+        """
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE category LIKE :category AND (title LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        ORDER BY createdDateTime DESC
+        """
+    )
+    suspend fun getMemoInfoListBySearchWordAndCategoryDao(
+        category: String,
+        searchWord: String
+    ): List<MemoInfo>
+
+    @Query(
+        """
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE reminderDateTime != ""
+        ORDER BY createdDateTime DESC
+        """
+    )
+    suspend fun getMemoInfoListWithReminderDao(): List<MemoInfo>
+
+    @Query(
+        """
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE reminderDateTime != "" AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        ORDER BY createdDateTime DESC
+        """
+    )
+    suspend fun getMemoInfoListBySearchWordWithReminderDao(searchWord: String): List<MemoInfo>
 
     @Query("""
         SELECT category
@@ -73,48 +118,4 @@ interface MemoInfoDao {
         ORDER BY category ASC
         """)
     suspend fun getDataSetForCategoryListDao(): List<DataSetForCategoryList>
-
-
-    @Query(
-        """
-        SELECT *
-        FROM MemoInfoTable
-        WHERE category LIKE :category
-        ORDER BY createdDateTime DESC
-        """
-    )
-    suspend fun getDataSetForMemoListDao(category: String): List<MemoInfo>
-
-    @Query(
-        """
-        SELECT * 
-        FROM memoInfoTable 
-        WHERE title LIKE :word OR category LIKE :word OR contentsForSearchByWord LIKE :word
-        ORDER BY createdDateTime DESC
-        """
-    )
-    suspend fun searchMemoByWordDao(word: String): List<MemoInfo>
-
-    @Query(
-        """
-        SELECT * 
-        FROM memoInfoTable 
-        WHERE category LIKE :category AND (title LIKE :word OR contentsForSearchByWord LIKE :word)
-        ORDER BY createdDateTime DESC
-        """
-    )
-    suspend fun searchMemoByWordAndCategoryDao(
-        category: String,
-        word: String
-    ): List<MemoInfo>
-
-    @Query(
-        """
-        SELECT * 
-        FROM memoInfoTable 
-        WHERE reminderDateTime != "" AND (title LIKE :word OR category LIKE :word OR contentsForSearchByWord LIKE :word)
-        ORDER BY createdDateTime DESC
-        """
-    )
-    suspend fun searchMemoByWordWithReminderDao(word: String): List<MemoInfo>
 }

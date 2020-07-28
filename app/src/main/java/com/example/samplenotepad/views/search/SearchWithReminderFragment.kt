@@ -33,6 +33,7 @@ class SearchWithReminderFragment : Fragment() {
 
 
     private lateinit var searchViewModel: SearchViewModel
+    private lateinit var listAdapter: SearchMemoListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +50,7 @@ class SearchWithReminderFragment : Fragment() {
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
-        val searchMemoListAdapter =
+        listAdapter =
             SearchMemoListAdapter(searchViewModel) { memoInfoId -> moveToMemoDisplay(memoInfoId) }
 
         //SearchViewの設定
@@ -58,7 +59,8 @@ class SearchWithReminderFragment : Fragment() {
             override fun onQueryTextSubmit(query: String?): Boolean = when (query == null) {
                 true -> false
                 false -> {
-                    searchViewModel.searchByWordWithReminderThenUpdateDataSetForMemoList(query)
+                    searchViewModel
+                        .loadAndSetDataSetForMemoListFindBySearchWordWithReminder(query)
                     moveToSearchResult()
                     true
                 }
@@ -73,14 +75,14 @@ class SearchWithReminderFragment : Fragment() {
         searchResultRecyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@SearchWithReminderFragment.context)
-            adapter = searchMemoListAdapter
+            adapter = listAdapter
             addItemDecoration(
                 DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL)
             )
 
             //スワイプでリストItemを削除する為の処理
             ItemTouchHelper(
-                searchMemoListAdapter.getCallbackForItemTouchHelper(
+                listAdapter.getCallbackForItemTouchHelper(
                     this@SearchWithReminderFragment.requireActivity(),
                     searchViewModel
                 )
@@ -89,10 +91,6 @@ class SearchWithReminderFragment : Fragment() {
 
         //必要ないのでtextViewを非表示にする
         searchWordTextView.visibility = View.GONE
-
-        //リマインダー付きMemoが無い場合に表示する
-        if (searchViewModel.getDataSetForMemoList().isEmpty())
-            noMatchResultTextView.visibility = View.VISIBLE
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -104,6 +102,16 @@ class SearchWithReminderFragment : Fragment() {
 
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_with_reminder)
+
+        //DataSetForMemoListを更新してからlistAdapterも更新
+        val dataSetForMemoList = searchViewModel.loadAndSetDataSetForMemoListFindByWithReminder()
+        listAdapter.notifyDataSetChanged()
+
+        //リマインダー付きMemoが無い場合に表示する
+        when (dataSetForMemoList.isEmpty()) {
+            true -> noMatchResultTextView.visibility = View.VISIBLE
+            false -> noMatchResultTextView.visibility = View.GONE
+        }
     }
 
     override fun onDestroy() {

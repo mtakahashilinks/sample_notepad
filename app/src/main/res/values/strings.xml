@@ -3,8 +3,10 @@
 
     <!-- OptionMenu -->
     <string name="appbar_menu_create_new_memo">新規メモの作成</string>
-    <string name="appbar_menu_to_search_top">メモ検索へ</string>
+    <string name="appbar_menu_to_search_top">メモ検索TOPへ</string>
     <string name="appbar_menu_to_reminder_list">リマインダーリスト</string>
+    <string name="appbar_menu_to_Search_by_calendar">カレンダー検索</string>
+    <string name="appbar_menu_finish_app">アプリを終了する</string>
 
     <!-- MemoEditFragment -->
     <string name="appbar_title_for_edit_fragment">Sample Notepad - メモ作成</string>
@@ -78,6 +80,13 @@
         <item>24時間後</item>
     </string-array>
 
+    <!-- SearchActivity -->
+    <string name="dialog_finish_app_title">アプリを終了します</string>
+    <string name="dialog_finish_app_message">よろしいですか？</string>
+    <string name="dialog_finish_app_positive_button">終了する</string>
+    <string name="dialog_finish_app_negative_button">キャンセル</string>
+
+
     <!-- SearchTopFragment -->
     <string name="appbar_title_search_top">Sample Notepad - メモ検索</string>
     <string name="dialog_search_top_swipe_delete_others_title">このカテゴリー内を空にします</string>
@@ -120,6 +129,11 @@
     <string name="post_alarm_30m">30分後</string>
     <string name="post_alarm_1h">1時間後</string>
     <string name="post_alarm_24h">24時間後</string>
+    <string name="dialog_delete_reminder_title">リマインダーを削除します</string>
+    <string name="dialog_delete_reminder_message">よろしいですか？</string>
+    <string name="dialog_delete_reminder_positive_button">削除する</string>
+    <string name="dialog_delete_reminder_negative_button">キャンセル</string>
+
 
     <!-- SearchResultFragment -->
     <string name="appbar_title_search_result">Sample Notepad - 検索結果</string>
@@ -136,5 +150,7 @@
 
     <!-- SearchWithReminderFragment -->
     <string name="appbar_title_search_with_reminder">Sample Notepad - Reminder List</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

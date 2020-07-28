@@ -26,8 +26,9 @@ class SearchMemoListAdapter(
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.search_memo_list_row, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(
+            R.layout.search_memo_list_row, parent, false
+        )
         val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
