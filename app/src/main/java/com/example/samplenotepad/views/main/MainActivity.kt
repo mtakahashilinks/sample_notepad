@@ -1,6 +1,5 @@
 package com.example.samplenotepad.views.main
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -17,11 +16,11 @@ import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
-import com.example.samplenotepad.views.search.MemoSearchActivity
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
 import com.example.samplenotepad.usecases.*
+import com.example.samplenotepad.views.moveToSearchActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -99,72 +98,95 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        if (memoPager.currentItem == 0) {
+            when (editViewModel.isSavedMemoContents()) {
+                true -> {
+                    viewModelStore.clear()
+                    finish()
+                    super.onBackPressed()
+                }
+                false -> showAlertDialogToCloseMainActivity()
+            }
+        }
+        else memoPager.currentItem = memoPager.currentItem - 1
+    }
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_menu, menu)
         return true
     }
 
     //オプションメニューのItemタップ時の処理
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.createNewMemo -> {
-                when (editViewModel.isSavedMemoContents()) {
-                    true -> {
-                        editViewModel.resetViewsAndStatesForCreateNewMemo()
-                        true
-                    }
-                    false -> {
-                        showAlertDialogToRebootAndCreateNewMemo()
-                        true
-                    }
-                }
-            }
-            R.id.toSearchTop -> {
-                when (editViewModel.isSavedMemoContents()) {
-                    true -> {
-                        moveToMemoSearchActivity()
-                        true
-                    }
-                    false -> {
-                        showAlertDialogToSearchTop()
-                        true
-                    }
-                }
-            }
+            R.id.createNewMemo -> createNewMemo()
+            R.id.toSearchTop -> moveToSearchTop()
+            R.id.toReminderList -> moveToReminderList()
+            R.id.toSearchByCalendar -> moveToSearchByCalendar()
+            R.id.finishApp -> showAlertDialogForFinishApp()
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onBackPressed() {
-        when (memoPager.currentItem) {
-            0 -> {
-                when (editViewModel.isSavedMemoContents()) {
-                    true -> {
-                        viewModelStore.clear()
-                        finish()
-                        super.onBackPressed()
-                    }
-                    false -> showAlertDialogToCloseMainActivity()
-                }
+
+    private fun createNewMemo() =
+        when (editViewModel.isSavedMemoContents()) {
+            true -> {
+                editViewModel.resetViewsAndStatesForCreateNewMemo()
+                true
             }
-            else -> memoPager.currentItem = memoPager.currentItem - 1
-        }
-    }
-
-
-    private fun moveToMemoSearchActivity() {
-        val intent = Intent(this, MemoSearchActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            false -> {
+                showAlertDialogToRebootAndCreateNewMemo()
+                true
+            }
         }
 
-        startActivity(intent)
-        viewModelStore.clear()
-        finish()
+    private fun moveToSearchTop() =
+        checkIfNeedToShowDialogForOptionMenu {
+            moveToSearchActivity(ConstValForSearch.SEARCH_TOP)
+        }
+
+    private fun moveToReminderList() =
+        checkIfNeedToShowDialogForOptionMenu {
+            moveToSearchActivity(ConstValForSearch.REMINDER_LIST)
+        }
+
+    private fun moveToSearchByCalendar() =
+        checkIfNeedToShowDialogForOptionMenu {
+            moveToSearchActivity(ConstValForSearch.SEARCH_BY_CALENDAR)
+        }
+
+
+    private fun checkIfNeedToShowDialogForOptionMenu(action: () -> Unit) =
+        when (editViewModel.isSavedMemoContents()) {
+            true -> {
+                action()
+                true
+            }
+            false -> {
+                showAlertDialogForOptionMenu{ action() }
+                true
+            }
+        }
+
+    private fun showAlertDialogForFinishApp(): Boolean {
+        MemoAlertDialog(
+            R.string.dialog_finish_app_title,
+            R.string.dialog_finish_app_message,
+            R.string.dialog_finish_app_positive_button,
+            R.string.dialog_finish_app_negative_button,
+            { dialog, id ->
+                finishAndRemoveTask()
+            },
+            { dialog, id -> dialog.dismiss() }
+        ).show(supportFragmentManager, "finish_app_dialog")
+
+        return true
     }
 
-    private fun showAlertDialogToSearchTop() {
+    private fun showAlertDialogForOptionMenu(function: () -> Unit) {
         MemoAlertDialog(
             R.string.dialog_close_edit_title,
             R.string.dialog_close_edit_message,
@@ -172,10 +194,10 @@ class MainActivity : AppCompatActivity() {
             R.string.dialog_close_edit_negative_button,
             { dialog, id ->
                 saveMemo(CreateNewMemo)
-                moveToMemoSearchActivity()
+                function()
             },
-            { dialog, id -> moveToMemoSearchActivity() }
-        ).show(supportFragmentManager, "main_to_search_dialog")
+            { dialog, id -> function() }
+        ).show(supportFragmentManager, "main_option_menu_dialog")
     }
 
     private fun showAlertDialogToCloseMainActivity() {

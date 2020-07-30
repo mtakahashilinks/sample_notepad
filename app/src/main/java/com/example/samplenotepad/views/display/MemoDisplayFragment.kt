@@ -1,6 +1,5 @@
 package com.example.samplenotepad.views.display
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -16,7 +15,7 @@ import com.example.samplenotepad.usecases.getShowMassageForSavedLiveData
 import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveData
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
-import com.example.samplenotepad.views.main.MainActivity
+import com.example.samplenotepad.views.moveToMainActivityForEditExistMemo
 import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.list
@@ -96,10 +95,14 @@ class MemoDisplayFragment : Fragment() {
 
         displayToEditImgBtn.setOnClickListener {
             when (displayViewModel.isSavedMemoContents()) {
-                true -> moveToMainActivityForEditMemo()
+                true -> requireActivity().moveToMainActivityForEditExistMemo(
+                    displayViewModel.getMemoInfo().rowid
+                )
                 false -> {
                     displayViewModel.saveMemoInfo()
-                    moveToMainActivityForEditMemo()
+                    requireActivity().moveToMainActivityForEditExistMemo(
+                        displayViewModel.getMemoInfo().rowid
+                    )
                 }
             }
         }
@@ -130,20 +133,6 @@ class MemoDisplayFragment : Fragment() {
         clearDisplayMemoFragmentInstanceFlag()
     }
 
-
-    private fun moveToMainActivityForEditMemo() {
-        val intent = Intent(this.requireActivity(), MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(ConstValForMemo.MEMO_Id, displayViewModel.getMemoInfo().rowid)
-        }
-
-        viewModelStore.clear()
-
-        requireActivity().apply {
-            startActivity(intent)
-            finish()
-        }
-    }
 
     internal fun setIsShowingPopupWindow(value: Boolean) {
         isShowingPopupWindow = value

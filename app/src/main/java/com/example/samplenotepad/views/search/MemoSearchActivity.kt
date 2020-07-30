@@ -1,19 +1,20 @@
 package com.example.samplenotepad.views.search
 
 import android.app.Activity
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.AppDatabase
+import com.example.samplenotepad.entities.ConstValForSearch
 import com.example.samplenotepad.viewModels.SearchViewModel
-import com.example.samplenotepad.views.MemoAlertDialog
-import com.example.samplenotepad.views.main.MainActivity
+import com.example.samplenotepad.views.*
+import com.example.samplenotepad.views.moveToMainActivity
+import com.example.samplenotepad.views.moveToReminderList
+import com.example.samplenotepad.views.moveToSearchTopAndCancelAllStacks
 import kotlinx.android.synthetic.main.activity_memo_search.*
 
 
@@ -35,14 +36,24 @@ class MemoSearchActivity : AppCompatActivity() {
             createMemoContentsOperationActor()
         }
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())
-            .commit()
-    }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
+        //searchIdによって遷移先のFragmentを選択
+        when (intent.getStringExtra(ConstValForSearch.SEARCH_ID)) {
+            ConstValForSearch.SEARCH_TOP ->
+                moveToSearchTopAndCancelAllStacks()
+            ConstValForSearch.REMINDER_LIST -> {
+                supportFragmentManager.apply {
+                    moveToSearchTopAndCancelAllStacks()
+                    moveToReminderList()
+                }
+            }
+            ConstValForSearch.SEARCH_BY_CALENDAR -> {
+                supportFragmentManager.apply {
+                    moveToSearchTopAndCancelAllStacks()
+                    moveToSearchByCalendar()
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -59,33 +70,36 @@ class MemoSearchActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         super.onBackPressed()
+        Log.d("場所:SearchActivity#onBackPressed", "tag=${supportFragmentManager.fragments.last().tag}")
     }
 
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.search_and_display_appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_menu, menu)
         return true
     }
 
     //オプションメニューのItemタップ時の処理
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d("場所:SearchActivity#onOptionsItemSelected", "tagOfFragment=${supportFragmentManager.fragments.last().tag}")
         return when (item.itemId) {
             R.id.createNewMemo -> {
                 moveToMainActivity()
                 true
             }
-            R.id.toSearchTop -> {
-                moveToSearchTopAndCancelAllStacks()
-                true
-            }
-            R.id.toReminderList -> {
-                moveToReminderList()
-                true
-            }
-            R.id.toSearchByCalendar -> {
-                true
-            }
+            R.id.toSearchTop ->
+                checkIfNeedAction(ConstValForSearch.SEARCH_TOP) {
+                    moveToSearchTopAndCancelAllStacks()
+                }
+            R.id.toReminderList ->
+                checkIfNeedAction(ConstValForSearch.REMINDER_LIST) {
+                    moveToReminderList()
+                }
+            R.id.toSearchByCalendar ->
+                checkIfNeedAction(ConstValForSearch.SEARCH_BY_CALENDAR) {
+                    moveToSearchByCalendar()
+                }
             R.id.finishApp -> {
                 showAlertDialogForFinishApp()
                 true
@@ -94,34 +108,14 @@ class MemoSearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun moveToMainActivity() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+    private fun checkIfNeedAction(tagOfFragment: String, action: () -> Unit) =
+        when (supportFragmentManager.fragments.last().tag) {
+            tagOfFragment -> false
+            else -> {
+                action()
+                true
+            }
         }
-
-        startActivity(intent)
-        viewModelStore.clear()
-        finish()
-    }
-
-    private fun moveToSearchTopAndCancelAllStacks() {
-        supportFragmentManager.apply {
-            popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-
-            beginTransaction()
-                .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())
-                .commit()
-        }
-    }
-
-    private fun moveToReminderList() {
-        supportFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .replace(
-                R.id.searchContainer, SearchWithReminderFragment.getInstanceOrCreateNew()
-            )
-            .commit()
-    }
 
     private fun showAlertDialogForFinishApp() {
         MemoAlertDialog(

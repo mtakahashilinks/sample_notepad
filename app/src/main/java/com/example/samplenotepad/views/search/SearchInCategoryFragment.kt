@@ -1,6 +1,5 @@
 package com.example.samplenotepad.views.search
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -11,11 +10,12 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.samplenotepad.R
-import com.example.samplenotepad.entities.ConstValForMemo
+import com.example.samplenotepad.entities.BySearchWordAndCategory
 import com.example.samplenotepad.usecases.searchMemoListRecyclerView.SearchMemoListAdapter
 import com.example.samplenotepad.usecases.searchMemoListRecyclerView.getCallbackForItemTouchHelper
 import com.example.samplenotepad.viewModels.SearchViewModel
-import com.example.samplenotepad.views.display.MemoDisplayActivity
+import com.example.samplenotepad.views.moveToDisplayActivity
+import com.example.samplenotepad.views.moveToSearchResult
 import kotlinx.android.synthetic.main.fragment_search_result.*
 
 
@@ -52,14 +52,16 @@ class SearchInCategoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         searchViewModel = MemoSearchActivity.searchViewModel.apply {
-            category = getSearchWord()
+            category = getSelectedCategory()
         }
 
-        listAdapter =
-            SearchMemoListAdapter(searchViewModel) { memoInfoId -> moveToMemoDisplay(memoInfoId) }
+        listAdapter = SearchMemoListAdapter(searchViewModel) {
+                memoInfoId -> requireActivity().moveToDisplayActivity(memoInfoId)
+        }
 
         //選択されたカテゴリーをViewのTextにセット
-        searchWordTextView.text = category
+        searchWordTextView.text =
+            getString(R.string.search_in_category_category_name_text, category)
 
         //SearchViewの設定
         memoSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener,
@@ -69,7 +71,7 @@ class SearchInCategoryFragment : Fragment() {
                 false -> {
                     searchViewModel
                         .loadAndSetDataSetForMemoListFindBySearchWordAndCategory(query)
-                    moveToSearchResult()
+                    requireActivity().moveToSearchResult(BySearchWordAndCategory)
                     true
                 }
             }
@@ -115,23 +117,5 @@ class SearchInCategoryFragment : Fragment() {
         super.onDestroy()
 
         clearSearchInACategoryFragmentInstanceFlag()
-    }
-
-
-    private fun moveToMemoDisplay(memoInfoId: Long) {
-        val displayActivity = requireActivity()
-        val intent = Intent(displayActivity, MemoDisplayActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(ConstValForMemo.MEMO_Id, memoInfoId)
-        }
-
-        startActivity(intent)
-    }
-
-    private fun moveToSearchResult() {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.searchContainer, SearchResultFragment.getInstanceOrCreateNew())
-            .commit()
     }
 }

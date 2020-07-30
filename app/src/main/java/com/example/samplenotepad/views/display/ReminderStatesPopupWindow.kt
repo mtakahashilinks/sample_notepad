@@ -1,6 +1,5 @@
 package com.example.samplenotepad.views.display
 
-import android.app.Activity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow

@@ -12,6 +12,11 @@ object EditFragment : TypeOfFragment()
 object DisplayFragment : TypeOfFragment()
 object NoneOfThem : TypeOfFragment()
 
+sealed class TypeOfSearch
+object BySearchWord : TypeOfSearch()
+object BySearchWordAndCategory : TypeOfSearch()
+object WithReminder : TypeOfSearch()
+
 //MemoのViewを作成するときに新規作成なのか再編集なのか編集なし(表示のみ)なのかを判断するため
 sealed class TypeOfBuildMemoViewOperation
 object CreateNewMemo : TypeOfBuildMemoViewOperation()

@@ -21,3 +21,10 @@ object ConstValForAlarm {
     const val PRE_POST_ALARM_1H = 4
     const val CHANNEL_ID = "com.example.samplenotepad_channel_id"
 }
+
+object ConstValForSearch {
+    const val SEARCH_ID = "search_id"
+    const val SEARCH_TOP = "search_top"
+    const val REMINDER_LIST = "reminder_list"
+    const val SEARCH_BY_CALENDAR = "search_by_calendar"
+}

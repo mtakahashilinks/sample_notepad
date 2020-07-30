@@ -9,9 +9,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.samplenotepad.R
+import com.example.samplenotepad.entities.BySearchWord
 import com.example.samplenotepad.usecases.searchTopListRecyclerView.SearchTopListAdapter
 import com.example.samplenotepad.usecases.searchTopListRecyclerView.getItemTouchHelperCallback
 import com.example.samplenotepad.viewModels.SearchViewModel
+import com.example.samplenotepad.views.moveToSearchResult
 import kotlinx.android.synthetic.main.fragment_search_top.*
 import kotlinx.coroutines.runBlocking
 
@@ -54,7 +56,7 @@ class SearchTopFragment : Fragment() {
                 true -> false
                 false -> {
                     searchViewModel.loadAndSetDataSetForMemoListFindBySearchWord(query)
-                    moveToSearchResult()
+                    requireActivity().moveToSearchResult(BySearchWord)
                     true
                 }
             }
@@ -96,22 +98,5 @@ class SearchTopFragment : Fragment() {
         super.onDestroy()
 
         clearSearchTopFragmentInstanceFlag()
-    }
-
-
-    internal fun moveToSearchInACategory(selectedCategory: String) {
-        searchViewModel.apply { this@SearchTopFragment.setSelectedCategory(selectedCategory) }
-
-        requireActivity().supportFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.searchContainer, SearchInCategoryFragment.getInstanceOrCreateNew())
-            .commit()
-    }
-
-    private fun moveToSearchResult() {
-        requireActivity().supportFragmentManager.beginTransaction()
-            .addToBackStack(null)
-            .replace(R.id.searchContainer, SearchResultFragment.getInstanceOrCreateNew())
-            .commit()
     }
 }

@@ -6,8 +6,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.samplenotepad.R
+import com.example.samplenotepad.views.main.MemoEditFragment
 
 class SearchByCalendarFragment : Fragment() {
+
+    companion object {
+        private var instance: SearchByCalendarFragment? = null
+
+        internal fun getInstanceOrCreateNew(): SearchByCalendarFragment =
+            instance ?: SearchByCalendarFragment().apply { if (instance == null) instance = this }
+
+        private fun resetFlagsInFragment() {
+            instance = null
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,5 +35,11 @@ class SearchByCalendarFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        resetFlagsInFragment()
     }
 }

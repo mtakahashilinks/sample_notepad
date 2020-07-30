@@ -57,20 +57,20 @@ class SearchViewModel : ViewModel() {
 
 
     internal fun loadAndSetDataSetForMemoListFindBySearchWord(
-        searchWord: String
+        mSearchWord: String
     ): List<MemoInfo> {
-        this.searchWord = searchWord
+        searchWord = mSearchWord
 
-        return updateDataSetForMemoList { loadMemoInfoListBySearchWordIO(searchWord) }
+        return updateDataSetForMemoList { loadMemoInfoListBySearchWordIO(mSearchWord) }
     }
 
     internal fun loadAndSetDataSetForMemoListFindBySearchWordAndCategory(
-        searchWord: String
+        mSearchWord: String
     ): List<MemoInfo> {
-        this.searchWord = searchWord
+        searchWord = mSearchWord
 
         return updateDataSetForMemoList {
-            loadMemoInfoListBySearchWordAndCategoryIO(selectedCategoryInSearchTop, searchWord)
+            loadMemoInfoListBySearchWordAndCategoryIO(selectedCategoryInSearchTop, mSearchWord)
         }
     }
 
@@ -78,16 +78,18 @@ class SearchViewModel : ViewModel() {
         updateDataSetForMemoList { loadMemoInfoListWithReminderIO() }
 
     internal fun loadAndSetDataSetForMemoListFindBySearchWordWithReminder(
-        searchWord: String
+        mSearchWord: String
     ): List<MemoInfo> {
-        this.searchWord = searchWord
+        searchWord = mSearchWord
 
-        return updateDataSetForMemoList { loadMemoInfoListBySearchWordWithReminderIO(searchWord) }
+        return updateDataSetForMemoList { loadMemoInfoListBySearchWordWithReminderIO(mSearchWord) }
     }
 
     internal fun getSearchWord() = searchWord
 
-    internal fun SearchTopFragment.setSelectedCategory(category: String) {
+    internal fun getSelectedCategory() = selectedCategoryInSearchTop
+
+    internal fun setSelectedCategory(category: String) {
         selectedCategoryInSearchTop = category
     }
 

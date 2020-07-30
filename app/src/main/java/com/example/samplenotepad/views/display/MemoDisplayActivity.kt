@@ -11,10 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.ConstValForMemo
+import com.example.samplenotepad.entities.ConstValForSearch
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
-import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.main.MainActivity
-import com.example.samplenotepad.views.search.MemoSearchActivity
+import com.example.samplenotepad.views.moveToSearchActivity
 import kotlinx.android.synthetic.main.activity_memo_display.*
 
 class MemoDisplayActivity : AppCompatActivity() {
@@ -67,7 +67,7 @@ class MemoDisplayActivity : AppCompatActivity() {
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.search_and_display_appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_menu, menu)
         return true
     }
 
@@ -83,6 +83,10 @@ class MemoDisplayActivity : AppCompatActivity() {
                 viewModelStore.clear()
                 finish()
 
+                true
+            }
+            R.id.toReminderList -> {
+                moveToSearchActivity(ConstValForSearch.REMINDER_LIST)
                 true
             }
             else -> super.onOptionsItemSelected(item)
