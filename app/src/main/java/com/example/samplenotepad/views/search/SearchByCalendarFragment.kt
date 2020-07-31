@@ -13,8 +13,14 @@ class SearchByCalendarFragment : Fragment() {
     companion object {
         private var instance: SearchByCalendarFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchByCalendarFragment =
-            instance ?: SearchByCalendarFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): SearchByCalendarFragment {
+            val mInstance = instance
+
+            return when (mInstance != null && !mInstance.isAdded) {
+                true -> mInstance
+                false -> SearchByCalendarFragment().apply { instance = this }
+            }
+        }
 
         private fun resetFlagsInFragment() {
             instance = null

@@ -8,7 +8,6 @@ import com.example.samplenotepad.data.renameCategoryIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.usecases.createMemoContentsOperationActor
-import com.example.samplenotepad.views.search.SearchTopFragment
 
 
 class SearchViewModel : ViewModel() {

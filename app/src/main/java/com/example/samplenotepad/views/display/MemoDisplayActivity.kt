@@ -13,8 +13,11 @@ import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.ConstValForMemo
 import com.example.samplenotepad.entities.ConstValForSearch
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
-import com.example.samplenotepad.views.main.MainActivity
+import com.example.samplenotepad.views.*
+import com.example.samplenotepad.views.moveToMainActivity
 import com.example.samplenotepad.views.moveToSearchActivity
+import com.example.samplenotepad.views.moveToSearchByCalendar
+import com.example.samplenotepad.views.moveToSearchTopAndCancelAllStacks
 import kotlinx.android.synthetic.main.activity_memo_display.*
 
 class MemoDisplayActivity : AppCompatActivity() {
@@ -47,11 +50,24 @@ class MemoDisplayActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("場所:DisplayActivity", "onNewIntentが呼ばれた")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Log.d("場所:DisplayActivity", "onRestoreInstanceStateが呼ばれた")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("場所:DisplayActivity", "onResumeが呼ばれた")
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("場所:MemoDisplayActivity", "onDestroyが呼ばれた activity=$this")
-
-        viewModelStore.clear()
+        Log.d("場所:DisplayActivity", "onDestroyが呼ばれた activity=$this")
 
         AppDatabase.apply {
             getDatabase(this@MemoDisplayActivity).close()
@@ -75,22 +91,39 @@ class MemoDisplayActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.createNewMemo -> {
-                val intent = Intent(this, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-
-                startActivity(intent)
-                viewModelStore.clear()
-                finish()
-
+                moveToMainActivity()
+                true
+            }
+            R.id.toSearchTop -> {
+                moveToSearchTopAndCancelAllStacks()
                 true
             }
             R.id.toReminderList -> {
                 moveToSearchActivity(ConstValForSearch.REMINDER_LIST)
                 true
             }
+            R.id.toSearchByCalendar -> {
+                moveToSearchByCalendar()
+                true
+            }
+            R.id.finishApp -> {
+                showAlertDialogForFinishApp()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+
+    private fun showAlertDialogForFinishApp() {
+        MemoAlertDialog(
+            R.string.dialog_finish_app_title,
+            R.string.dialog_finish_app_message,
+            R.string.dialog_finish_app_positive_button,
+            R.string.dialog_finish_app_negative_button,
+            { dialog, id -> finishAndRemoveTask() },
+            { dialog, id -> dialog.dismiss() }
+        ).show(supportFragmentManager, "finish_app_dialog")
     }
 }
 

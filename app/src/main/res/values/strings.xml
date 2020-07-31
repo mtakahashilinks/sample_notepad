@@ -21,6 +21,8 @@
     <string name="dialog_template_name_edit_text_hint">追加するテンプレート名を入力</string>
     <string name="dialog_memo_template_swipe_delete_title">このテンプレートを削除します</string>
     <string name="dialog_memo_template_swipe_delete_message">続行しますか？</string>
+    <string name="dialog_memo_template_swipe_delete_positive_button">YES</string>
+    <string name="dialog_memo_template_swipe_delete_negative_button">キャンセル</string>
     <string name="template_number_view_text">%s.</string>
     <string name="add_template_to_list">追加</string>
     <string name="dialog_rename_template_title">テンプテート名の変更</string>
@@ -46,20 +48,14 @@
     <string name="reminder_post_alarm_label">事後通知</string>
     <string name="add_format">フォーマットに追加</string>
     <string name="save_snackbar">保存しました</string>
-    <string name="dialog_close_edit_title">メモの編集を終了します</string>
-    <string name="dialog_close_edit_message">作業内容を保存しますか？</string>
-    <string name="dialog_close_edit_positive_button">保存する</string>
-    <string name="dialog_close_edit_negative_button">保存しない</string>
+    <string name="dialog_confirm_save_memo_title">作業内容が変更されています</string>
+    <string name="dialog_confirm_save_memo_message">作業内容を保存しますか？</string>
+    <string name="dialog_confirm_save_memo_positive_button">保存する</string>
+    <string name="dialog_confirm_save_memo_negative_button">保存しない</string>
     <string name="dialog_clear_all_title">作業内容をクリアします</string>
     <string name="dialog_clear_all_message">続行しますか？</string>
     <string name="dialog_clear_all_positive_button">YES</string>
     <string name="dialog_clear_all_negative_button">キャンセル</string>
-    <string name="dialog_reboot_and_create_new_memo_title">作業内容が変更されています</string>
-    <string name="dialog_reboot_and_create_new_memo_message">保存しますか？</string>
-    <string name="dialog_reboot_and_create_new_memo_positive_button">保存する</string>
-    <string name="dialog_reboot_and_create_new_memo_negative_button">保存しない</string>
-    <string name="dialog_memo_template_swipe_delete_positive_button">YES</string>
-    <string name="dialog_memo_template_swipe_delete_negative_button">キャンセル</string>
 
 
     <string-array name="reminder_pre_alarm_spinner">

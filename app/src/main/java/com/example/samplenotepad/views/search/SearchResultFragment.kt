@@ -26,9 +26,16 @@ class SearchResultFragment : Fragment() {
 
         internal fun getInstanceOrCreateNew(mSearchType: TypeOfSearch): SearchResultFragment {
             searchType = mSearchType
-            return instance
-                ?: SearchResultFragment().apply { if (instance == null) instance = this }
+
+            val mInstance = instance
+
+            return when (mInstance != null && !mInstance.isAdded) {
+                true -> mInstance
+                false -> SearchResultFragment().apply { instance = this }
+            }
         }
+
+
 
         private fun resetFlagsInFragment() {
             instance = null

@@ -1,5 +1,6 @@
 package com.example.samplenotepad.views.main
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -33,7 +34,9 @@ class MainActivity : AppCompatActivity() {
 
 
     //PagerにセットするAdapter
-    private inner class MemoPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
+    private inner class MemoPagerAdapter(
+        fragment: FragmentActivity
+    ) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 2
 
         override fun createFragment(position: Int): Fragment {
@@ -85,12 +88,24 @@ class MainActivity : AppCompatActivity() {
         }.attach()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("場所:MainActivity", "onNewIntentが呼ばれた")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Log.d("場所:MainActivity", "onRestoreInstanceStateが呼ばれた")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("場所:MainActivity", "onResumeが呼ばれた")
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d("場所:MainActivity", "onDestroyが呼ばれた activity=$this")
-
-        viewModelStore.clear()
 
         AppDatabase.apply {
             getDatabase(this@MainActivity).close()
@@ -99,17 +114,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (memoPager.currentItem == 0) {
-            when (editViewModel.isSavedMemoContents()) {
-                true -> {
-                    viewModelStore.clear()
-                    finish()
-                    super.onBackPressed()
-                }
-                false -> showAlertDialogToCloseMainActivity()
-            }
+        when (memoPager.currentItem == 0) {
+            true -> showAlertDialogForFinishApp()
+            false -> memoPager.currentItem = memoPager.currentItem - 1
         }
-        else memoPager.currentItem = memoPager.currentItem - 1
     }
 
     //オプションメニューを作成
@@ -138,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             false -> {
-                showAlertDialogToRebootAndCreateNewMemo()
+                showAlertDialogIfSaveMemo { editViewModel.resetViewsAndStatesForCreateNewMemo() }
                 true
             }
         }
@@ -166,7 +174,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             false -> {
-                showAlertDialogForOptionMenu{ action() }
+                showAlertDialogIfSaveMemo{ action() }
                 true
             }
         }
@@ -186,53 +194,17 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun showAlertDialogForOptionMenu(function: () -> Unit) {
+    private fun showAlertDialogIfSaveMemo(function: () -> Unit) {
         MemoAlertDialog(
-            R.string.dialog_close_edit_title,
-            R.string.dialog_close_edit_message,
-            R.string.dialog_close_edit_positive_button,
-            R.string.dialog_close_edit_negative_button,
+            R.string.dialog_confirm_save_memo_title,
+            R.string.dialog_confirm_save_memo_message,
+            R.string.dialog_confirm_save_memo_positive_button,
+            R.string.dialog_confirm_save_memo_negative_button,
             { dialog, id ->
                 saveMemo(CreateNewMemo)
                 function()
             },
             { dialog, id -> function() }
-        ).show(supportFragmentManager, "main_option_menu_dialog")
-    }
-
-    private fun showAlertDialogToCloseMainActivity() {
-        MemoAlertDialog(
-            R.string.dialog_close_edit_title,
-            R.string.dialog_close_edit_message,
-            R.string.dialog_close_edit_positive_button,
-            R.string.dialog_close_edit_negative_button,
-            { dialog, id ->
-                saveMemo(CreateNewMemo)
-                viewModelStore.clear()
-                finish()
-                super.onBackPressed()
-            },
-            { dialog, id ->
-                viewModelStore.clear()
-                finish()
-                super.onBackPressed()
-            }
-        ).show(supportFragmentManager, "main_close_dialog")
-    }
-
-    private fun showAlertDialogToRebootAndCreateNewMemo() {
-        MemoAlertDialog(
-            R.string.dialog_reboot_and_create_new_memo_title,
-            R.string.dialog_reboot_and_create_new_memo_message,
-            R.string.dialog_reboot_and_create_new_memo_positive_button,
-            R.string.dialog_reboot_and_create_new_memo_negative_button,
-            { dialog, id ->
-                saveMemo(CreateNewMemo)
-                editViewModel.resetViewsAndStatesForCreateNewMemo()
-            },
-            { dialog, id ->
-                editViewModel.resetViewsAndStatesForCreateNewMemo()
-            }
-        ).show(supportFragmentManager, "reboot_and_create_new_memo_dialog")
+        ).show(supportFragmentManager, "confirm_save_memo_dialog")
     }
 }

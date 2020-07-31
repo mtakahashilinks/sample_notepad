@@ -26,8 +26,14 @@ class MemoEditFragment : Fragment() {
     companion object {
         private var instance: MemoEditFragment? = null
 
-        internal fun getInstanceOrCreateNew(): MemoEditFragment =
-            instance ?: MemoEditFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): MemoEditFragment {
+            val mInstance = instance
+
+            return when (mInstance != null && !mInstance.isAdded) {
+                true -> mInstance
+                false -> MemoEditFragment().apply { instance = this }
+            }
+        }
 
         private fun clearEditFragmentInstanceFlag() {
             instance = null

@@ -1,6 +1,7 @@
 package com.example.samplenotepad.views.search
 
 import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -36,7 +37,6 @@ class MemoSearchActivity : AppCompatActivity() {
             createMemoContentsOperationActor()
         }
 
-
         //searchIdによって遷移先のFragmentを選択
         when (intent.getStringExtra(ConstValForSearch.SEARCH_ID)) {
             ConstValForSearch.SEARCH_TOP ->
@@ -56,11 +56,44 @@ class MemoSearchActivity : AppCompatActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("場所:SearchActivity", "onNewIntentが呼ばれた")
+
+        if (intent != null) {
+            //searchIdによって遷移先のFragmentを選択
+            when (intent.getStringExtra(ConstValForSearch.SEARCH_ID)) {
+                ConstValForSearch.SEARCH_TOP ->
+                    moveToSearchTopAndCancelAllStacks()
+                ConstValForSearch.REMINDER_LIST -> {
+                    supportFragmentManager.apply {
+                        moveToSearchTopAndCancelAllStacks()
+                        moveToReminderList()
+                    }
+                }
+                ConstValForSearch.SEARCH_BY_CALENDAR -> {
+                    supportFragmentManager.apply {
+                        moveToSearchTopAndCancelAllStacks()
+                        moveToSearchByCalendar()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Log.d("場所:SearchActivity", "onRestoreInstanceStateが呼ばれた")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("場所:SearchActivity", "onResumeが呼ばれた")
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("場所:MemoSearchActivity", "onDestroyが呼ばれた activity=$this")
-
-        viewModelStore.clear()
+        Log.d("場所:SearchActivity", "onDestroyが呼ばれた activity=$this")
 
         AppDatabase.apply {
             getDatabase(this@MemoSearchActivity).close()
@@ -69,8 +102,10 @@ class MemoSearchActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        Log.d("場所:SearchActivity#onBackPressed", "tag=${supportFragmentManager.fragments.last().tag}")
+        when (supportFragmentManager.fragments.last().tag == ConstValForSearch.SEARCH_TOP) {
+            true -> showAlertDialogForFinishApp()
+            false -> super.onBackPressed()
+        }
     }
 
 
@@ -123,9 +158,7 @@ class MemoSearchActivity : AppCompatActivity() {
             R.string.dialog_finish_app_message,
             R.string.dialog_finish_app_positive_button,
             R.string.dialog_finish_app_negative_button,
-            { dialog, id ->
-                finishAndRemoveTask()
-            },
+            { dialog, id -> finishAndRemoveTask() },
             { dialog, id -> dialog.dismiss() }
         ).show(supportFragmentManager, "finish_app_dialog")
     }

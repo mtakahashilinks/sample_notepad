@@ -27,8 +27,14 @@ class MemoOptionFragment : Fragment() {
     companion object {
         private var instance: MemoOptionFragment? = null
 
-        internal fun getInstanceOrCreateNew(): MemoOptionFragment =
-            instance ?: MemoOptionFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): MemoOptionFragment {
+            val mInstance = instance
+
+            return when (mInstance != null && !mInstance.isAdded) {
+                true -> mInstance
+                false -> MemoOptionFragment().apply { instance = this }
+            }
+        }
 
         private fun clearOptionFragmentInstanceFlag() {
             instance = null

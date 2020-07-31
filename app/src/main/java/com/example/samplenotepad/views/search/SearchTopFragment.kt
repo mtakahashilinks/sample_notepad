@@ -1,6 +1,7 @@
 package com.example.samplenotepad.views.search
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,8 +24,14 @@ class SearchTopFragment : Fragment() {
     companion object {
         private var instance: SearchTopFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchTopFragment =
-            instance ?: SearchTopFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): SearchTopFragment {
+            val mInstance = instance
+
+            return when (mInstance != null && !mInstance.isAdded) {
+                true -> mInstance
+                false -> SearchTopFragment().apply { instance = this }
+            }
+        }
 
         internal fun clearSearchTopFragmentInstanceFlag() {
             instance = null
@@ -44,6 +51,7 @@ class SearchTopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = runBlocking<Unit> {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("場所:SearchTopFragment", "onViewCreatedが呼ばれた")
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
@@ -85,6 +93,7 @@ class SearchTopFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("場所:SearchTopFragment", "onResumeが呼ばれた")
 
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_top)
@@ -96,6 +105,7 @@ class SearchTopFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("場所:SearchTopFragment", "onDestroyが呼ばれた")
 
         clearSearchTopFragmentInstanceFlag()
     }

@@ -16,7 +16,6 @@ internal fun FragmentActivity.moveToMainActivity() {
     }
 
     startActivity(intent)
-    viewModelStore.clear()
     finish()
 }
 
@@ -27,7 +26,6 @@ internal fun FragmentActivity.moveToMainActivityForEditExistMemo(memoInfoId: Lon
     }
 
     startActivity(intent)
-    viewModelStore.clear()
     finish()
 }
 
@@ -38,7 +36,6 @@ internal fun FragmentActivity.moveToSearchActivity(searchId: String) {
     }
 
     startActivity(intent)
-    viewModelStore.clear()
     finish()
 }
 

@@ -16,6 +16,7 @@ import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveData
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.views.moveToMainActivityForEditExistMemo
+import com.example.samplenotepad.views.search.SearchInCategoryFragment
 import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.list
@@ -27,8 +28,14 @@ class MemoDisplayFragment : Fragment() {
     companion object {
         private var instance: MemoDisplayFragment? = null
 
-        internal fun getInstanceOrCreateNew(): MemoDisplayFragment =
-            instance ?: MemoDisplayFragment().apply { if (instance == null) instance = this }
+        internal fun getInstanceOrCreateNew(): MemoDisplayFragment {
+            val mInstance = instance
+
+            return when (mInstance != null && !mInstance.isAdded) {
+                true -> mInstance
+                false -> MemoDisplayFragment().apply { instance = this }
+            }
+        }
 
         internal fun clearDisplayMemoFragmentInstanceFlag() {
             instance = null
