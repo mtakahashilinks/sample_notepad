@@ -62,8 +62,8 @@ class SearchInCategoryFragment : Fragment() {
             category = getSelectedCategory()
         }
 
-        listAdapter = SearchMemoListAdapter(searchViewModel) {
-                memoInfoId -> requireActivity().moveToDisplayActivity(memoInfoId)
+        listAdapter = SearchMemoListAdapter(searchViewModel) { memoInfoId ->
+            requireActivity().moveToDisplayActivity(memoInfoId)
         }
 
         //選択されたカテゴリーをViewのTextにセット

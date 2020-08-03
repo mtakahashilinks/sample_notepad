@@ -22,8 +22,11 @@ import kotlinx.android.synthetic.main.activity_memo_search.*
 class MemoSearchActivity : AppCompatActivity() {
 
     companion object {
-        lateinit var instanceOfActivity: Activity private set
+        private var isInstance = false
+        lateinit var instance: Activity private set
         lateinit var searchViewModel: SearchViewModel private set
+
+        internal fun isInstance() = isInstance
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +34,7 @@ class MemoSearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_memo_search)
         setSupportActionBar(searchToolbar)
 
-        instanceOfActivity = this
+        instance = this.apply { isInstance = true }
 
         searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java).apply {
             createMemoContentsOperationActor()
@@ -58,8 +61,8 @@ class MemoSearchActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.d("場所:SearchActivity", "onNewIntentが呼ばれた")
-
+        Log.d("場所:SearchActivity", "onNewIntentが呼ばれた activity=$this")
+        Log.d("場所:SearchActivity#onNewIntent", "intent=${intent?.getStringExtra(ConstValForSearch.SEARCH_ID)}")
         if (intent != null) {
             //searchIdによって遷移先のFragmentを選択
             when (intent.getStringExtra(ConstValForSearch.SEARCH_ID)) {
@@ -88,7 +91,7 @@ class MemoSearchActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        Log.d("場所:SearchActivity", "onResumeが呼ばれた")
+        Log.d("場所:SearchActivity", "onResumeが呼ばれた activity=$this")
     }
 
     override fun onDestroy() {
@@ -99,6 +102,8 @@ class MemoSearchActivity : AppCompatActivity() {
             getDatabase(this@MemoSearchActivity).close()
             clearDBInstanceFlag()
         }
+
+        isInstance = false
     }
 
     override fun onBackPressed() {

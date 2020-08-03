@@ -16,6 +16,7 @@ import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveData
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.views.moveToMainActivityForEditExistMemo
+import com.example.samplenotepad.views.search.MemoSearchActivity
 import com.example.samplenotepad.views.search.SearchInCategoryFragment
 import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.coroutines.launch
@@ -102,11 +103,15 @@ class MemoDisplayFragment : Fragment() {
 
         displayToEditImgBtn.setOnClickListener {
             when (displayViewModel.isSavedMemoContents()) {
-                true -> requireActivity().moveToMainActivityForEditExistMemo(
-                    displayViewModel.getMemoInfo().rowid
-                )
+                true -> {
+                    finishSearchActivityIfInstanced()
+                    requireActivity().moveToMainActivityForEditExistMemo(
+                        displayViewModel.getMemoInfo().rowid
+                    )
+                }
                 false -> {
                     displayViewModel.saveMemoInfo()
+                    finishSearchActivityIfInstanced()
                     requireActivity().moveToMainActivityForEditExistMemo(
                         displayViewModel.getMemoInfo().rowid
                     )
@@ -141,6 +146,9 @@ class MemoDisplayFragment : Fragment() {
     }
 
 
+    private fun finishSearchActivityIfInstanced() {
+        if (MemoSearchActivity.isInstance()) MemoSearchActivity.instance.finish()
+    }
     internal fun setIsShowingPopupWindow(value: Boolean) {
         isShowingPopupWindow = value
     }

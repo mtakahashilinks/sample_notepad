@@ -18,6 +18,7 @@ import com.example.samplenotepad.views.moveToMainActivity
 import com.example.samplenotepad.views.moveToSearchActivity
 import com.example.samplenotepad.views.moveToSearchByCalendar
 import com.example.samplenotepad.views.moveToSearchTopAndCancelAllStacks
+import com.example.samplenotepad.views.search.MemoSearchActivity
 import kotlinx.android.synthetic.main.activity_memo_display.*
 
 class MemoDisplayActivity : AppCompatActivity() {
@@ -91,11 +92,12 @@ class MemoDisplayActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.createNewMemo -> {
+                finishSearchActivityIfInstanced()
                 moveToMainActivity()
                 true
             }
             R.id.toSearchTop -> {
-                moveToSearchTopAndCancelAllStacks()
+                moveToSearchActivity(ConstValForSearch.SEARCH_TOP)
                 true
             }
             R.id.toReminderList -> {
@@ -103,7 +105,7 @@ class MemoDisplayActivity : AppCompatActivity() {
                 true
             }
             R.id.toSearchByCalendar -> {
-                moveToSearchByCalendar()
+                moveToSearchActivity(ConstValForSearch.SEARCH_BY_CALENDAR)
                 true
             }
             R.id.finishApp -> {
@@ -125,6 +127,11 @@ class MemoDisplayActivity : AppCompatActivity() {
             { dialog, id -> dialog.dismiss() }
         ).show(supportFragmentManager, "finish_app_dialog")
     }
+}
+
+
+private fun finishSearchActivityIfInstanced() {
+    if (MemoSearchActivity.isInstance()) MemoSearchActivity.instance.finish()
 }
 
 //val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {

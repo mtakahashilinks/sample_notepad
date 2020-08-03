@@ -51,7 +51,7 @@ class SearchTopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = runBlocking<Unit> {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("場所:SearchTopFragment", "onViewCreatedが呼ばれた")
+        Log.d("場所:SearchTopFragment", "onViewCreatedが呼ばれた fragment=${this@SearchTopFragment.id}")
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
@@ -93,7 +93,7 @@ class SearchTopFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        Log.d("場所:SearchTopFragment", "onResumeが呼ばれた")
+        Log.d("場所:SearchTopFragment", "onResumeが呼ばれた fragment=${this.id}")
 
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_top)
@@ -105,7 +105,7 @@ class SearchTopFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("場所:SearchTopFragment", "onDestroyが呼ばれた")
+        Log.d("場所:SearchTopFragment", "onDestroyが呼ばれた fragment=${this.id}")
 
         clearSearchTopFragmentInstanceFlag()
     }
