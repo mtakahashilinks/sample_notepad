@@ -16,8 +16,6 @@ import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.views.*
 import com.example.samplenotepad.views.moveToMainActivity
 import com.example.samplenotepad.views.moveToSearchActivity
-import com.example.samplenotepad.views.moveToSearchByCalendar
-import com.example.samplenotepad.views.moveToSearchTopAndCancelAllStacks
 import com.example.samplenotepad.views.search.MemoSearchActivity
 import kotlinx.android.synthetic.main.activity_memo_display.*
 
@@ -46,7 +44,7 @@ class MemoDisplayActivity : AppCompatActivity() {
             )
 
             supportFragmentManager.beginTransaction()
-                .replace(R.id.displayContainer, MemoDisplayFragment.getInstanceOrCreateNew())
+                .replace(R.id.displayContainer, MemoDisplayFragment.instanceToAddOnActivity())
                 .commit()
         }
     }
@@ -123,7 +121,10 @@ class MemoDisplayActivity : AppCompatActivity() {
             R.string.dialog_finish_app_message,
             R.string.dialog_finish_app_positive_button,
             R.string.dialog_finish_app_negative_button,
-            { dialog, id -> finishAndRemoveTask() },
+            { dialog, id ->
+                finishSearchActivityIfInstanced()
+                finishAndRemoveTask()
+            },
             { dialog, id -> dialog.dismiss() }
         ).show(supportFragmentManager, "finish_app_dialog")
     }

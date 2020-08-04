@@ -39,7 +39,7 @@ interface MemoInfoDao {
 
     @Query("""
         UPDATE memoInfoTable
-        SET reminderDateTime = "", preAlarm = 0, postAlarm = 0
+        SET standardDateTimeForAlarm = "", reminderDateTime = "", preAlarm = 0, postAlarm = 0
         WHERE memoId == :id
     """)
     suspend fun clearReminderValuesByIdDao(id: Long)

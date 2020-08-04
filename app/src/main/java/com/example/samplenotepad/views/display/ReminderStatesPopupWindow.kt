@@ -13,21 +13,21 @@ import kotlinx.android.synthetic.main.reminder_states_popup_window.view.*
 
 private var popupWindow: PopupWindow? = null
 
-internal fun getReminderStatesPopupWindow(): PopupWindow =
-    popupWindow ?: createPopupWindow().apply { if (popupWindow == null) popupWindow = this }
+internal fun getReminderStatesPopupWindow(displayFragment: MemoDisplayFragment): PopupWindow =
+    popupWindow
+        ?: createPopupWindow(displayFragment).apply { if (popupWindow == null) popupWindow = this }
 
 internal fun clearReminderStatesPopupWindowFlag() {
     popupWindow = null
 }
 
-internal fun PopupWindow.dismissReminderStatesPopupWindow() {
+internal fun PopupWindow.dismissReminderStatesPopupWindow(displayFragment: MemoDisplayFragment) {
     this.dismiss()
     clearReminderStatesPopupWindowFlag()
-    MemoDisplayFragment.getInstanceOrCreateNew().setIsShowingPopupWindow(false)
+    displayFragment.setIsShowingPopupWindow(false)
 }
 
-private fun createPopupWindow(): PopupWindow {
-    val displayFragment = MemoDisplayFragment.getInstanceOrCreateNew()
+private fun createPopupWindow(displayFragment: MemoDisplayFragment): PopupWindow {
     val layoutView = displayFragment.requireActivity().layoutInflater.inflate(
         R.layout.reminder_states_popup_window, null, false
     ).apply {
@@ -110,7 +110,7 @@ private fun MemoDisplayFragment.showAlertDialogForDeleteReminder() {
                 saveMemoInfo()
             }
 
-            popupWindow?.dismissReminderStatesPopupWindow()
+            popupWindow?.dismissReminderStatesPopupWindow(this)
         },
         { dialog, id -> dialog.dismiss() }
     ).show(this.requireActivity().supportFragmentManager, "delete_reminder_dialog")

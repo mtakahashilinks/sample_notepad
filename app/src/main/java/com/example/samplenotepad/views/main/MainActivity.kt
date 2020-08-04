@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity() {
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
-                0 -> MemoEditFragment.getInstanceOrCreateNew()
-                1 -> MemoOptionFragment.getInstanceOrCreateNew()
+                0 -> MemoEditFragment.instanceToAddOnActivity()
+                1 -> MemoOptionFragment.instanceToAddOnActivity()
                 else -> throw Exception("total number of fragments is different from getItemCount() ")
             }
         }

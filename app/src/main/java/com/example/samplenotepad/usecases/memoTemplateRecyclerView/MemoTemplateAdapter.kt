@@ -40,7 +40,7 @@ class MemoTemplateAdapter(
             clearAll()
             editViewModel.loadTemplateAndUpdateMemoContents(viewHolder.templateNameView.text.toString())
 
-            getTemplatePopupWindow().dismissTemplatePopupWindow(editFragment)
+            getTemplatePopupWindow(editFragment).dismissTemplatePopupWindow(editFragment)
 
             initMemoContentsOperation(
                 editFragment,

@@ -26,7 +26,7 @@ class MemoEditFragment : Fragment() {
     companion object {
         private var instance: MemoEditFragment? = null
 
-        internal fun getInstanceOrCreateNew(): MemoEditFragment {
+        internal fun instanceToAddOnActivity(): MemoEditFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {
@@ -85,7 +85,7 @@ class MemoEditFragment : Fragment() {
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー群
         templateImgBtn.setOnClickListener {
-            val popupWindow = getTemplatePopupWindow()
+            val popupWindow = getTemplatePopupWindow(this)
 
             isShowingPopupWindow = when (isShowingPopupWindow) {
                 true -> {
@@ -100,10 +100,6 @@ class MemoEditFragment : Fragment() {
                     true
                 }
             }
-
-//            TemplateListDialogFragment.getInstanceOrCreateNew().show(
-//                this@MemoEditFragment.requireActivity().supportFragmentManager, "template_list_dialog"
- //           )
         }
 
         checkBoxImgBtn.setOnClickListener {

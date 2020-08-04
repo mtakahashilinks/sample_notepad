@@ -24,7 +24,7 @@ class SearchResultFragment : Fragment() {
         private var instance: SearchResultFragment? = null
         private var searchType: TypeOfSearch = BySearchWord
 
-        internal fun getInstanceOrCreateNew(mSearchType: TypeOfSearch): SearchResultFragment {
+        internal fun instanceToAddOnActivity(mSearchType: TypeOfSearch): SearchResultFragment {
             searchType = mSearchType
 
             val mInstance = instance

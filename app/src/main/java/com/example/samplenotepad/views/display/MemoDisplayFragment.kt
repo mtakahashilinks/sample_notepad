@@ -17,7 +17,6 @@ import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveDat
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.views.moveToMainActivityForEditExistMemo
 import com.example.samplenotepad.views.search.MemoSearchActivity
-import com.example.samplenotepad.views.search.SearchInCategoryFragment
 import kotlinx.android.synthetic.main.fragment_display_memo.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.list
@@ -29,7 +28,7 @@ class MemoDisplayFragment : Fragment() {
     companion object {
         private var instance: MemoDisplayFragment? = null
 
-        internal fun getInstanceOrCreateNew(): MemoDisplayFragment {
+        internal fun instanceToAddOnActivity(): MemoDisplayFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {
@@ -87,11 +86,11 @@ class MemoDisplayFragment : Fragment() {
 
         //reminderの設定表示用のPopupWindowの設定
         reminderStatesImgBtn.setOnClickListener {
-            val popupWindow = getReminderStatesPopupWindow()
+            val popupWindow = getReminderStatesPopupWindow(this)
 
             isShowingPopupWindow = when (isShowingPopupWindow) {
                 true -> {
-                    popupWindow.dismissReminderStatesPopupWindow()
+                    popupWindow.dismissReminderStatesPopupWindow(this)
                     false
                 }
                 false -> {

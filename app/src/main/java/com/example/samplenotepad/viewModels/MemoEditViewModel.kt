@@ -14,7 +14,6 @@ import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.createMemoContentsOperationActor
 import com.example.samplenotepad.usecases.getMemoContentsOperationActor
-import com.example.samplenotepad.views.main.MainActivity
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
@@ -120,8 +119,7 @@ class MemoEditViewModel : ViewModel() {
         memoInfo = null
         loadAndSetCategoryList()
 
-        if (MemoOptionFragment.isInstance())
-            MemoOptionFragment.getInstanceOrCreateNew().resetValueOfAllView(this)
+        MemoOptionFragment.instance()?.resetValueOfAllView(this)
     }
 
 

@@ -33,11 +33,10 @@ private fun MemoContents.createContentsText(): String {
 }
 
 private fun RequestCode.cancelAlarm(context: Context) {
-    val application = SampleMemoApplication.instance
     val pendingIntent = this.isAlarmExist(context)
 
     if (pendingIntent != null) {
-        val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         alarmManager.cancel(pendingIntent)
     }
@@ -70,19 +69,23 @@ internal fun MemoInfoId.clearReminderValuesInMemoInfoIO() = runBlocking {
     }
 }
 
+internal fun List<MemoInfo>.resetAllAlarm(context:Context) {
+    this.onEach { memoInfo -> memoInfo.setAlarm(context) }
+}
+
 private fun Calendar.registerAlarm(
+    context: Context,
     requestCode: Int,
     memoTitle: String,
     alarmPosition: Int = -1
 ) {
-    val application = SampleMemoApplication.instance
-    val alarmManager = application.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val intent = Intent(application.baseContext, ReminderNotificationReceiver::class.java).apply {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, ReminderNotificationReceiver::class.java).apply {
         putExtra(ConstValForAlarm.REQUEST_CODE, requestCode)
         putExtra(ConstValForAlarm.MEMO_TITLE, memoTitle)
         putExtra(ConstValForAlarm.ALARM_POSITION, alarmPosition)
     }
-    val pendingIntent = PendingIntent.getBroadcast(application.baseContext, requestCode, intent, 0)
+    val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, 0)
 
     alarmManager.setExactAndAllowWhileIdle(
         AlarmManager.RTC_WAKEUP, this.timeInMillis, pendingIntent
@@ -91,54 +94,59 @@ private fun Calendar.registerAlarm(
 
 
 //TargetDateTime,PreAlarm,PostAlarm、それぞれ値があればアラームをセットする
-private fun MemoInfo.setAlarm() {
-    val context = SampleMemoApplication.instance.baseContext
+private fun MemoInfo.setAlarm(context: Context) {
     val requestCodeForTargetDataTime = this.getRequestCodeForAlarm(ConstValForAlarm.TARGET_DATE_TIME)
     val requestCodeForPreAlarm = this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM)
     val requestCodeForPostAlarm = this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM)
 
+    //targetDateTimeがあればアラームをセット
     when (this.reminderDateTime.isNotEmpty()) {
        true -> {
-           val calendarOfTargetDateTime = Calendar.getInstance().apply {
-               val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("ja", "JP", "JP"))
+           val targetDateTimeCalendar = getCalendarForAlarm(this.reminderDateTime)
 
-               formatter.parse(this@setAlarm.reminderDateTime)?.let { time = it }
-           }
-
-           //preAlarmがあればアラームをセット
-           when (this.preAlarm != 0) {
-               true -> {
-                   val preAlarmTime =
-                       (calendarOfTargetDateTime.clone() as Calendar).getPreAlarmTime(this.preAlarm)
-
-                   preAlarmTime.registerAlarm(requestCodeForPreAlarm, this.title, this.preAlarm)
-               }
-               false -> requestCodeForPreAlarm.cancelAlarm(context)
-           }
-
-           //postAlarmがあればアラームをセット
-           when (this.postAlarm != 0) {
-               true -> {
-                   val postAlarmTime =
-                       (calendarOfTargetDateTime.clone() as Calendar).getPostAlarmTime(this.postAlarm)
-
-                   postAlarmTime.registerAlarm(requestCodeForPostAlarm, this.title, this.postAlarm)
-               }
-               false -> requestCodeForPostAlarm.cancelAlarm(context)
-           }
-
-           //targetDateTimeのアラームをセット
-           calendarOfTargetDateTime.registerAlarm(requestCodeForTargetDataTime, this.title)
+           targetDateTimeCalendar.registerAlarm(
+               context, requestCodeForTargetDataTime, this.title
+           )
        }
-       false -> {
-           requestCodeForTargetDataTime.cancelAlarm(context)
-           requestCodeForPreAlarm.cancelAlarm(context)
-           requestCodeForPostAlarm.cancelAlarm(context)
-       }
+       false -> requestCodeForTargetDataTime.cancelAlarm(context)
    }
+
+    //preAlarmがあればアラームをセット
+    when (this.preAlarm != 0) {
+        true -> {
+            val preAlarmTimeCalendar =
+                getCalendarForAlarm(this.standardDateTimeForAlarm).getPreAlarmTime(this.preAlarm)
+
+            preAlarmTimeCalendar.registerAlarm(
+                context, requestCodeForPreAlarm, this.title, this.preAlarm
+            )
+        }
+        false -> requestCodeForPreAlarm.cancelAlarm(context)
+    }
+
+    //postAlarmがあればアラームをセット
+    when (this.postAlarm != 0) {
+        true -> {
+            val postAlarmTimeCalendar =
+                getCalendarForAlarm(this.standardDateTimeForAlarm).getPostAlarmTime(this.postAlarm)
+
+            postAlarmTimeCalendar.registerAlarm(
+                context, requestCodeForPostAlarm, this.title, this.postAlarm
+            )
+        }
+        false -> requestCodeForPostAlarm.cancelAlarm(context)
+    }
 }
 
-internal fun MemoInfo.getRequestCodeForAlarm(reminderType: Int): Int =
+private fun getCalendarForAlarm(dateTime: String): Calendar =
+    Calendar.getInstance().apply {
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("ja", "JP", "JP"))
+
+        formatter.parse(dateTime)?.let { time = it }
+    }
+
+
+private fun MemoInfo.getRequestCodeForAlarm(reminderType: Int): Int =
     this.rowid.toInt() * 10 + reminderType
 
 private fun Calendar.getPreAlarmTime(position: Int): Calendar = when (position) {
@@ -160,6 +168,7 @@ private fun Calendar.getPostAlarmTime(position: Int) = when (position) {
 private fun MemoInfo.saveMemoInfoToDatabaseAsync(viewModel: ViewModel) = runBlocking {
     launch(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+        val context = SampleMemoApplication.instance.baseContext
 
         //新規のメモはMemoInfoTableに挿入。その他はtableにアップデート。
         when (this@saveMemoInfoToDatabaseAsync.rowid) {
@@ -168,14 +177,16 @@ private fun MemoInfo.saveMemoInfoToDatabaseAsync(viewModel: ViewModel) = runBloc
                 val rowId = memoInfoDao.insertMemoInfoDao(this@saveMemoInfoToDatabaseAsync)
                 Log.d("場所:saveMemoInfo#挿入", "NewMemoId=${rowId} MemoContents=${Json.parse(MemoRowInfo.serializer().list, memoInfoDao.getMemoInfoByIdDao(rowId).contents)}")
 
-                this@saveMemoInfoToDatabaseAsync.updateMemoInfoInViewModel(viewModel, rowId)?.setAlarm()
+                this@saveMemoInfoToDatabaseAsync
+                    .updateMemoInfoInViewModel(viewModel, rowId)?.setAlarm(context)
             }
             else -> {
                 //databaseに編集したmemoInfoをアップデート
                 memoInfoDao.updateMemoInfoDao(this@saveMemoInfoToDatabaseAsync)
                 Log.d("場所:saveMemoInfo#アップデート", "MemoId=${this@saveMemoInfoToDatabaseAsync.rowid} MemoContents=${Json.parse(MemoRowInfo.serializer().list, memoInfoDao.getMemoInfoByIdDao(this@saveMemoInfoToDatabaseAsync.rowid).contents)}")
 
-                this@saveMemoInfoToDatabaseAsync.updateMemoInfoInViewModel(viewModel, null)?.setAlarm()
+                this@saveMemoInfoToDatabaseAsync
+                    .updateMemoInfoInViewModel(viewModel, null)?.setAlarm(context)
             }
         }
     }
@@ -195,21 +206,23 @@ private fun MemoInfo?.createNewMemoInfo(
     category: String?,
     stringMemoContents: String,
     contentsTextForSearch: String,
+    standardDateTimeForAlarm: String?,
     reminderDateTime: String?,
     preAlarmPosition: Int?,
     postAlarmPosition: Int?
 ) = MemoInfo(
-        this?.rowid ?: 0,
-        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-            .format(Timestamp(System.currentTimeMillis())),
-        title ?: SampleMemoApplication.instance.getString(R.string.memo_title_default_value),
-        category ?: SampleMemoApplication.instance.getString(R.string.memo_category_default_value),
-        stringMemoContents,
-        contentsTextForSearch,
-        reminderDateTime ?: "",
-        preAlarmPosition ?: 0,
-        postAlarmPosition ?: 0
-    )
+    this?.rowid ?: 0,
+    SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        .format(Timestamp(System.currentTimeMillis())),
+    title ?: SampleMemoApplication.instance.getString(R.string.memo_title_default_value),
+    category ?: SampleMemoApplication.instance.getString(R.string.memo_category_default_value),
+    stringMemoContents,
+    contentsTextForSearch,
+    standardDateTimeForAlarm ?: "",
+    reminderDateTime ?: "",
+    preAlarmPosition ?: 0,
+    postAlarmPosition ?: 0
+)
 
 internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoContents) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")
@@ -227,6 +240,7 @@ internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoCo
                 optionValues?.category,
                 stringMemoContents.await(),
                 contentsTextForSearch.await(),
+                optionValues?.standardDateTimeForAlarm,
                 optionValues?.targetDateTime,
                 optionValues?.preAlarm,
                 optionValues?.postAlarm
@@ -238,6 +252,7 @@ internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoCo
                 this@saveMemoInfoIO?.category,
                 stringMemoContents.await(),
                 contentsTextForSearch.await(),
+                this@saveMemoInfoIO?.standardDateTimeForAlarm,
                 this@saveMemoInfoIO?.reminderDateTime,
                 this@saveMemoInfoIO?.preAlarm,
                 this@saveMemoInfoIO?.postAlarm

@@ -14,7 +14,6 @@ import com.example.samplenotepad.entities.BySearchWordAndCategory
 import com.example.samplenotepad.usecases.searchMemoListRecyclerView.SearchMemoListAdapter
 import com.example.samplenotepad.usecases.searchMemoListRecyclerView.getCallbackForItemTouchHelper
 import com.example.samplenotepad.viewModels.SearchViewModel
-import com.example.samplenotepad.views.main.MemoEditFragment
 import com.example.samplenotepad.views.moveToDisplayActivity
 import com.example.samplenotepad.views.moveToSearchResult
 import kotlinx.android.synthetic.main.fragment_search_result.*
@@ -25,7 +24,7 @@ class SearchInCategoryFragment : Fragment() {
     companion object {
         private var instance: SearchInCategoryFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchInCategoryFragment {
+        internal fun instanceToAddOnActivity(): SearchInCategoryFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {

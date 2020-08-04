@@ -24,7 +24,7 @@ class SearchTopFragment : Fragment() {
     companion object {
         private var instance: SearchTopFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchTopFragment {
+        internal fun instanceToAddOnActivity(): SearchTopFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {

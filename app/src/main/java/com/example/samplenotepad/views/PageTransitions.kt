@@ -56,7 +56,7 @@ internal fun FragmentActivity.moveToSearchTopAndCancelAllStacks() {
         beginTransaction()
             .replace(
                 R.id.searchContainer,
-                SearchTopFragment.getInstanceOrCreateNew(),
+                SearchTopFragment.instanceToAddOnActivity(),
                 ConstValForSearch.SEARCH_TOP
             )
             .commit()
@@ -66,7 +66,7 @@ internal fun FragmentActivity.moveToSearchTopAndCancelAllStacks() {
 internal fun FragmentActivity.moveToSearchInCategory() {
     supportFragmentManager.beginTransaction()
         .addToBackStack(null)
-        .replace(R.id.searchContainer, SearchInCategoryFragment.getInstanceOrCreateNew())
+        .replace(R.id.searchContainer, SearchInCategoryFragment.instanceToAddOnActivity())
         .commit()
 }
 
@@ -75,7 +75,7 @@ internal fun FragmentActivity.moveToReminderList() {
         .addToBackStack(ConstValForSearch.REMINDER_LIST)
         .replace(
             R.id.searchContainer,
-            SearchWithReminderFragment.getInstanceOrCreateNew(),
+            SearchWithReminderFragment.instanceToAddOnActivity(),
             ConstValForSearch.REMINDER_LIST
         )
         .commit()
@@ -86,7 +86,7 @@ internal fun FragmentActivity.moveToSearchByCalendar() {
         .addToBackStack(ConstValForSearch.SEARCH_BY_CALENDAR)
         .replace(
             R.id.searchContainer,
-            SearchByCalendarFragment.getInstanceOrCreateNew(),
+            SearchByCalendarFragment.instanceToAddOnActivity(),
             ConstValForSearch.SEARCH_BY_CALENDAR
         )
         .commit()
@@ -96,7 +96,7 @@ internal fun FragmentActivity.moveToSearchResult(typeOfSearch: TypeOfSearch) {
     supportFragmentManager.beginTransaction()
         .replace(
             R.id.searchContainer,
-            SearchResultFragment.getInstanceOrCreateNew(typeOfSearch)
+            SearchResultFragment.instanceToAddOnActivity(typeOfSearch)
         )
         .addToBackStack(null)
         .commit()

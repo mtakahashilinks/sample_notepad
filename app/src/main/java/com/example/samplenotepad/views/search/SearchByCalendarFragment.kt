@@ -6,14 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.samplenotepad.R
-import com.example.samplenotepad.views.main.MemoEditFragment
 
 class SearchByCalendarFragment : Fragment() {
 
     companion object {
         private var instance: SearchByCalendarFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchByCalendarFragment {
+        internal fun instanceToAddOnActivity(): SearchByCalendarFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {

@@ -27,7 +27,7 @@ class MemoOptionFragment : Fragment() {
     companion object {
         private var instance: MemoOptionFragment? = null
 
-        internal fun getInstanceOrCreateNew(): MemoOptionFragment {
+        internal fun instanceToAddOnActivity(): MemoOptionFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {
@@ -36,37 +36,38 @@ class MemoOptionFragment : Fragment() {
             }
         }
 
+        internal fun instance(): MemoOptionFragment? = instance
+
         private fun clearOptionFragmentInstanceFlag() {
             instance = null
         }
 
-        internal fun isInstance() = instance != null
 
-
-        internal fun getOptionValuesForSave(): ValuesOfOptionSetting? {
-            return when (MemoOptionFragment.isInstance()) {
-                true -> {
-                    val optionFragment = MemoOptionFragment.getInstanceOrCreateNew()
-                    val reminderSwitch = optionFragment.reminderOnOffSwitchView
-                    val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
-                        true -> null
-                        false -> optionFragment.titleBodyTextView.text.toString()
-                    }
-                    val category = when (optionFragment.categoryTextView.text.isEmpty()) {
-                        true -> null
-                        false -> optionFragment.categoryTextView.text.toString()
-                    }
-                    val targetDateTime = optionFragment.getTargetDateTimeParams(reminderSwitch)
-                    val preAlarm =
-                        optionFragment.preAlarmSpinnerView.getPreAndPostAlarmParams(reminderSwitch)
-                    val postAlarm =
-                        optionFragment.postAlarmSpinnerView.getPreAndPostAlarmParams(reminderSwitch)
-
-                    ValuesOfOptionSetting(title, category, targetDateTime, preAlarm, postAlarm)
+        internal fun getOptionValuesForSave(): ValuesOfOptionSetting? =
+            MemoOptionFragment.instance()?.let { optionFragment ->
+                val reminderSwitch = optionFragment.reminderOnOffSwitchView
+                val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
+                    true -> null
+                    false -> optionFragment.titleBodyTextView.text.toString()
                 }
-                false -> null
+                val category = when (optionFragment.categoryTextView.text.isEmpty()) {
+                    true -> null
+                    false -> optionFragment.categoryTextView.text.toString()
+                }
+                val targetDateTime = optionFragment.getTargetDateTimeParams(reminderSwitch)
+                val preAlarm =
+                    optionFragment.preAlarmSpinnerView.getPreAndPostAlarmParams(
+                        reminderSwitch
+                    )
+                val postAlarm =
+                    optionFragment.postAlarmSpinnerView.getPreAndPostAlarmParams(
+                        reminderSwitch
+                    )
+
+                ValuesOfOptionSetting(
+                    title, category, targetDateTime, targetDateTime, preAlarm, postAlarm
+                )
             }
-        }
 
         private fun MemoOptionFragment.getTargetDateTimeParams(switchView: Switch): String? =
             when (switchView.isChecked) {
@@ -153,14 +154,14 @@ class MemoOptionFragment : Fragment() {
     }
 
     private fun MemoInfo.setViewsProperties() {
-        when (this.reminderDateTime.isEmpty()){
-            true -> this.apply {
+        when (this.reminderDateTime.isNotEmpty()){
+            true -> this.setReminderSwitchOnForExistMemo(
+                this@setViewsProperties.reminderDateTime.split(" ")
+            )
+            false -> this.apply {
                 setTitleTextWithMemoInfo()
                 setCategoryTextWithMemoInfo()
                 setCurrentValueInReminderDateTimeView()
-            }
-            false -> {
-                this.setReminderSwitchOnForExistMemo(this@setViewsProperties.reminderDateTime.split(" "))
             }
         }
     }

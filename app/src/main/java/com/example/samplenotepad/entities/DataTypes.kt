@@ -99,6 +99,7 @@ data class MemoRowInfo(
 data class ValuesOfOptionSetting(
     val title: String?,
     val category: String?,
+    val standardDateTimeForAlarm: String?,
     val targetDateTime: String?,
     val preAlarm: Int?,
     val postAlarm: Int?

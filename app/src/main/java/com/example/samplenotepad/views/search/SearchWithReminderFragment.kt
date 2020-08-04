@@ -23,7 +23,7 @@ class SearchWithReminderFragment : Fragment() {
     companion object {
         private var instance: SearchWithReminderFragment? = null
 
-        internal fun getInstanceOrCreateNew(): SearchWithReminderFragment {
+        internal fun instanceToAddOnActivity(): SearchWithReminderFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {
