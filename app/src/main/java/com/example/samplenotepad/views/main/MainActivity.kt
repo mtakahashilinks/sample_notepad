@@ -127,8 +127,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     //オプションメニューのItemタップ時の処理
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.createNewMemo -> createNewMemo()
             R.id.toSearchTop -> moveToSearchTop()
             R.id.toReminderList -> moveToReminderList()
@@ -136,11 +136,11 @@ class MainActivity : AppCompatActivity() {
             R.id.finishApp -> showAlertDialogForFinishApp()
             else -> super.onOptionsItemSelected(item)
         }
-    }
+
 
 
     private fun createNewMemo() =
-        when (editViewModel.isSavedMemoContents()) {
+        when (editViewModel.isSaved()) {
             true -> {
                 editViewModel.resetViewsAndStatesForCreateNewMemo()
                 true
@@ -168,16 +168,17 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun checkIfNeedToShowDialogForOptionMenu(action: () -> Unit) =
-        when (editViewModel.isSavedMemoContents()) {
+        when (editViewModel.isSaved()) {
             true -> {
                 action()
                 true
             }
             false -> {
-                showAlertDialogIfSaveMemo{ action() }
+                showAlertDialogIfSaveMemo { action() }
                 true
             }
         }
+
 
     private fun showAlertDialogForFinishApp(): Boolean {
         MemoAlertDialog(

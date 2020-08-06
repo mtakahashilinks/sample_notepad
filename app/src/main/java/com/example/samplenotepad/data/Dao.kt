@@ -37,12 +37,14 @@ interface MemoInfoDao {
     """)
     suspend fun updateCategoryDao(oldCategoryName: String, newCategoryName: String)
 
-    @Query("""
+    @Query(
+        """
         UPDATE memoInfoTable
-        SET standardDateTimeForAlarm = "", reminderDateTime = "", preAlarm = 0, postAlarm = 0
+        SET baseDateTimeForAlarm = "", reminderDateTime = "", preAlarmPosition = 0, postAlarmPosition = 0
         WHERE memoId == :id
-    """)
-    suspend fun clearReminderValuesByIdDao(id: Long)
+    """
+    )
+    suspend fun clearAllReminderValueByIdDao(id: Long)
 
     @Query("""
         SELECT * 
@@ -87,7 +89,7 @@ interface MemoInfoDao {
         """
         SELECT * 
         FROM memoInfoTable 
-        WHERE reminderDateTime != ""
+        WHERE baseDateTimeForAlarm != ""
         ORDER BY createdDateTime DESC
         """
     )
@@ -97,7 +99,7 @@ interface MemoInfoDao {
         """
         SELECT * 
         FROM memoInfoTable 
-        WHERE reminderDateTime != "" AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        WHERE baseDateTimeForAlarm != "" AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
         ORDER BY createdDateTime DESC
         """
     )

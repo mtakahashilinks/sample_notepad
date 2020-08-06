@@ -13,7 +13,7 @@ import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.getMemoContentsOperationActor
 import com.example.samplenotepad.usecases.getShowMassageForSavedLiveData
 import com.example.samplenotepad.usecases.initMemoContentsOperation
-import com.example.samplenotepad.usecases.resetValueOfShowMassageForSavedLiveData
+import com.example.samplenotepad.usecases.initValueOfShowMassageForSavedLiveData
 import com.example.samplenotepad.viewModels.MemoDisplayViewModel
 import com.example.samplenotepad.views.moveToMainActivityForEditExistMemo
 import com.example.samplenotepad.views.search.MemoSearchActivity
@@ -64,7 +64,7 @@ class MemoDisplayFragment : Fragment() {
                     this@MemoDisplayFragment.showSnackbarForSavedMassageAtDisplayMemo()
                 }
 
-                resetValueOfShowMassageForSavedLiveData()
+                initValueOfShowMassageForSavedLiveData()
             })
         }
 
@@ -81,7 +81,7 @@ class MemoDisplayFragment : Fragment() {
 
 
         //リマインダーがあればボタンを表示
-        if (displayViewModel.getMemoInfo().reminderDateTime.isNotEmpty())
+        if (displayViewModel.getMemoInfo().baseDateTimeForAlarm.isNotEmpty())
             reminderStatesImgBtn.visibility = View.VISIBLE
 
         //reminderの設定表示用のPopupWindowの設定

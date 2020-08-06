@@ -15,7 +15,7 @@ import kotlinx.coroutines.runBlocking
 
 class MemoDisplayViewModel : ViewModel() {
 
-    private var memoInfo = MemoInfo(-1, "", "", "", "", "", "", -1, -1)
+    private var memoInfo = MemoInfo(-1, "", "", "", "", "", "", "", -1, -1)
     private var savePointOfMemoContents = listOf<MemoRowInfo>()
 
     internal fun createNewMemoContentsExecuteActor() = createMemoContentsOperationActor(this)

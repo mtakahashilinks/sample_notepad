@@ -6,6 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.samplenotepad.R
+import kotlinx.android.synthetic.main.fragment_search_by_calendar.*
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.*
 
 class SearchByCalendarFragment : Fragment() {
 
@@ -40,6 +44,8 @@ class SearchByCalendarFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        calendarView.setDate(Date())
     }
 
     override fun onDestroy() {

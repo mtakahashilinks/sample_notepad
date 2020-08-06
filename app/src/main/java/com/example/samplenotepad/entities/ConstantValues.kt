@@ -11,7 +11,7 @@ object ConstValForAlarm {
     const val REQUEST_CODE = "request_code_for_alarm"
     const val MEMO_TITLE = "memo_title_for_alarm"
     const val ALARM_POSITION = "alarm_position"
-    const val TARGET_DATE_TIME = 1
+    const val REMINDER_DATE_TIME = 1
     const val PRE_ALARM = 2
     const val POST_ALARM = 3
     const val PRE_POST_ALARM_NO_SET = 0

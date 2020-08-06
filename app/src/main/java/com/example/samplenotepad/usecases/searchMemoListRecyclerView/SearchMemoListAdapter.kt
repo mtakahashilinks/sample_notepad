@@ -48,7 +48,7 @@ class SearchMemoListAdapter(
         holder.title.text = dataSetForMemoList.title
         holder.memoBody.text = dataSetForMemoList.contentsForSearchByWord
 
-        when (dataSetForMemoList.reminderDateTime.isEmpty()) {
+        when (dataSetForMemoList.baseDateTimeForAlarm.isEmpty()) {
             true -> holder.isSetRemainder.visibility = View.GONE
             false -> holder.isSetRemainder.visibility = View.VISIBLE
         }

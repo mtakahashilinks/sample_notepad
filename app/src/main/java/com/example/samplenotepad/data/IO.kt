@@ -22,35 +22,57 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-private fun MemoContents.createContentsText(): String {
-    val builder = StringBuilder("")
+private fun MemoInfo.cancelAlarm(
+    context: Context,
+    alarmType: Int
+) = runBlocking {
+    val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+    val requestCode = this@cancelAlarm.getRequestCodeForAlarm(alarmType)
+    val pendingIntent = requestCode.isAlarmExist(context)
 
-    this.toList().onEach { memoRowInfo ->
-        builder.append(memoRowInfo.memoText.value + '\u21B5')
-    }
-
-    return builder.toString()
-}
-
-private fun RequestCode.cancelAlarm(context: Context) {
-    val pendingIntent = this.isAlarmExist(context)
-
+    //アラームがセットされてればキャンセル
     if (pendingIntent != null) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         alarmManager.cancel(pendingIntent)
     }
+
+    //DatabaseのReminder関係の値をUpdate
+    when (alarmType) {
+        ConstValForAlarm.REMINDER_DATE_TIME -> {
+            when (this@cancelAlarm.postAlarmPosition == 0) {
+                true -> memoInfoDao.updateMemoInfoDao(
+                    this@cancelAlarm.copy(baseDateTimeForAlarm = "", reminderDateTime = "")
+                )
+                false -> memoInfoDao.updateMemoInfoDao(this@cancelAlarm.copy(reminderDateTime = ""))
+            }
+        }
+        ConstValForAlarm.PRE_ALARM ->
+            memoInfoDao.updateMemoInfoDao(this@cancelAlarm.copy(preAlarmPosition = 0))
+        ConstValForAlarm.POST_ALARM -> {
+            when (this@cancelAlarm.reminderDateTime == "") {
+                true -> memoInfoDao.updateMemoInfoDao(
+                    this@cancelAlarm.copy(baseDateTimeForAlarm = "", postAlarmPosition = 0)
+                )
+                false -> memoInfoDao.updateMemoInfoDao(this@cancelAlarm.copy(postAlarmPosition = 0))
+            }
+        }
+    }
+}
+
+internal fun MemoInfo.cancelAlarmIO(context: Context, alarmType: Int) {
+    this.cancelAlarm(context, alarmType)
 }
 
 internal fun MemoInfo.cancelAllAlarmIO(context: Context) {
     if (this.reminderDateTime.isNotEmpty())
-        this.getRequestCodeForAlarm(ConstValForAlarm.TARGET_DATE_TIME).cancelAlarm(context)
+        this.cancelAlarm(context, ConstValForAlarm.REMINDER_DATE_TIME)
 
-    if (this.preAlarm != 0)
-        this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM).cancelAlarm(context)
+    if (this.preAlarmPosition != 0)
+        this.cancelAlarm(context, ConstValForAlarm.PRE_ALARM)
 
-    if (this.postAlarm != 0)
-        this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM).cancelAlarm(context)
+    if (this.postAlarmPosition != 0)
+        this.cancelAlarm(context, ConstValForAlarm.POST_ALARM)
 }
 
 //returnがnull以外ならAlarmはセットされている
@@ -60,19 +82,37 @@ internal fun RequestCode.isAlarmExist(context: Context): PendingIntent? {
     return PendingIntent.getBroadcast(context, this, intent, PendingIntent.FLAG_NO_CREATE)
 }
 
-//MemoInfoのReminder関係の値を初期値に戻す
-internal fun MemoInfoId.clearReminderValuesInMemoInfoIO() = runBlocking {
+//DBのMemoInfoのReminder関係の値を初期値に戻す
+internal fun MemoInfoId.clearAllReminderValueInDataBaseIO() = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
-        memoInfoDao.clearReminderValuesByIdDao(this@clearReminderValuesInMemoInfoIO)
+        memoInfoDao.clearAllReminderValueByIdDao(this@clearAllReminderValueInDataBaseIO)
     }
 }
 
-internal fun List<MemoInfo>.resetAllAlarm(context:Context) {
-    this.onEach { memoInfo -> memoInfo.setAlarm(context) }
+internal fun MemoInfo.resetAlarm(context:Context, reminderType: Int) {
+    val requestCode = this.getRequestCodeForAlarm(reminderType)
+
+    when (reminderType) {
+        ConstValForAlarm.REMINDER_DATE_TIME -> {
+            getReminderDateTimeCalendar(this.reminderDateTime)
+                .registerAlarm(context, requestCode, this.title)
+        }
+        ConstValForAlarm.PRE_ALARM -> {
+            getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
+                .getPreAlarmCalendar(this.preAlarmPosition)
+                .registerAlarm(context, requestCode, this.title, this.preAlarmPosition)
+        }
+        else -> {
+            getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
+                .getPostAlarmCalendar(this.postAlarmPosition)
+                .registerAlarm(context, requestCode, this.title, this.postAlarmPosition)
+        }
+    }
 }
 
+//Alarmを登録する
 private fun Calendar.registerAlarm(
     context: Context,
     requestCode: Int,
@@ -93,72 +133,83 @@ private fun Calendar.registerAlarm(
 }
 
 
-//TargetDateTime,PreAlarm,PostAlarm、それぞれ値があればアラームをセットする
+//ReminderDateTime,PreAlarm,PostAlarm、それぞれ値があればアラームをセットする
 private fun MemoInfo.setAlarm(context: Context) {
-    val requestCodeForTargetDataTime = this.getRequestCodeForAlarm(ConstValForAlarm.TARGET_DATE_TIME)
-    val requestCodeForPreAlarm = this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM)
-    val requestCodeForPostAlarm = this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM)
-
-    //targetDateTimeがあればアラームをセット
+    //reminderDateTimeがあればアラームをセット
     when (this.reminderDateTime.isNotEmpty()) {
-       true -> {
-           val targetDateTimeCalendar = getCalendarForAlarm(this.reminderDateTime)
-
-           targetDateTimeCalendar.registerAlarm(
-               context, requestCodeForTargetDataTime, this.title
+       true ->
+           getReminderDateTimeCalendar(this.reminderDateTime).registerAlarm(
+               context,
+               this.getRequestCodeForAlarm(ConstValForAlarm.REMINDER_DATE_TIME),
+               this.title
            )
-       }
-       false -> requestCodeForTargetDataTime.cancelAlarm(context)
+       false -> this.cancelAlarm(context, ConstValForAlarm.REMINDER_DATE_TIME)
    }
 
     //preAlarmがあればアラームをセット
-    when (this.preAlarm != 0) {
+    when (this.preAlarmPosition != 0) {
         true -> {
-            val preAlarmTimeCalendar =
-                getCalendarForAlarm(this.standardDateTimeForAlarm).getPreAlarmTime(this.preAlarm)
+            val preAlarmTimeCalendar = getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
+                .getPreAlarmCalendar(this.preAlarmPosition)
 
             preAlarmTimeCalendar.registerAlarm(
-                context, requestCodeForPreAlarm, this.title, this.preAlarm
+                context,
+                this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM),
+                this.title,
+                this.preAlarmPosition
             )
         }
-        false -> requestCodeForPreAlarm.cancelAlarm(context)
+        false -> this.cancelAlarm(context, ConstValForAlarm.PRE_ALARM)
     }
 
     //postAlarmがあればアラームをセット
-    when (this.postAlarm != 0) {
+    when (this.postAlarmPosition != 0) {
         true -> {
-            val postAlarmTimeCalendar =
-                getCalendarForAlarm(this.standardDateTimeForAlarm).getPostAlarmTime(this.postAlarm)
+            val postAlarmTimeCalendar = getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
+                .getPostAlarmCalendar(this.postAlarmPosition)
 
             postAlarmTimeCalendar.registerAlarm(
-                context, requestCodeForPostAlarm, this.title, this.postAlarm
+                context,
+                this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM),
+                this.title,
+                this.postAlarmPosition
             )
         }
-        false -> requestCodeForPostAlarm.cancelAlarm(context)
+        false -> this.cancelAlarm(context, ConstValForAlarm.POST_ALARM)
     }
 }
 
-private fun getCalendarForAlarm(dateTime: String): Calendar =
+private fun getReminderDateTimeCalendar(dateTime: String): Calendar =
     Calendar.getInstance().apply {
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale("ja", "JP", "JP"))
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
 
         formatter.parse(dateTime)?.let { time = it }
     }
 
+internal fun MemoInfo.getPrePostAlarmDateTime(alarmType: Int): Date =
+    when (alarmType) {
+        ConstValForAlarm.PRE_ALARM ->
+            getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
+                .getPreAlarmCalendar(this.preAlarmPosition).time
+        ConstValForAlarm.POST_ALARM ->
+            getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
+                .getPostAlarmCalendar(this.postAlarmPosition).time
+        else -> Date()
+    }
 
-private fun MemoInfo.getRequestCodeForAlarm(reminderType: Int): Int =
-    this.rowid.toInt() * 10 + reminderType
+internal fun MemoInfo.getRequestCodeForAlarm(alarmType: Int): Int =
+    this.rowid.toInt() * 10 + alarmType
 
-private fun Calendar.getPreAlarmTime(position: Int): Calendar = when (position) {
-    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1) }
+private fun Calendar.getPreAlarmCalendar(position: Int): Calendar = when (position) {
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1);TODO("-5に戻す") }
     ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, -10) }
     ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, -30) }
     ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, -1) }
     else -> this.apply { add(Calendar.DATE, -1) }
 }
 
-private fun Calendar.getPostAlarmTime(position: Int) = when (position) {
-    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 1) }
+private fun Calendar.getPostAlarmCalendar(position: Int) = when (position) {
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 1);TODO("5に戻す") }
     ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, 10) }
     ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, 30) }
     ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -206,7 +257,7 @@ private fun MemoInfo?.createNewMemoInfo(
     category: String?,
     stringMemoContents: String,
     contentsTextForSearch: String,
-    standardDateTimeForAlarm: String?,
+    baseDateTimeForAlarm: String?,
     reminderDateTime: String?,
     preAlarmPosition: Int?,
     postAlarmPosition: Int?
@@ -218,11 +269,21 @@ private fun MemoInfo?.createNewMemoInfo(
     category ?: SampleMemoApplication.instance.getString(R.string.memo_category_default_value),
     stringMemoContents,
     contentsTextForSearch,
-    standardDateTimeForAlarm ?: "",
+    baseDateTimeForAlarm ?: "",
     reminderDateTime ?: "",
     preAlarmPosition ?: 0,
     postAlarmPosition ?: 0
 )
+
+private fun MemoContents.createContentsText(): String {
+    val builder = StringBuilder("")
+
+    this.toList().onEach { memoRowInfo ->
+        builder.append(memoRowInfo.memoText.value + '\u21B5')
+    }
+
+    return builder.toString()
+}
 
 internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoContents) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")
@@ -240,10 +301,10 @@ internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoCo
                 optionValues?.category,
                 stringMemoContents.await(),
                 contentsTextForSearch.await(),
-                optionValues?.standardDateTimeForAlarm,
-                optionValues?.targetDateTime,
-                optionValues?.preAlarm,
-                optionValues?.postAlarm
+                optionValues?.baseDateTimeForAlarm,
+                optionValues?.reminderDateTime,
+                optionValues?.preAlarmPosition,
+                optionValues?.postAlarmPosition
             )
         }
         else -> {
@@ -252,10 +313,10 @@ internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoCo
                 this@saveMemoInfoIO?.category,
                 stringMemoContents.await(),
                 contentsTextForSearch.await(),
-                this@saveMemoInfoIO?.standardDateTimeForAlarm,
+                this@saveMemoInfoIO?.baseDateTimeForAlarm,
                 this@saveMemoInfoIO?.reminderDateTime,
-                this@saveMemoInfoIO?.preAlarm,
-                this@saveMemoInfoIO?.postAlarm
+                this@saveMemoInfoIO?.preAlarmPosition,
+                this@saveMemoInfoIO?.postAlarmPosition
             )
         }
     }

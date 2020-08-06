@@ -61,24 +61,14 @@ class MemoEditFragment : Fragment() {
         editViewModel = MainActivity.editViewModel
         memoContainer = memoContentsContainerLayout
 
+        //メモの保存時にSnackbarを表示
         lifecycleScope.launch {
             getShowMassageForSavedLiveData().observe(viewLifecycleOwner, Observer { typeOfFragment ->
                 if (typeOfFragment is EditFragment)
                     this@MemoEditFragment.showSnackbarForSavedMassageAtEditMemo()
 
-                resetValueOfShowMassageForSavedLiveData()
+                initValueOfShowMassageForSavedLiveData()
             })
-        }
-
-        lifecycleScope.launch {
-            editViewModel.getClearAllFocusInMemoContainerLiveData().observe(
-                viewLifecycleOwner,
-                Observer { flag ->
-                    if (flag) memoContentsContainerLayout.clearFocus()
-
-                    editViewModel.resetValueOfClearAllFocusInMemoContainerLiveData()
-                }
-            )
         }
 
         editViewModel.initEditViewModel()

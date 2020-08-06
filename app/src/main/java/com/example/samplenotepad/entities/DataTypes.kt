@@ -16,6 +16,7 @@ sealed class TypeOfSearch
 object BySearchWord : TypeOfSearch()
 object BySearchWordAndCategory : TypeOfSearch()
 object WithReminder : TypeOfSearch()
+object ByCalendar : TypeOfSearch()
 
 //MemoのViewを作成するときに新規作成なのか再編集なのか編集なし(表示のみ)なのかを判断するため
 sealed class TypeOfBuildMemoViewOperation
@@ -99,10 +100,10 @@ data class MemoRowInfo(
 data class ValuesOfOptionSetting(
     val title: String?,
     val category: String?,
-    val standardDateTimeForAlarm: String?,
-    val targetDateTime: String?,
-    val preAlarm: Int?,
-    val postAlarm: Int?
+    val baseDateTimeForAlarm: String?,
+    val reminderDateTime: String?,
+    val preAlarmPosition: Int?,
+    val postAlarmPosition: Int?
 ) { companion object }
 
 //検索TOPのCategoryリストを表示するためのDataSet

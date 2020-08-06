@@ -60,11 +60,13 @@ private fun createPopupWindow(displayFragment: MemoDisplayFragment): PopupWindow
 private fun View.setTextForReminderPopupWindow() {
     val memoInfo = MemoDisplayActivity.displayViewModel.getMemoInfo()
 
-    if (memoInfo.reminderDateTime.isNotEmpty())
-        targetDateTimeBodyTextView.setTargetDateTimeTextView(memoInfo.reminderDateTime.split(" "))
+    if (memoInfo.baseDateTimeForAlarm.isNotEmpty())
+        targetDateTimeBodyTextView.setReminderDateTimeTextView(
+            memoInfo.baseDateTimeForAlarm.split(" ")
+        )
 
-    preAlarmBodyTextView.setText(getPreAlarmTextFromPosition(memoInfo.preAlarm))
-    postAlarmBodyTextView.setText(getPostAlarmTextFromPosition(memoInfo.postAlarm))
+    preAlarmBodyTextView.setText(getPreAlarmTextFromPosition(memoInfo.preAlarmPosition))
+    postAlarmBodyTextView.setText(getPostAlarmTextFromPosition(memoInfo.postAlarmPosition))
 }
 
 private fun getPreAlarmTextFromPosition(position: Int) = when (position) {
@@ -85,12 +87,12 @@ private fun getPostAlarmTextFromPosition(position: Int) = when (position) {
     else -> R.string.post_alarm_24h
 }
 
-private fun TextView.setTargetDateTimeTextView(targetDateTimeList: List<String>) {
-    val targetDate = targetDateTimeList[0].replace('-', '/')
-    val targetTime = targetDateTimeList[1].replace(":", " : ")
-    val targetDateTime = "$targetDate  $targetTime"
+private fun TextView.setReminderDateTimeTextView(reminderDateTimeList: List<String>) {
+    val reminderDate = reminderDateTimeList[0].replace('-', '/')
+    val reminderTime = reminderDateTimeList[1]
+    val reminderDateTime = "$reminderDate  $reminderTime"
 
-    this.text = targetDateTime
+    this.text = reminderDateTime
 }
 
 private fun MemoDisplayFragment.showAlertDialogForDeleteReminder() {
@@ -104,7 +106,12 @@ private fun MemoDisplayFragment.showAlertDialogForDeleteReminder() {
 
             MemoDisplayActivity.displayViewModel.apply {
                 updateMemoInfo { memoInfo ->
-                    memoInfo.copy(reminderDateTime = "", preAlarm = 0, postAlarm = 0)
+                    memoInfo.copy(
+                        baseDateTimeForAlarm = "",
+                        reminderDateTime = "",
+                        preAlarmPosition = 0,
+                        postAlarmPosition = 0
+                    )
                 }.cancelAllAlarm()
 
                 saveMemoInfo()

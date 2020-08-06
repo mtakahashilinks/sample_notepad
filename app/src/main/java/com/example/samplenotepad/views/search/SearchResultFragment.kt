@@ -153,6 +153,7 @@ class SearchResultFragment : Fragment() {
                 listAdapter.searchAgainAndShowResult ()
                 dataSetForMemoList
             }
+            ByCalendar -> { TODO() }
         }
 
     //新しいFragmentで検索結果を表示

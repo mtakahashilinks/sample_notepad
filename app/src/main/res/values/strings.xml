@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Sample Notepad</string>
 
-    <!-- OptionMenu -->
+    <!-- AppBarOptionMenu -->
     <string name="appbar_menu_create_new_memo">新規メモの作成</string>
     <string name="appbar_menu_to_search_top">メモ検索TOPへ</string>
     <string name="appbar_menu_to_reminder_list">リマインダーリスト</string>
@@ -44,8 +44,8 @@
     <string name="register_reminder">リマインダー登録</string>
     <string name="reminder_set_date_label">日付</string>
     <string name="reminder_set_time_label">時間</string>
-    <string name="reminder_pre_alarm_label">事前通知</string>
-    <string name="reminder_post_alarm_label">事後通知</string>
+    <string name="reminder_pre_alarm_label">事前アラーム</string>
+    <string name="reminder_post_alarm_label">事後アラーム</string>
     <string name="add_format">フォーマットに追加</string>
     <string name="save_snackbar">保存しました</string>
     <string name="dialog_confirm_save_memo_title">作業内容が変更されています</string>
@@ -112,8 +112,8 @@
     <string name="popup_window_reminder_states_title">リマインダー設定</string>
     <string name="popup_window_reminder_states_delete">削除</string>
     <string name="target_date_label">設定日時：</string>
-    <string name="pre_alarm_label">事前通知：</string>
-    <string name="post_alarm_label">事後通知：</string>
+    <string name="pre_alarm_label">事前アラーム：</string>
+    <string name="post_alarm_label">事後アラーム：</string>
     <string name="alarm_none">なし</string>
     <string name="pre_alarm_5m">5分前</string>
     <string name="pre_alarm_10m">10分前</string>
@@ -146,7 +146,5 @@
 
     <!-- SearchWithReminderFragment -->
     <string name="appbar_title_search_with_reminder">Sample Notepad - Reminder List</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

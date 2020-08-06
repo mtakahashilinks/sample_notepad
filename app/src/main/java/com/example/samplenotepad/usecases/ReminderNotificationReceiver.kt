@@ -10,10 +10,12 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.clearReminderValuesInMemoInfoIO
+import com.example.samplenotepad.data.cancelAlarmIO
+import com.example.samplenotepad.data.clearAllReminderValueInDataBaseIO
 import com.example.samplenotepad.data.isAlarmExist
+import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.entities.*
-import com.example.samplenotepad.views.search.MemoSearchActivity
+import com.example.samplenotepad.views.display.MemoDisplayActivity
 
 class ReminderNotificationReceiver : BroadcastReceiver() {
 
@@ -48,18 +50,21 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
             alarmPosition
         )
 
-        //通知が全て終わったらデータベースのMemoInfoのReminder関係の値を初期地に戻す
+        //通知が全て終わったらデータベースのDataBaseのReminder関係の値を初期地に戻す
         when (alarmType) {
-            ConstValForAlarm.TARGET_DATE_TIME ->  {
+            ConstValForAlarm.REMINDER_DATE_TIME ->  {
                 val intMemoInfoId = requestCodeForAlarm / 10
                 val requestCodeForPostAlarm = intMemoInfoId * 10 + ConstValForAlarm.POST_ALARM
 
                 //postAlarmがセットされていれば発火しない
                 if (requestCodeForPostAlarm.isAlarmExist(context) == null)
-                    intMemoInfoId.toLong().clearReminderValuesInMemoInfoIO()
+                    intMemoInfoId.toLong().clearAllReminderValueInDataBaseIO()
             }
+            ConstValForAlarm.PRE_ALARM ->
+                loadMemoInfoIO((requestCodeForAlarm / 10).toLong())
+                    .cancelAlarmIO(context, ConstValForAlarm.PRE_ALARM)
             ConstValForAlarm.POST_ALARM ->
-                (requestCodeForAlarm / 10).toLong().clearReminderValuesInMemoInfoIO()
+                (requestCodeForAlarm / 10).toLong().clearAllReminderValueInDataBaseIO()
         }
     }
 
@@ -72,7 +77,7 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
         alarmType: Int,
         alarmPosition: Int
     ) {
-        val notifyIntent = Intent(context, MemoSearchActivity::class.java).apply {
+        val notifyIntent = Intent(context, MemoDisplayActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra(ConstValForMemo.MEMO_Id, memoId.toLong())
         }
@@ -83,7 +88,7 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
         //SDKのVersionが25以下の場合はチャンネルIDは無視される
         val builder = NotificationCompat.Builder(context, ConstValForAlarm.CHANNEL_ID).apply {
             val notifyTitle = when (alarmType) {
-                ConstValForAlarm.TARGET_DATE_TIME -> context.resources.getString(R.string.notification_title_target)
+                ConstValForAlarm.REMINDER_DATE_TIME -> context.resources.getString(R.string.notification_title_target)
                 ConstValForAlarm.PRE_ALARM -> context.resources.getString(
                     R.string.notification_title_pre_post,
                     context.resources.getString(R.string.reminder_pre_alarm_label),

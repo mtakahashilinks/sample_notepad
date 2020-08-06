@@ -1,6 +1,5 @@
 package com.example.samplenotepad.viewModels
 
-
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +13,7 @@ import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.createMemoContentsOperationActor
 import com.example.samplenotepad.usecases.getMemoContentsOperationActor
+import com.example.samplenotepad.usecases.updateText
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
@@ -25,9 +25,9 @@ class MemoEditViewModel : ViewModel() {
 
     private var memoInfo: MemoInfo? = null
     private var savePointOfMemoContents = listOf<MemoRowInfo>()
+    private var isChangedValueInOptionFragment = false
     private var categoryList = listOf<String>()
     private var templateNameList = listOf<String>()
-    private val clearAllFocusInMemoContainerLiveData = MutableLiveData<Boolean>(false)
 
     internal fun getMemoInfo() = memoInfo
 
@@ -41,14 +41,20 @@ class MemoEditViewModel : ViewModel() {
         savePointOfMemoContents = memoContentsDefer.await()
     }
 
-    internal fun isSavedMemoContents(): Boolean = runBlocking {
-        //まずFocusを外してmemoContentsのTextを更新してから比較する
-        clearAllFocusInMemoContainerLiveData.postValue(true)
+    internal fun isSaved(): Boolean = runBlocking {
+        //まずmemoContentsのTextを更新してから比較する
+        updateText()
+
         val memoContentsDefer = CompletableDeferred<MemoContents>()
         getMemoContentsOperationActor().send(GetMemoContents(memoContentsDefer))
 
         return@runBlocking memoContentsDefer.await() == savePointOfMemoContents
+                && !isChangedValueInOptionFragment
     }
+
+    internal fun MemoOptionFragment.valueChanged() { isChangedValueInOptionFragment = true }
+
+    internal fun clearIsChangedValueInOptionFragment() { isChangedValueInOptionFragment = false }
 
 
     internal fun getCategoryList() = categoryList
@@ -91,11 +97,6 @@ class MemoEditViewModel : ViewModel() {
     private fun loadAndSetTemplateNameList() =
         updateTemplateNameList { loadTemplateNameListIO() }
 
-    internal fun getClearAllFocusInMemoContainerLiveData() = clearAllFocusInMemoContainerLiveData
-
-    internal fun resetValueOfClearAllFocusInMemoContainerLiveData() {
-        clearAllFocusInMemoContainerLiveData.postValue(false)
-    }
 
     internal fun createNewMemoContentsExecuteActor() = createMemoContentsOperationActor(this)
 

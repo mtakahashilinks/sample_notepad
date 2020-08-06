@@ -54,22 +54,18 @@ class MemoOptionFragment : Fragment() {
                     true -> null
                     false -> optionFragment.categoryTextView.text.toString()
                 }
-                val targetDateTime = optionFragment.getTargetDateTimeParams(reminderSwitch)
+                val reminderDateTime = optionFragment.getReminderDateTimeParams(reminderSwitch)
                 val preAlarm =
-                    optionFragment.preAlarmSpinnerView.getPreAndPostAlarmParams(
-                        reminderSwitch
-                    )
+                    optionFragment.preAlarmSpinnerView.getPreAndPostAlarmParams(reminderSwitch)
                 val postAlarm =
-                    optionFragment.postAlarmSpinnerView.getPreAndPostAlarmParams(
-                        reminderSwitch
-                    )
+                    optionFragment.postAlarmSpinnerView.getPreAndPostAlarmParams(reminderSwitch)
 
                 ValuesOfOptionSetting(
-                    title, category, targetDateTime, targetDateTime, preAlarm, postAlarm
+                    title, category, reminderDateTime, reminderDateTime, preAlarm, postAlarm
                 )
             }
 
-        private fun MemoOptionFragment.getTargetDateTimeParams(switchView: Switch): String? =
+        private fun MemoOptionFragment.getReminderDateTimeParams(switchView: Switch): String? =
             when (switchView.isChecked) {
                 true -> {
                     val reminderDate = this.reminderDateView.text.toString().replace('/', '-')
@@ -115,15 +111,20 @@ class MemoOptionFragment : Fragment() {
                 true -> {
                     view.hideSoftwareKeyBoard(requireContext())
                     changeStateForReminderSwitch(true, View.VISIBLE)
+ //                   preAlarmSpinnerView.setListenerOnAlarmSpinner()
+ //                   postAlarmSpinnerView.setListenerOnAlarmSpinner()
                 }
                 false -> changeStateForReminderSwitch(false, View.INVISIBLE)
             }
+
+            editViewModel.apply { valueChanged() }
         }
 
         //リマインダーの日付にDialogで選択した値をセットする処理
         reminderDateView.setOnClickListener {
             DatePickerFragment { year, month, day ->
                 reminderDateView.text = String.format("%04d/%02d/%02d", year, month + 1, day)
+                editViewModel.apply { valueChanged() }
             }.show(requireActivity().supportFragmentManager, "date_dialog")
         }
 
@@ -131,8 +132,12 @@ class MemoOptionFragment : Fragment() {
         reminderTimeView.setOnClickListener {
             TimePickerFragment { hour, minute ->
                 reminderTimeView.text = String.format("%02d : %02d", hour, minute)
+                editViewModel.apply { valueChanged() }
             }.show(requireActivity().supportFragmentManager, "time_dialog")
         }
+
+        preAlarmSpinnerView.setListenerOnAlarmSpinner()
+        postAlarmSpinnerView.setListenerOnAlarmSpinner()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -146,6 +151,17 @@ class MemoOptionFragment : Fragment() {
     }
 
 
+    //spinnerのItemがクリックされたらisChangedValueInOptionFragmentをtrueに変更
+    private fun Spinner.setListenerOnAlarmSpinner() {
+        this.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(p0: AdapterView<*>?) { }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                editViewModel.apply { valueChanged() }
+            }
+        }
+    }
+
     private fun MemoInfo?.initValueOfAllViewWithMemoInfo() {
         titleBodyTextView.setCounterText (titleCounterView, 15) //TitleのViewに文字数カウンターをセット
         categoryTextView.setCounterText(categoryCounterView, 15) //CategoryのViewに文字数カウンターをセット
@@ -154,9 +170,9 @@ class MemoOptionFragment : Fragment() {
     }
 
     private fun MemoInfo.setViewsProperties() {
-        when (this.reminderDateTime.isNotEmpty()){
+        when (this.baseDateTimeForAlarm.isNotEmpty()){
             true -> this.setReminderSwitchOnForExistMemo(
-                this@setViewsProperties.reminderDateTime.split(" ")
+                this@setViewsProperties.baseDateTimeForAlarm.split(" ")
             )
             false -> this.apply {
                 setTitleTextWithMemoInfo()
@@ -169,6 +185,8 @@ class MemoOptionFragment : Fragment() {
     private fun MemoInfo.setReminderSwitchOnForExistMemo(reminderDateTimeList: List<String>) {
         reminderOnOffSwitchView.isChecked = true
         changeStateForReminderSwitch(true, View.VISIBLE)
+        //preAlarmSpinnerView.setListenerOnAlarmSpinner()
+        //postAlarmSpinnerView.setListenerOnAlarmSpinner()
 
         reminderDateTimeList.setReminderTargetDateTimeWithMemoInfo()
 
@@ -237,8 +255,8 @@ class MemoOptionFragment : Fragment() {
     }
 
     private fun MemoInfo.setReminderPreAndPostAlarmWithMemoInfo() {
-        preAlarmSpinnerView.setSelection(this.preAlarm)
-        postAlarmSpinnerView.setSelection(this.postAlarm)
+        preAlarmSpinnerView.setSelection(this.preAlarmPosition)
+        postAlarmSpinnerView.setSelection(this.postAlarmPosition)
     }
 
 
@@ -274,6 +292,7 @@ class MemoOptionFragment : Fragment() {
         this.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 counterView.text = formatter.format((s?.toString() ?: "0").length)
+                editViewModel.apply { valueChanged() }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}

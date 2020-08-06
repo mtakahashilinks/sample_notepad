@@ -42,7 +42,7 @@ private val showMassageForSavedLiveData = MutableLiveData<TypeOfFragment>(NoneOf
 
 internal fun getShowMassageForSavedLiveData() = showMassageForSavedLiveData
 
-internal fun resetValueOfShowMassageForSavedLiveData() {
+internal fun initValueOfShowMassageForSavedLiveData() {
     showMassageForSavedLiveData.postValue(NoneOfThem)
 }
 
@@ -71,6 +71,7 @@ internal fun initMemoContentsOperation(
                 operationActor.send(CreateFirstMemoEditText(Text(""), CreateNewMemo))
 
                 updateSavePointOfMemoContents()
+                clearIsChangedValueInOptionFragment()
             }
         }
         is EditExistMemo -> {
@@ -137,6 +138,15 @@ internal fun MemoEditText.dotOperation() = runBlocking {
     }
 }
 
+internal fun updateText() = runBlocking {
+    val focusView = memoContainer.findFocus()
+
+    if (focusView != null && focusView is MemoEditText)
+        editViewModel.viewModelScope.launch {
+            operationActor.send(UpdateTextOfMemoRowInfo(focusView))
+        }
+}
+
 internal fun clearAll() = runBlocking {
     Log.d("場所:clearAll", "ClearAll処理に入った")
 
@@ -150,8 +160,7 @@ internal fun clearAll() = runBlocking {
 }
 
 internal fun saveMemo(buildType: TypeOfBuildMemoViewOperation) = runBlocking {
-    //フォーカスを外しすことでupdateTextOfMemoRowInfoが呼ばれてTextプロパティが更新される
-    memoContainer.clearFocus()
+    updateText() //まずmemoContentsのTextを更新する
 
     operationActor.send(SaveMemoInfo(buildType))
 
@@ -161,7 +170,10 @@ internal fun saveMemo(buildType: TypeOfBuildMemoViewOperation) = runBlocking {
             showMassageForSavedLiveData.postValue(DisplayFragment)
         }
         else -> {
-            editViewModel.updateSavePointOfMemoContents()
+            editViewModel.apply {
+                updateSavePointOfMemoContents()
+                clearIsChangedValueInOptionFragment()
+            }
             showMassageForSavedLiveData.postValue(EditFragment)
         }
     }
@@ -205,7 +217,10 @@ private fun createMemoRowsForExistMemo(
         else -> {
             memoContents.toList().createFirstRow().createNextRow()
 
-            editViewModel.updateSavePointOfMemoContents()
+            editViewModel.apply {
+                updateSavePointOfMemoContents()
+                clearIsChangedValueInOptionFragment()
+            }
         }
     }
 }
@@ -259,11 +274,11 @@ private fun CoroutineScope.memoContentsOperationActor() =
 
 
 private fun updateTextOfMemoRowInfo(
-    operateType: UpdateTextOfMemoRowInfo,
+    operationType: UpdateTextOfMemoRowInfo,
     memoContents: MemoContents
 ): MemoContents = memoContents.flatMap { memoRowInfo ->
-    if (memoRowInfo.memoEditTextId.value == operateType.memoEditText.id)
-        listOf(memoRowInfo.copy(memoText = Text(operateType.memoEditText.text.toString())))
+    if (memoRowInfo.memoEditTextId.value == operationType.memoEditText.id)
+        listOf(memoRowInfo.copy(memoText = Text(operationType.memoEditText.text.toString())))
     else listOf(memoRowInfo)
 }
 
