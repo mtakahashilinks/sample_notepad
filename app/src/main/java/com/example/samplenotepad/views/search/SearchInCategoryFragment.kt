@@ -66,7 +66,7 @@ class SearchInCategoryFragment : Fragment() {
         }
 
         //選択されたカテゴリーをViewのTextにセット
-        searchWordTextView.text =
+        searchSubjectTextView.text =
             getString(R.string.search_in_category_category_name_text, category)
 
         //SearchViewの設定

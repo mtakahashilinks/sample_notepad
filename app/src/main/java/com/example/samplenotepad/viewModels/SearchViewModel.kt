@@ -16,6 +16,7 @@ class SearchViewModel : ViewModel() {
     private var dataSetForMemoList = listOf<MemoInfo>()
     private var selectedCategoryInSearchTop = ""
     private var searchWord = ""
+    private var selectedDateOnCalendar =""
 
     internal fun createMemoContentsOperationActor() = createMemoContentsOperationActor(this)
 
@@ -58,7 +59,7 @@ class SearchViewModel : ViewModel() {
     internal fun loadAndSetDataSetForMemoListFindBySearchWord(
         mSearchWord: String
     ): List<MemoInfo> {
-        searchWord = mSearchWord
+        setSearchWord(mSearchWord)
 
         return updateDataSetForMemoList { loadMemoInfoListBySearchWordIO(mSearchWord) }
     }
@@ -66,7 +67,7 @@ class SearchViewModel : ViewModel() {
     internal fun loadAndSetDataSetForMemoListFindBySearchWordAndCategory(
         mSearchWord: String
     ): List<MemoInfo> {
-        searchWord = mSearchWord
+        setSearchWord(mSearchWord)
 
         return updateDataSetForMemoList {
             loadMemoInfoListBySearchWordAndCategoryIO(selectedCategoryInSearchTop, mSearchWord)
@@ -79,18 +80,43 @@ class SearchViewModel : ViewModel() {
     internal fun loadAndSetDataSetForMemoListFindBySearchWordWithReminder(
         mSearchWord: String
     ): List<MemoInfo> {
-        searchWord = mSearchWord
+        setSearchWord(mSearchWord)
 
         return updateDataSetForMemoList { loadMemoInfoListBySearchWordWithReminderIO(mSearchWord) }
     }
 
-    internal fun getSearchWord() = searchWord
+
+    internal fun loadAndSetDataSetForMemoListFindBySearchWordAndDate(
+        mSearchWord: String
+    ): List<MemoInfo> {
+        setSearchWord(mSearchWord)
+
+        return updateDataSetForMemoList {
+            loadMemoInfoListBySearchWordAndDateIO(mSearchWord, selectedDateOnCalendar)
+        }
+    }
+
 
     internal fun getSelectedCategory() = selectedCategoryInSearchTop
 
     internal fun setSelectedCategory(category: String) {
         selectedCategoryInSearchTop = category
     }
+
+
+    internal fun getSearchWord() = searchWord
+
+    internal fun setSearchWord(value: String) {
+        searchWord = value
+    }
+
+
+    internal fun getSelectedDateOnCalendar() = selectedDateOnCalendar
+
+    internal fun setSelectedDateOnCalendar(selectedDate: String) {
+        selectedDateOnCalendar = selectedDate
+    }
+
 
     internal fun MemoInfo.cancelAllAlarm(): MemoInfo {
         this.cancelAllAlarmIO(SampleMemoApplication.instance.baseContext)

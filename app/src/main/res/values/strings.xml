@@ -135,6 +135,7 @@
     <string name="appbar_title_search_result">Sample Notepad - 検索結果</string>
     <string name="search_view_hint_search_result">メモの検索</string>
     <string name="search_word_text">検索ワード：「%s」</string>
+    <string name="search_date_text">日付：「%s」</string>
     <string name="no_match_result_text">一致するメモがありませんでした</string>
 
     <!-- ReminderBroadcastReceiver -->

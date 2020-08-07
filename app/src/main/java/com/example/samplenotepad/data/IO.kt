@@ -14,7 +14,7 @@ import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.*
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.sql.Timestamp
@@ -226,7 +226,7 @@ private fun MemoInfo.saveMemoInfoToDatabaseAsync(viewModel: ViewModel) = runBloc
             0L -> {
                 //databaseに新しいmemoInfoを挿入
                 val rowId = memoInfoDao.insertMemoInfoDao(this@saveMemoInfoToDatabaseAsync)
-                Log.d("場所:saveMemoInfo#挿入", "NewMemoId=${rowId} MemoContents=${Json.parse(MemoRowInfo.serializer().list, memoInfoDao.getMemoInfoByIdDao(rowId).contents)}")
+                Log.d("場所:saveMemoInfo#挿入", "NewMemoId=${rowId} MemoContents=${memoInfoDao.getMemoInfoByIdDao(rowId).contents.deserializeToMemoContents()}")
 
                 this@saveMemoInfoToDatabaseAsync
                     .updateMemoInfoInViewModel(viewModel, rowId)?.setAlarm(context)
@@ -234,7 +234,7 @@ private fun MemoInfo.saveMemoInfoToDatabaseAsync(viewModel: ViewModel) = runBloc
             else -> {
                 //databaseに編集したmemoInfoをアップデート
                 memoInfoDao.updateMemoInfoDao(this@saveMemoInfoToDatabaseAsync)
-                Log.d("場所:saveMemoInfo#アップデート", "MemoId=${this@saveMemoInfoToDatabaseAsync.rowid} MemoContents=${Json.parse(MemoRowInfo.serializer().list, memoInfoDao.getMemoInfoByIdDao(this@saveMemoInfoToDatabaseAsync.rowid).contents)}")
+                Log.d("場所:saveMemoInfo#アップデート", "MemoId=${this@saveMemoInfoToDatabaseAsync.rowid} MemoContents=${memoInfoDao.getMemoInfoByIdDao(this@saveMemoInfoToDatabaseAsync.rowid).contents.deserializeToMemoContents()}")
 
                 this@saveMemoInfoToDatabaseAsync
                     .updateMemoInfoInViewModel(viewModel, null)?.setAlarm(context)
@@ -285,11 +285,17 @@ private fun MemoContents.createContentsText(): String {
     return builder.toString()
 }
 
+private fun MemoContents.serializeToJson() =
+    Json.stringify(ListSerializer(MemoRowInfo.serializer()), this)
+
+private fun String.deserializeToMemoContents() =
+    Json.parse(ListSerializer(MemoRowInfo.serializer()), this)
+
 internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoContents) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")
 
     val stringMemoContents =
-        async(Dispatchers.Default) { Json.stringify(MemoRowInfo.serializer().list, memoContents) }
+        async(Dispatchers.Default) { memoContents.serializeToJson() }
     val contentsTextForSearch = async(Dispatchers.Default) { memoContents.createContentsText() }
 
     val newMemoInfo = when (viewModel) {
@@ -353,7 +359,7 @@ internal fun saveTemplateBodyIO(
     templateName: String,
     template: MemoContents
 ) = runBlocking {
-    val stringData = Json.stringify(MemoRowInfo.serializer().list, template.toList())
+    val stringData = template.toList().serializeToJson()
 
     launch(Dispatchers.IO) {
         SampleMemoApplication.instance.openFileOutput(
@@ -367,10 +373,10 @@ internal fun loadTemplateBodyIO(templateName: String): MemoContents = runBlockin
 
     withContext(Dispatchers.IO) {
         when (file.exists()) {
-            true -> Json.parse(
-                MemoRowInfo.serializer().list,
-                SampleMemoApplication.instance.openFileInput(ConstValForMemo.TEMPLATE_FILE + templateName)
-                    .bufferedReader().readLine())
+            true ->
+                SampleMemoApplication.instance.openFileInput(
+                    ConstValForMemo.TEMPLATE_FILE + templateName
+                ).bufferedReader().readLine().deserializeToMemoContents()
             false -> throw(IllegalArgumentException("File does not exist for「$templateName」"))
         }
     }
@@ -395,9 +401,8 @@ internal fun loadMemoInfoListBySearchWordIO(
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val searchWord = "%$searchWord%"
 
-        memoInfoDao.getMemoInfoListBySearchWordDao(searchWord)
+        memoInfoDao.getMemoInfoListBySearchWordDao("%$searchWord%")
     }
 }
 
@@ -407,9 +412,8 @@ internal fun loadMemoInfoListBySearchWordAndCategoryIO(
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val searchWord = "%$searchWord%"
 
-        memoInfoDao.getMemoInfoListBySearchWordAndCategoryDao(category, searchWord)
+        memoInfoDao.getMemoInfoListBySearchWordAndCategoryDao(category, "%$searchWord%")
     }
 }
 
@@ -426,9 +430,19 @@ internal fun loadMemoInfoListBySearchWordWithReminderIO(
 ): List<MemoInfo> = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
-        val searchWord = "%$searchWord%"
 
-        memoInfoDao.getMemoInfoListBySearchWordWithReminderDao(searchWord)
+        memoInfoDao.getMemoInfoListBySearchWordWithReminderDao("%$searchWord%")
+    }
+}
+
+internal fun loadMemoInfoListBySearchWordAndDateIO(
+    searchWord: String,
+    date: String
+): List<MemoInfo> = runBlocking {
+    withContext(Dispatchers.IO) {
+        val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+
+        memoInfoDao.getMemoInfoListBySearchWordAndDateDao("%$searchWord%", "$date%")
     }
 }
 

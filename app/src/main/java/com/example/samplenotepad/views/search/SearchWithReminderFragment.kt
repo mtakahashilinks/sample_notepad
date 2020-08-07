@@ -97,7 +97,7 @@ class SearchWithReminderFragment : Fragment() {
         }
 
         //必要ないのでtextViewを非表示にする
-        searchWordTextView.visibility = View.GONE
+        searchSubjectTextView.visibility = View.GONE
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

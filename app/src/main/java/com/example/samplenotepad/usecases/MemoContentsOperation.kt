@@ -301,20 +301,20 @@ private fun createNewMemoEditText(
     memoEditTextId: Int?, text : Text, executeType: TypeOfBuildMemoViewOperation
 ): MemoEditText = when (executeType) {
         is CreateNewMemo -> {
-            MemoEditText(editFragment.context, editViewModel, operationActor).apply {
+            MemoEditText(editFragment.requireContext(), editViewModel, operationActor).apply {
                 id = View.generateViewId()
                 setCommonLayoutParams()
             }
         }
         is EditExistMemo -> {
-            MemoEditText(editFragment.context, editViewModel, operationActor).apply {
+            MemoEditText(editFragment.requireContext(), editViewModel, operationActor).apply {
                 setCommonLayoutParams()
                 id = memoEditTextId ?: throw(NullPointerException("memoEditTextId mast be not null"))
                 setText(text.value)
             }
         }
         is DisplayExistMemo -> {
-            MemoEditText(displayFragment.context, editViewModel, operationActor).apply {
+            MemoEditText(displayFragment.requireContext(), editViewModel, operationActor).apply {
                 setCommonLayoutParams()
                 id = memoEditTextId ?: throw(NullPointerException("memoEditTextId mast be not null"))
                 setText(text.value)

@@ -35,8 +35,6 @@ class SearchResultFragment : Fragment() {
             }
         }
 
-
-
         private fun resetFlagsInFragment() {
             instance = null
             searchType = BySearchWord
@@ -46,8 +44,6 @@ class SearchResultFragment : Fragment() {
 
     private lateinit var searchViewModel: SearchViewModel
     private lateinit var listAdapter: SearchMemoListAdapter
-    private lateinit var searchWord: String
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +98,7 @@ class SearchResultFragment : Fragment() {
             ).attachToRecyclerView(this)
         }
 
-        setSearchWordText()
+        setSearchSubjectText()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -153,7 +149,12 @@ class SearchResultFragment : Fragment() {
                 listAdapter.searchAgainAndShowResult ()
                 dataSetForMemoList
             }
-            ByCalendar -> { TODO() }
+            OnCalendar -> {
+                val dataSetForMemoList = searchViewModel
+                    .loadAndSetDataSetForMemoListFindBySearchWordAndDate(searchWord)
+                listAdapter.searchAgainAndShowResult ()
+                dataSetForMemoList
+            }
         }
 
     //新しいFragmentで検索結果を表示
@@ -163,13 +164,25 @@ class SearchResultFragment : Fragment() {
             false -> noMatchResultTextView.visibility = View.GONE
         }
 
-        setSearchWordText()
+        setSearchSubjectText()
         this.notifyDataSetChanged()
     }
 
-    private fun setSearchWordText() {
-        searchWord = searchViewModel.getSearchWord()
-        memoSearchView.setQuery(searchWord, false)
-        searchWordTextView.text = getString(R.string.search_word_text, searchWord)
+    private fun setSearchSubjectText() {
+        when (searchType) {
+            is OnCalendar -> {
+                val selectedDate =
+                    searchViewModel.getSelectedDateOnCalendar().replace('-', '/')
+                val searchWord = searchViewModel.getSearchWord()
+
+                memoSearchView.setQuery(searchWord, false)
+                searchSubjectTextView.text = getString(R.string.search_date_text, selectedDate)
+            }
+            else -> {
+                val searchWord = searchViewModel.getSearchWord()
+                memoSearchView.setQuery(searchWord, false)
+                searchSubjectTextView.text = getString(R.string.search_word_text, searchWord)
+            }
+        }
     }
 }

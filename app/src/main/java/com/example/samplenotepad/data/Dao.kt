@@ -105,6 +105,19 @@ interface MemoInfoDao {
     )
     suspend fun getMemoInfoListBySearchWordWithReminderDao(searchWord: String): List<MemoInfo>
 
+    @Query(
+        """
+        SELECT * 
+        FROM memoInfoTable 
+        WHERE baseDateTimeForAlarm LIKE :date AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        ORDER BY createdDateTime DESC
+        """
+    )
+    suspend fun getMemoInfoListBySearchWordAndDateDao(
+        searchWord: String,
+        date: String
+    ): List<MemoInfo>
+
     @Query("""
         SELECT category
         FROM MemoInfoTable

@@ -18,7 +18,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 
 class MemoEditText(
-    context: Context?,
+    context: Context,
     val viewModel: ViewModel,
     val executeActor: SendChannel<TypeOfMemoContentsOperation>
 ) : AppCompatEditText(context) {

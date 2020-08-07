@@ -16,7 +16,7 @@ sealed class TypeOfSearch
 object BySearchWord : TypeOfSearch()
 object BySearchWordAndCategory : TypeOfSearch()
 object WithReminder : TypeOfSearch()
-object ByCalendar : TypeOfSearch()
+object OnCalendar : TypeOfSearch()
 
 //MemoのViewを作成するときに新規作成なのか再編集なのか編集なし(表示のみ)なのかを判断するため
 sealed class TypeOfBuildMemoViewOperation
