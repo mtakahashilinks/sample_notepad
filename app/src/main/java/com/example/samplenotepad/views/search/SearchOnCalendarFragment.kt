@@ -9,21 +9,21 @@ import com.applandeo.materialcalendarview.EventDay
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.OnCalendar
 import com.example.samplenotepad.views.moveToSearchResult
-import kotlinx.android.synthetic.main.fragment_search_by_calendar.*
+import kotlinx.android.synthetic.main.fragment_search_on_calendar.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class SearchByCalendarFragment : Fragment() {
+class SearchOnCalendarFragment : Fragment() {
 
     companion object {
-        private var instance: SearchByCalendarFragment? = null
+        private var instance: SearchOnCalendarFragment? = null
 
-        internal fun instanceToAddOnActivity(): SearchByCalendarFragment {
+        internal fun instanceToAddOnActivity(): SearchOnCalendarFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {
                 true -> mInstance
-                false -> SearchByCalendarFragment().apply { instance = this }
+                false -> SearchOnCalendarFragment().apply { instance = this }
             }
         }
 
@@ -41,7 +41,7 @@ class SearchByCalendarFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_search_by_calendar, container, false)
+        return inflater.inflate(R.layout.fragment_search_on_calendar, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -63,7 +63,7 @@ class SearchByCalendarFragment : Fragment() {
                     setSearchWord("")
                 }
 
-                this@SearchByCalendarFragment.requireActivity().moveToSearchResult(OnCalendar)
+                this@SearchOnCalendarFragment.requireActivity().moveToSearchResult(OnCalendar)
             }
         }
     }
@@ -79,7 +79,7 @@ class SearchByCalendarFragment : Fragment() {
             MemoSearchActivity.searchViewModel.loadAndSetDataSetForMemoListFindByWithReminder()
 
         return memoList.map { memoInfo ->
-            EventDay(getCalendarFrom(memoInfo.baseDateTimeForAlarm), R.drawable.ic_alarm_black_24dp)
+            EventDay(getCalendarFrom(memoInfo.baseDateTimeForAlarm), R.drawable.ic_calendar_event_8)
         }
     }
 

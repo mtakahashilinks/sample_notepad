@@ -86,7 +86,7 @@ internal fun FragmentActivity.moveToSearchByCalendar() {
         .addToBackStack(ConstValForSearch.SEARCH_BY_CALENDAR)
         .replace(
             R.id.searchContainer,
-            SearchByCalendarFragment.instanceToAddOnActivity(),
+            SearchOnCalendarFragment.instanceToAddOnActivity(),
             ConstValForSearch.SEARCH_BY_CALENDAR
         )
         .commit()

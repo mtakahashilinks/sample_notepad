@@ -94,16 +94,13 @@ class MemoDisplayActivity : AppCompatActivity() {
                 moveToMainActivity()
                 true
             }
+            R.id.deleteMemo -> {TODO()}
             R.id.toSearchTop -> {
                 moveToSearchActivity(ConstValForSearch.SEARCH_TOP)
                 true
             }
             R.id.toReminderList -> {
                 moveToSearchActivity(ConstValForSearch.REMINDER_LIST)
-                true
-            }
-            R.id.toSearchByCalendar -> {
-                moveToSearchActivity(ConstValForSearch.SEARCH_BY_CALENDAR)
                 true
             }
             R.id.finishApp -> {

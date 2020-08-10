@@ -1,6 +1,7 @@
 package com.example.samplenotepad.views.search
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import com.example.samplenotepad.usecases.searchMemoListRecyclerView.SearchMemoL
 import com.example.samplenotepad.usecases.searchMemoListRecyclerView.getCallbackForItemTouchHelper
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.moveToDisplayActivity
+import com.example.samplenotepad.views.moveToSearchByCalendar
 import com.example.samplenotepad.views.moveToSearchResult
 import kotlinx.android.synthetic.main.fragment_search_result.*
 
@@ -113,6 +115,14 @@ class SearchWithReminderFragment : Fragment() {
         //DataSetForMemoListを更新してからlistAdapterも更新
         val dataSetForMemoList = searchViewModel.loadAndSetDataSetForMemoListFindByWithReminder()
         listAdapter.notifyDataSetChanged()
+
+        //カレンダー検索へのボタンの表示とクリックリスナー登録
+        moveToCalendarBtn.apply {
+            visibility = View.VISIBLE
+            setOnClickListener {
+                this@SearchWithReminderFragment.requireActivity().moveToSearchByCalendar()
+            }
+        }
 
         //リマインダー付きMemoが無い場合に表示する
         when (dataSetForMemoList.isEmpty()) {

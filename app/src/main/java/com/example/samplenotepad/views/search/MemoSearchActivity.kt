@@ -40,48 +40,14 @@ class MemoSearchActivity : AppCompatActivity() {
             createMemoContentsOperationActor()
         }
 
-        //searchIdによって遷移先のFragmentを選択
-        when (intent.getStringExtra(ConstValForSearch.SEARCH_ID)) {
-            ConstValForSearch.SEARCH_TOP ->
-                moveToSearchTopAndCancelAllStacks()
-            ConstValForSearch.REMINDER_LIST -> {
-                supportFragmentManager.apply {
-                    moveToSearchTopAndCancelAllStacks()
-                    moveToReminderList()
-                }
-            }
-            ConstValForSearch.SEARCH_BY_CALENDAR -> {
-                supportFragmentManager.apply {
-                    moveToSearchTopAndCancelAllStacks()
-                    moveToSearchByCalendar()
-                }
-            }
-        }
+        intent?.attachFragmentBySearchId()
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.d("場所:SearchActivity", "onNewIntentが呼ばれた activity=$this")
-        Log.d("場所:SearchActivity#onNewIntent", "intent=${intent?.getStringExtra(ConstValForSearch.SEARCH_ID)}")
-        if (intent != null) {
-            //searchIdによって遷移先のFragmentを選択
-            when (intent.getStringExtra(ConstValForSearch.SEARCH_ID)) {
-                ConstValForSearch.SEARCH_TOP ->
-                    moveToSearchTopAndCancelAllStacks()
-                ConstValForSearch.REMINDER_LIST -> {
-                    supportFragmentManager.apply {
-                        moveToSearchTopAndCancelAllStacks()
-                        moveToReminderList()
-                    }
-                }
-                ConstValForSearch.SEARCH_BY_CALENDAR -> {
-                    supportFragmentManager.apply {
-                        moveToSearchTopAndCancelAllStacks()
-                        moveToSearchByCalendar()
-                    }
-                }
-            }
-        }
+
+        intent?.attachFragmentBySearchId()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -136,15 +102,25 @@ class MemoSearchActivity : AppCompatActivity() {
                 checkIfNeedAction(ConstValForSearch.REMINDER_LIST) {
                     moveToReminderList()
                 }
-            R.id.toSearchByCalendar ->
-                checkIfNeedAction(ConstValForSearch.SEARCH_BY_CALENDAR) {
-                    moveToSearchByCalendar()
-                }
             R.id.finishApp -> {
                 showAlertDialogForFinishApp()
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    //searchIdによって遷移先のFragmentを選択
+    private fun Intent.attachFragmentBySearchId() {
+        when (this.getStringExtra(ConstValForSearch.SEARCH_ID)) {
+            ConstValForSearch.SEARCH_TOP ->
+                moveToSearchTopAndCancelAllStacks()
+            ConstValForSearch.REMINDER_LIST -> {
+                supportFragmentManager.apply {
+                    moveToSearchTopAndCancelAllStacks()
+                    moveToReminderList()
+                }
+            }
         }
     }
 

@@ -17,10 +17,9 @@
         android:background="@drawable/search_view_background"
         android:iconifiedByDefault="false"
         android:queryHint="@string/search_view_hint_search_result"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/moveToCalendarBtn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </SearchView>
+        app:layout_constraintTop_toTopOf="parent"></SearchView>
 
     <TextView
         android:id="@+id/searchSubjectTextView"
@@ -32,20 +31,34 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/memoSearchView" />
 
+    <ImageButton
+        android:id="@+id/moveToCalendarBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/background_transparent"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+        android:src="@drawable/ic_baseline_calendar_today_28"
+        android:text="@string/search_move_to_calendar"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/memoSearchView"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchResultRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchSubjectTextView"
         tools:listitem="@layout/search_memo_list_row" />
-
 
     <TextView
         android:id="@+id/noMatchResultTextView"

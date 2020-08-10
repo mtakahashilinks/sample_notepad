@@ -1,6 +1,7 @@
 package com.example.samplenotepad.views.search
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import com.example.samplenotepad.usecases.searchMemoListRecyclerView.SearchMemoL
 import com.example.samplenotepad.usecases.searchMemoListRecyclerView.getCallbackForItemTouchHelper
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.moveToDisplayActivity
+import com.example.samplenotepad.views.moveToSearchByCalendar
 import kotlinx.android.synthetic.main.fragment_search_result.*
 
 
@@ -57,6 +59,7 @@ class SearchResultFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("場所:SearchResultFragment", "onViewCreatedが呼ばれた")
 
         searchViewModel = MemoSearchActivity.searchViewModel
 
@@ -107,6 +110,7 @@ class SearchResultFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("場所:SearchResultFragment", "onResumeが呼ばれた")
 
         //アプリバーのタイトルをセット
         activity?.title = getString(R.string.appbar_title_search_result)
@@ -115,6 +119,18 @@ class SearchResultFragment : Fragment() {
         val dataSetForMemoList =
             getDataSetForMemoListBySearchTypeAndUpdateView(searchViewModel.getSearchWord())
 
+        //カレンダー検索へのボタンの表示・非表示切り替えとクリックリスナー登録
+        when (searchType is WithReminder) {
+            true ->
+                moveToCalendarBtn.apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        this@SearchResultFragment.requireActivity().moveToSearchByCalendar()
+                    }
+                }
+            false -> moveToCalendarBtn.visibility = View.GONE
+
+        }
         //検索ワードに合うものが無い場合に表示する
         when (dataSetForMemoList.isEmpty()) {
             true -> noMatchResultTextView.visibility = View.VISIBLE

@@ -132,7 +132,6 @@ class MainActivity : AppCompatActivity() {
             R.id.createNewMemo -> createNewMemo()
             R.id.toSearchTop -> moveToSearchTop()
             R.id.toReminderList -> moveToReminderList()
-            R.id.toSearchByCalendar -> moveToSearchByCalendar()
             R.id.finishApp -> showAlertDialogForFinishApp()
             else -> super.onOptionsItemSelected(item)
         }
@@ -160,12 +159,6 @@ class MainActivity : AppCompatActivity() {
         checkIfNeedToShowDialogForOptionMenu {
             moveToSearchActivity(ConstValForSearch.REMINDER_LIST)
         }
-
-    private fun moveToSearchByCalendar() =
-        checkIfNeedToShowDialogForOptionMenu {
-            moveToSearchActivity(ConstValForSearch.SEARCH_BY_CALENDAR)
-        }
-
 
     private fun checkIfNeedToShowDialogForOptionMenu(action: () -> Unit) =
         when (editViewModel.isSaved()) {

@@ -3,9 +3,9 @@
 
     <!-- AppBarOptionMenu -->
     <string name="appbar_menu_create_new_memo">新規メモの作成</string>
-    <string name="appbar_menu_to_search_top">メモ検索TOPへ</string>
+    <string name="appbar_menu_delete_memo">このメモを削除</string>
+    <string name="appbar_menu_to_search_top">検索TOPへ</string>
     <string name="appbar_menu_to_reminder_list">リマインダーリスト</string>
-    <string name="appbar_menu_to_Search_by_calendar">カレンダー検索</string>
     <string name="appbar_menu_finish_app">アプリを終了する</string>
 
     <!-- MemoEditFragment -->
@@ -136,6 +136,7 @@
     <string name="search_view_hint_search_result">メモの検索</string>
     <string name="search_word_text">検索ワード：「%s」</string>
     <string name="search_date_text">日付：「%s」</string>
+    <string name="search_move_to_calendar">カレンダー検索</string>
     <string name="no_match_result_text">一致するメモがありませんでした</string>
 
     <!-- ReminderBroadcastReceiver -->
@@ -147,5 +148,9 @@
 
     <!-- SearchWithReminderFragment -->
     <string name="appbar_title_search_with_reminder">Sample Notepad - Reminder List</string>
+
+    <!-- SearchOnCalendarFragment -->
+    <string name="appbar_title_search_on_calendar">Sample Notepad - カレンダー検索</string>
+    <string name="describe_event_mark_text">--- リマインダーがセットされている日</string>
 
 </resources>

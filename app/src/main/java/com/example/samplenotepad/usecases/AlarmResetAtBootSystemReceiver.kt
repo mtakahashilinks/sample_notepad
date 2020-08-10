@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.samplenotepad.R
@@ -20,9 +21,11 @@ import com.example.samplenotepad.views.display.MemoDisplayActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AlarmResetReceiver : BroadcastReceiver() {
+class AlarmResetAtBootSystemReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d("場所:AlarmResetReceiver", "onReceiveが呼ばれた")
+
         loadMemoInfoListWithReminderIO().onEach { memoInfo ->
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val currentDate = Date()
@@ -30,9 +33,7 @@ class AlarmResetReceiver : BroadcastReceiver() {
             if (memoInfo.reminderDateTime.isNotEmpty()) {
                 when (formatter.parse(memoInfo.reminderDateTime)?.compareTo(currentDate)) {
                     1 -> memoInfo.resetAlarm(context, ConstValForAlarm.REMINDER_DATE_TIME)
-                    else -> memoInfo.sendNotification(
-                        context, ConstValForAlarm.REMINDER_DATE_TIME
-                    )
+                    else -> memoInfo.sendNotification(context, ConstValForAlarm.REMINDER_DATE_TIME)
                 }
             }
 

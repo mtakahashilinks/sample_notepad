@@ -55,42 +55,16 @@ internal fun SearchMemoListAdapter.getCallbackForItemTouchHelper(
 
         private fun deleteSelectedItemFromDataSetList(adapterPosition: Int) {
             val targetMemoInfo = searchViewModel.getDataSetForMemoList()[adapterPosition]
-            val targetMemoId = targetMemoInfo.rowid
-            val targetCategory = targetMemoInfo.category
+            val targetMemoInfoId = targetMemoInfo.rowid
 
-            deleteMemoByIdIO(targetMemoId)
+            deleteMemoByIdIO(targetMemoInfoId)
 
             searchViewModel.apply {
                 targetMemoInfo.cancelAllAlarm()
 
                 //削除したMemoInfoをリストから除外する
                 updateDataSetForMemoList { dataSetList ->
-                    dataSetList.filterNot { memoInfo -> memoInfo.rowid == targetMemoId }
-                }
-
-                //DataSetForCategoryListを更新。
-                //DataSetForCategoryListはSearchTopの表示のためだけにあるので現在ではここで更新する
-                //必要はなく今後のアプリ変更のために念のためここで更新している。
-                updateDataSetForCategoryList { dataSetList ->
-                    val targetIndex =
-                        dataSetList.indexOf(dataSetList.find { it.name == targetCategory })
-                    val targetListSize = dataSetList[targetIndex].listSize
-                    val updatedTarget = dataSetList[targetIndex].copy(listSize = targetListSize - 1)
-
-                    //CategoryがDefaultValueでなく且つ中身が空になった場合はそのcategoryをリストから削除する。
-                    //それ以外の場合はcategoryの中身の数だけ減らす
-                    when (targetListSize == 1 && targetCategory != activity.getString(
-                        R.string.memo_category_default_value
-                    )) {
-                        true -> {
-                            dataSetList.take(targetIndex).plus(dataSetList.drop(targetIndex + 1))
-                        }
-                        false -> {
-                            dataSetList.take(targetIndex)
-                                .plus(updatedTarget)
-                                .plus(dataSetList.drop(targetIndex + 1))
-                        }
-                    }
+                    dataSetList.filterNot { memoInfo -> memoInfo.rowid == targetMemoInfoId }
                 }
             }
         }
