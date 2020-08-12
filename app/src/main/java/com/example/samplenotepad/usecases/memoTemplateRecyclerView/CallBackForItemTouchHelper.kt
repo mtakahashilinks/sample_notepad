@@ -3,8 +3,8 @@ package com.example.samplenotepad.usecases.memoTemplateRecyclerView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.deleteTemplateFile
-import com.example.samplenotepad.data.saveTemplateNameListToFile
+import com.example.samplenotepad.data.deleteTemplateIO
+import com.example.samplenotepad.data.saveTemplateNameListIO
 import com.example.samplenotepad.entities.AdapterPosition
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
@@ -12,10 +12,9 @@ import com.example.samplenotepad.views.main.MemoEditFragment
 
 
 //SwipeでリストのItemを削除するためのCallback
-internal fun RecyclerView.getItemTouchHelperCallback(
+internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
     editFragment: MemoEditFragment,
-    editViewModel: MemoEditViewModel,
-    adapter: MemoTemplateAdapter
+    editViewModel: MemoEditViewModel
 ) =
     object : ItemTouchHelper.Callback() {
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
@@ -37,9 +36,9 @@ internal fun RecyclerView.getItemTouchHelperCallback(
                 R.string.dialog_memo_template_swipe_delete_negative_button,
                 { dialog, id ->
                     viewHolder.adapterPosition.deleteTemplateFileAndUpdateNameList()
-                    adapter.notifyDataSetChanged()
+                    this@getItemTouchHelperCallback.notifyDataSetChanged()
                 },
-                { dialog, id -> adapter.notifyDataSetChanged() }
+                { dialog, id -> this@getItemTouchHelperCallback.notifyDataSetChanged() }
             ).show(
                 editFragment.requireActivity().supportFragmentManager,
                 "memo_template_swipe_delete_dialog"
@@ -53,9 +52,9 @@ internal fun RecyclerView.getItemTouchHelperCallback(
             val modifiedTemplateList = templateNameList.take(this)
                 .plus(templateNameList.drop(this + 1))
 
-            deleteTemplateFile(targetTemplateName)
+            deleteTemplateIO(targetTemplateName)
 
-            saveTemplateNameListToFile(modifiedTemplateList)
+            saveTemplateNameListIO(modifiedTemplateList)
             editViewModel.updateTemplateNameList { modifiedTemplateList }
         }
     }

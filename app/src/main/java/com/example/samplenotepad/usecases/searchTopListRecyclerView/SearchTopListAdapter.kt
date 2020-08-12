@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.viewModels.SearchViewModel
+import com.example.samplenotepad.views.moveToSearchInCategory
 import com.example.samplenotepad.views.search.SearchTopFragment
 import kotlinx.android.synthetic.main.fragment_rename_dialog.view.*
 import kotlinx.android.synthetic.main.search_top_container_row.view.*
@@ -31,9 +32,11 @@ class SearchTopListAdapter(
         val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
-            fragment.moveToSearchInACategory(
+            searchViewModel.setSelectedCategory(
                 searchViewModel.getDataSetForCategoryList()[viewHolder.adapterPosition].name
             )
+
+            fragment.requireActivity().moveToSearchInCategory()
         }
 
         viewHolder.itemView.setOnLongClickListener { view ->

@@ -4,77 +4,143 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.lifecycle.ViewModelProvider
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.AppDatabase
+import com.example.samplenotepad.entities.ConstValForSearch
 import com.example.samplenotepad.viewModels.SearchViewModel
-import com.example.samplenotepad.views.main.MainActivity
-import kotlinx.android.synthetic.main.memo_search_activity.*
+import com.example.samplenotepad.views.*
+import com.example.samplenotepad.views.moveToMainActivity
+import com.example.samplenotepad.views.moveToReminderList
+import com.example.samplenotepad.views.moveToSearchTopAndCancelAllStacks
+import kotlinx.android.synthetic.main.activity_memo_search.*
 
 
 class MemoSearchActivity : AppCompatActivity() {
 
     companion object {
-        lateinit var instanceOfActivity: Activity private set
+        private var isInstance = false
+        lateinit var instance: Activity private set
         lateinit var searchViewModel: SearchViewModel private set
-    }
 
+        internal fun isInstance() = isInstance
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.memo_search_activity)
+        setContentView(R.layout.activity_memo_search)
         setSupportActionBar(searchToolbar)
 
-        instanceOfActivity = this
-        searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
+        instance = this.apply { isInstance = true }
 
-        searchViewModel.loadDataSetForCategoryListAndSetPropertyInViewModel()
+        searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java).apply {
+            createMemoContentsOperationActor()
+        }
 
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.searchContainer, SearchTopFragment.getInstanceOrCreateNew())
-            .commit()
+        intent?.attachFragmentBySearchId()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("場所:SearchActivity", "onNewIntentが呼ばれた activity=$this")
+
+        intent?.attachFragmentBySearchId()
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Log.d("場所:SearchActivity", "onRestoreInstanceStateが呼ばれた")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("場所:SearchActivity", "onResumeが呼ばれた activity=$this")
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("場所:SearchActivity", "onDestroyが呼ばれた activity=$this")
 
-        viewModelStore.clear()
         AppDatabase.apply {
             getDatabase(this@MemoSearchActivity).close()
             clearDBInstanceFlag()
         }
+
+        isInstance = false
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
+        when (supportFragmentManager.fragments.last().tag == ConstValForSearch.SEARCH_TOP) {
+            true -> showAlertDialogForFinishApp()
+            false -> super.onBackPressed()
+        }
     }
 
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.search_appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_menu, menu)
         return true
     }
 
     //オプションメニューのItemタップ時の処理
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.d("場所:SearchActivity#onOptionsItemSelected", "tagOfFragment=${supportFragmentManager.fragments.last().tag}")
         return when (item.itemId) {
             R.id.createNewMemo -> {
-                val intent = Intent(this, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                moveToMainActivity()
+                true
+            }
+            R.id.toSearchTop ->
+                checkIfNeedAction(ConstValForSearch.SEARCH_TOP) {
+                    moveToSearchTopAndCancelAllStacks()
                 }
-
-                startActivity(intent)
-                viewModelStore.clear()
-                finish()
-
+            R.id.toReminderList ->
+                checkIfNeedAction(ConstValForSearch.REMINDER_LIST) {
+                    moveToReminderList()
+                }
+            R.id.finishApp -> {
+                showAlertDialogForFinishApp()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    //searchIdによって遷移先のFragmentを選択
+    private fun Intent.attachFragmentBySearchId() {
+        when (this.getStringExtra(ConstValForSearch.SEARCH_ID)) {
+            ConstValForSearch.SEARCH_TOP ->
+                moveToSearchTopAndCancelAllStacks()
+            ConstValForSearch.REMINDER_LIST -> {
+                supportFragmentManager.apply {
+                    moveToSearchTopAndCancelAllStacks()
+                    moveToReminderList()
+                }
+            }
+        }
+    }
 
+    private fun checkIfNeedAction(tagOfFragment: String, action: () -> Unit) =
+        when (supportFragmentManager.fragments.last().tag) {
+            tagOfFragment -> false
+            else -> {
+                action()
+                true
+            }
+        }
+
+    private fun showAlertDialogForFinishApp() {
+        MemoAlertDialog(
+            R.string.dialog_finish_app_title,
+            R.string.dialog_finish_app_message,
+            R.string.dialog_finish_app_positive_button,
+            R.string.dialog_finish_app_negative_button,
+            { dialog, id -> finishAndRemoveTask() },
+            { dialog, id -> dialog.dismiss() }
+        ).show(supportFragmentManager, "finish_app_dialog")
+    }
 }

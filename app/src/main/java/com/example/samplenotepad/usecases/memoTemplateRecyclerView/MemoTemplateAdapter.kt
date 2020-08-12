@@ -17,7 +17,7 @@ import com.example.samplenotepad.views.main.dismissTemplatePopupWindow
 import com.example.samplenotepad.views.main.getTemplatePopupWindow
 import kotlinx.android.synthetic.main.fragment_rename_dialog.view.*
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
-import kotlinx.android.synthetic.main.memo_template_list_row.view.*
+import kotlinx.android.synthetic.main.template_list_row.view.*
 
 
 class MemoTemplateAdapter(
@@ -33,14 +33,14 @@ class MemoTemplateAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.memo_template_list_row, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.template_list_row, parent, false)
         val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
             clearAll()
             editViewModel.loadTemplateAndUpdateMemoContents(viewHolder.templateNameView.text.toString())
 
-            getTemplatePopupWindow().dismissTemplatePopupWindow(editFragment)
+            getTemplatePopupWindow(editFragment).dismissTemplatePopupWindow(editFragment)
 
             initMemoContentsOperation(
                 editFragment,

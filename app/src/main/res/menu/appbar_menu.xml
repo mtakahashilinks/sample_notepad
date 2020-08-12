@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+<menu
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
@@ -11,4 +12,15 @@
         android:id="@+id/toSearchTop"
         android:title="@string/appbar_menu_to_search_top"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/toReminderList"
+        android:title="@string/appbar_menu_to_reminder_list"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/finishApp"
+        android:title="@string/appbar_menu_finish_app"
+        app:showAsAction="never" />
+
 </menu>

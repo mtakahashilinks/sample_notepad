@@ -17,8 +17,9 @@ import kotlinx.android.synthetic.main.template_popup_window.view.*
 
 private var popupWindow: PopupWindow? = null
 
-internal fun getTemplatePopupWindow(): PopupWindow =
-    popupWindow ?: createPopupWindow().apply { if (popupWindow == null) popupWindow = this }
+internal fun getTemplatePopupWindow(editFragment: MemoEditFragment): PopupWindow =
+    popupWindow
+        ?: createPopupWindow(editFragment).apply { if (popupWindow == null) popupWindow = this }
 
 internal fun clearTemplatePopupWindowFlag() {
     popupWindow = null
@@ -30,8 +31,7 @@ internal fun PopupWindow.dismissTemplatePopupWindow(fragment: MemoEditFragment) 
     fragment.setIsShowingPopupWindow(false)
 }
 
-private fun createPopupWindow(): PopupWindow {
-    val editFragment = MemoEditFragment.getInstanceOrCreateNew()
+private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
     val layoutView = editFragment.requireActivity().layoutInflater.inflate(
         R.layout.template_popup_window, null, false
     )
@@ -71,10 +71,10 @@ private fun View.setRecyclerViewOnPopupWindow(
 ) {
     this.apply {
         templateRecyclerView.apply {
-            val mAdapter = MemoTemplateAdapter(fragment, viewModel)
+            val memoTemplateAdapter = MemoTemplateAdapter(fragment, viewModel)
 
             layoutManager = LinearLayoutManager(fragment.requireContext())
-            adapter = mAdapter
+            adapter = memoTemplateAdapter
             setHasFixedSize(true)
             addItemDecoration(
                 DividerItemDecoration(
@@ -83,7 +83,7 @@ private fun View.setRecyclerViewOnPopupWindow(
             )
 
             //スワイプでリストItemを削除する為の処理
-            ItemTouchHelper(getItemTouchHelperCallback(fragment, viewModel, mAdapter))
+            ItemTouchHelper(memoTemplateAdapter.getItemTouchHelperCallback(fragment, viewModel))
                 .attachToRecyclerView(this)
         }
     }

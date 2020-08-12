@@ -2,119 +2,127 @@ package com.example.samplenotepad.viewModels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import arrow.core.internal.AtomicRefW
-import arrow.core.k
 import com.example.samplenotepad.data.*
-import com.example.samplenotepad.data.loadDataSetForMemoListFromDatabase
-import com.example.samplenotepad.data.loadMemoInfoFromDatabase
-import com.example.samplenotepad.data.renameCategory
-import com.example.samplenotepad.data.updateMemoContentsInDatabase
+import com.example.samplenotepad.data.loadDataSetForMemoListByCategoryIO
+import com.example.samplenotepad.data.renameCategoryIO
 import com.example.samplenotepad.entities.*
-import kotlinx.coroutines.runBlocking
+import com.example.samplenotepad.views.SampleMemoApplication
+import com.example.samplenotepad.usecases.createMemoContentsOperationActor
 
 
 class SearchViewModel : ViewModel() {
 
-    private val dataSetForCategoryList = AtomicRefW(listOf<DataSetForCategoryList>())
-    private val dataSetForMemoList = AtomicRefW(listOf<DataSetForMemoList>())
-    private val memoInfo = AtomicRefW(MemoInfo(-1, -1, "", "", "", "", -1, -1, -1, -1))
-    private val memoContents = AtomicRefW(MemoContents(listOf<MemoRowInfo>().k()))
-    private val memoContentsAtSavePoint = AtomicRefW(listOf<MemoRowInfo>().k())
-    private val searchWord = AtomicRefW("")
+    private var dataSetForCategoryList = listOf<DataSetForCategoryList>()
+    private var dataSetForMemoList = listOf<MemoInfo>()
+    private var selectedCategoryInSearchTop = ""
+    private var searchWord = ""
+    private var selectedDateOnCalendar =""
 
-    internal fun getDataSetForCategoryList() = dataSetForCategoryList.value
+    internal fun createMemoContentsOperationActor() = createMemoContentsOperationActor(this)
+
+
+    internal fun getDataSetForCategoryList() = dataSetForCategoryList
 
     internal fun updateDataSetForCategoryList(
         newValue: (List<DataSetForCategoryList>) -> List<DataSetForCategoryList>
-    ) = dataSetForCategoryList.updateAndGet { newValue(dataSetForCategoryList.value) }
+    ) = newValue(dataSetForCategoryList).apply { dataSetForCategoryList = this }
 
     internal fun renameItemInDataSetForCategoryListAndUpdateDatabase(
         oldCategoryName: String,
         newCategoryName: String
     ) {
-        dataSetForCategoryList.updateAndGet { list -> list.map {
+        updateDataSetForCategoryList { list -> list.map {
             if (it.name == oldCategoryName) DataSetForCategoryList(newCategoryName, it.listSize)
             else it
         } }
 
-        renameCategory(oldCategoryName, newCategoryName)
+        renameCategoryIO(oldCategoryName, newCategoryName)
     }
 
-    internal fun loadDataSetForCategoryListAndSetPropertyInViewModel() {
-        val mDataSetForCategoryList = loadDataSetForCategoryListFromDatabase()
-        dataSetForCategoryList.updateAndGet { mDataSetForCategoryList }
+    internal fun loadAndSetDataSetForCategoryList() {
+        updateDataSetForCategoryList { loadDataSetForCategoryListIO() }
     }
 
 
-    internal fun getDataSetForMemoList() = dataSetForMemoList.value
+    internal fun getDataSetForMemoList() = dataSetForMemoList
 
     internal fun updateDataSetForMemoList(
-        newValue: (List<DataSetForMemoList>) -> List<DataSetForMemoList>
-    ) = dataSetForMemoList.updateAndGet { newValue(dataSetForMemoList.value) }
+        newValue: (List<MemoInfo>) -> List<MemoInfo>
+    ) = newValue(dataSetForMemoList).apply { dataSetForMemoList = this }
 
-    internal fun loadDataSetForMemoListAndSetPropertyInViewModel(category: String) = runBlocking {
-        val mDataSetForMemoList = loadDataSetForMemoListFromDatabase(category)
-        dataSetForMemoList.updateAndGet { mDataSetForMemoList }
+    internal fun loadAndSetDataSetForMemoListFindByCategory() =
+        loadDataSetForMemoListByCategoryIO(selectedCategoryInSearchTop).apply {
+            dataSetForMemoList = this
+        }
+
+
+    internal fun loadAndSetDataSetForMemoListFindBySearchWord(
+        mSearchWord: String
+    ): List<MemoInfo> {
+        setSearchWord(mSearchWord)
+
+        return updateDataSetForMemoList { loadMemoInfoListBySearchWordIO(mSearchWord) }
+    }
+
+    internal fun loadAndSetDataSetForMemoListFindBySearchWordAndCategory(
+        mSearchWord: String
+    ): List<MemoInfo> {
+        setSearchWord(mSearchWord)
+
+        return updateDataSetForMemoList {
+            loadMemoInfoListBySearchWordAndCategoryIO(selectedCategoryInSearchTop, mSearchWord)
+        }
+    }
+
+    internal fun loadAndSetDataSetForMemoListFindByWithReminder(): List<MemoInfo> =
+        updateDataSetForMemoList { loadMemoInfoListWithReminderIO() }
+
+    internal fun loadAndSetDataSetForMemoListFindBySearchWordWithReminder(
+        mSearchWord: String
+    ): List<MemoInfo> {
+        setSearchWord(mSearchWord)
+
+        return updateDataSetForMemoList { loadMemoInfoListBySearchWordWithReminderIO(mSearchWord) }
     }
 
 
-    internal fun getMemoInfo() = memoInfo.value
+    internal fun loadAndSetDataSetForMemoListFindBySearchWordAndDate(
+        mSearchWord: String
+    ): List<MemoInfo> {
+        setSearchWord(mSearchWord)
 
-    internal fun updateMemoInfo( newValue: (MemoInfo) -> MemoInfo) =
-        memoInfo.updateAndGet { newValue(memoInfo.value) }
-
-    internal fun loadMemoInfoAndUpdateInViewModel(memoInfoId: Long): MemoInfo {
-        val mMemoInfo = loadMemoInfoFromDatabase(memoInfoId)
-
-        memoInfo.updateAndGet { mMemoInfo }
-
-        return mMemoInfo
+        return updateDataSetForMemoList {
+            loadMemoInfoListBySearchWordAndDateIO(mSearchWord, selectedDateOnCalendar)
+        }
     }
 
 
-    internal fun updateMemoContents(newValue: (MemoContents) -> MemoContents) =
-        memoContents.updateAndGet { newValue(memoContents.value) }
+    internal fun getSelectedCategory() = selectedCategoryInSearchTop
 
-    internal fun getMemoContents() = memoContents.value
-
-    internal fun updateMemoContentsInDatabaseAndSavePoint(executionType: WhichMemoExecution) {
-        updateMemoContentsInDatabase(executionType, memoInfo.value.rowid, memoContents.value)
-        updateMemoContentsAtSavePoint()
-    }
-
-    internal fun updateMemoContentsAtSavePoint() =
-        memoContentsAtSavePoint.updateAndGet { memoContents.value }
-
-    internal fun compareMemoContentsWithSavePoint(): Boolean {
-        return memoContents.value == memoContentsAtSavePoint.value
+    internal fun setSelectedCategory(category: String) {
+        selectedCategoryInSearchTop = category
     }
 
 
-    internal fun searchMemoInfoAndSetWordAndResultForSearchTop(searchWord: String): List<DataSetForMemoList> {
-        val result = searchMemoInfoForSearchTopInDatabase(searchWord)
+    internal fun getSearchWord() = searchWord
 
-        this.searchWord.updateAndGet { searchWord }
-        dataSetForMemoList.updateAndGet { result }
-
-        return result
+    internal fun setSearchWord(value: String) {
+        searchWord = value
     }
 
-    internal fun searchMemoInfoAndSetWordAndResultForSearchInACategory(
-        category: String,
-        searchWord: String
-    ): List<DataSetForMemoList> {
-        val result = searchMemoInfoForSearchInACategoryInDatabase(category, searchWord)
 
-        this.searchWord.updateAndGet { searchWord }
-        dataSetForMemoList.updateAndGet { result }
+    internal fun getSelectedDateOnCalendar() = selectedDateOnCalendar
 
-        return result
+    internal fun setSelectedDateOnCalendar(selectedDate: String) {
+        selectedDateOnCalendar = selectedDate
     }
 
-        internal fun getSearchWord() = searchWord.value
 
+    internal fun MemoInfo.cancelAllAlarm(): MemoInfo {
+        this.cancelAllAlarmIO(SampleMemoApplication.instance.baseContext)
 
-
+        return this
+    }
 
     override fun onCleared() {
         super.onCleared()

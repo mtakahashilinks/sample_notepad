@@ -15,6 +15,7 @@ class SampleMemoApplication : Application(){
         Log.d("場所:SampleMemoApp#onCreate", "AppのonCreateが呼ばれた")
 
         instance = this
+
     }
 
     override fun onTerminate() {
