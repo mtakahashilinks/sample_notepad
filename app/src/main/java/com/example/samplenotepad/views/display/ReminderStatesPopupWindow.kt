@@ -97,7 +97,6 @@ private fun TextView.setReminderDateTimeTextView(reminderDateTimeList: List<Stri
 
 private fun MemoDisplayFragment.showAlertDialogForDeleteReminder() {
     MemoAlertDialog(
-        R.string.dialog_delete_reminder_title,
         R.string.dialog_delete_reminder_message,
         R.string.dialog_delete_reminder_positive_button,
         R.string.dialog_delete_reminder_negative_button,

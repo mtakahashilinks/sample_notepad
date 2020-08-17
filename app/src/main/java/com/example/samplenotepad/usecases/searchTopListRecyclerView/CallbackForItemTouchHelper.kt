@@ -37,7 +37,6 @@ internal fun SearchViewModel.getItemTouchHelperCallback(
             when (viewHolder.adapterPosition == 0) {
                 true -> {
                     MemoAlertDialog(
-                        R.string.dialog_search_top_swipe_delete_others_title,
                         R.string.dialog_search_top_swipe_delete_others_message,
                         R.string.dialog_search_top_swipe_delete_others_positive_button,
                         R.string.dialog_search_top_swipe_delete_others_negative_button,
@@ -53,7 +52,6 @@ internal fun SearchViewModel.getItemTouchHelperCallback(
                 }
                 false -> {
                     MemoAlertDialog(
-                        R.string.dialog_search_top_swipe_delete_title,
                         R.string.dialog_search_top_swipe_delete_message,
                         R.string.dialog_search_top_swipe_delete_positive_button,
                         R.string.dialog_search_top_swipe_delete_negative_button,

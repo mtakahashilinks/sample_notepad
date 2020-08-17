@@ -8,7 +8,6 @@ import androidx.fragment.app.DialogFragment
 
 
 class MemoAlertDialog(
-    private val title: Int,
     private val message: Int,
     private val positiveButton: Int,
     private val negativeButton: Int,
@@ -18,7 +17,6 @@ class MemoAlertDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity.let {
             AlertDialog.Builder(requireContext()).apply {
-                setTitle(title)
                 setMessage(message)
                 setPositiveButton(positiveButton) { dialog, id -> positiveAction(dialog, id) }
                 setNegativeButton(negativeButton) { dialog, id -> negativeAction(dialog, id) }

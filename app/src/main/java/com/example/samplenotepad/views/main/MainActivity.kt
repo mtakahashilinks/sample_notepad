@@ -16,11 +16,11 @@ import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.viewModels.MemoOptionViewModel
-import com.example.samplenotepad.views.MemoAlertDialog
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
 import com.example.samplenotepad.usecases.*
+import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.moveToSearchActivity
 
 
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_default_menu, menu)
         return true
     }
 
@@ -175,7 +175,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAlertDialogForFinishApp(): Boolean {
         MemoAlertDialog(
-            R.string.dialog_finish_app_title,
             R.string.dialog_finish_app_message,
             R.string.dialog_finish_app_positive_button,
             R.string.dialog_finish_app_negative_button,
@@ -190,7 +189,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun showAlertDialogIfSaveMemo(function: () -> Unit) {
         MemoAlertDialog(
-            R.string.dialog_confirm_save_memo_title,
             R.string.dialog_confirm_save_memo_message,
             R.string.dialog_confirm_save_memo_positive_button,
             R.string.dialog_confirm_save_memo_negative_button,

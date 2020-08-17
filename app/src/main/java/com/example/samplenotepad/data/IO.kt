@@ -60,8 +60,16 @@ private fun MemoInfo.cancelAlarm(
     }
 }
 
-internal fun MemoInfo.cancelAlarmIO(context: Context, alarmType: Int) {
-    this.cancelAlarm(context, alarmType)
+internal fun clearReminderStateInDatabaseIO(memoId: Long, alarmType: Int) = runBlocking {
+    val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+
+    launch(Dispatchers.IO) {
+        when (alarmType) {
+            ConstValForAlarm.REMINDER_DATE_TIME -> memoInfoDao.clearReminderDateTimeByIdDao(memoId)
+            ConstValForAlarm.PRE_ALARM -> memoInfoDao.clearPreAlarmPositionByIdDao(memoId)
+            ConstValForAlarm.POST_ALARM -> memoInfoDao.clearPostAlarmPositionByIdDao(memoId)
+        }
+    }
 }
 
 internal fun MemoInfo.cancelAllAlarmIO(context: Context) {
@@ -83,11 +91,11 @@ internal fun RequestCode.isAlarmExist(context: Context): PendingIntent? {
 }
 
 //DBのMemoInfoのReminder関係の値を初期値に戻す
-internal fun MemoInfoId.clearAllReminderValueInDataBaseIO() = runBlocking {
+internal fun MemoInfoId.clearAllReminderStateInDataBaseIO() = runBlocking {
     withContext(Dispatchers.IO) {
         val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
-        memoInfoDao.clearAllReminderValueByIdDao(this@clearAllReminderValueInDataBaseIO)
+        memoInfoDao.clearAllReminderValueByIdDao(this@clearAllReminderStateInDataBaseIO)
     }
 }
 
@@ -519,6 +527,17 @@ internal fun renameCategoryIO(oldCategoryName: String, newCategoryName: String) 
     launch(Dispatchers.IO) { memoInfoDao.updateCategoryDao(oldCategoryName, newCategoryName) }
 }
 
+
+internal fun MemoInfo.updateMemoInfoAndCancelAlarmIO(
+    context: Context,
+    alarmType: Int
+) = runBlocking {
+    val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
+
+    launch(Dispatchers.IO) { memoInfoDao.updateMemoInfoDao(this@updateMemoInfoAndCancelAlarmIO) }
+
+    cancelAlarm(context, alarmType)
+}
 
 internal fun deleteMemoByCategoryIO(category: String) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()

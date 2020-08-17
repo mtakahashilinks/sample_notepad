@@ -44,6 +44,19 @@
         app:layout_constraintStart_toStartOf="@+id/templateNameEditText"
         app:layout_constraintTop_toBottomOf="@+id/templateNameEditText" />
 
+    <TextView
+        android:id="@+id/listActionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/description_list_action_flick_longpress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addNewTemplateBtn" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/templateRecyclerView"
         android:layout_width="0dp"
@@ -56,7 +69,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addNewTemplateBtn"
+        app:layout_constraintTop_toBottomOf="@+id/listActionTextView"
         tools:listitem="@layout/template_list_row" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

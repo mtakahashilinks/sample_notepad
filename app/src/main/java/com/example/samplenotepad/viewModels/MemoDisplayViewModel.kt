@@ -3,6 +3,7 @@ package com.example.samplenotepad.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.cancelAllAlarmIO
+import com.example.samplenotepad.data.deleteMemoByIdIO
 import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.createMemoContentsOperationActor
@@ -24,6 +25,10 @@ class MemoDisplayViewModel : ViewModel() {
 
     internal fun updateMemoInfo( newValue: (MemoInfo) -> MemoInfo) =
         newValue(memoInfo).apply { memoInfo = this }
+
+    internal fun deleteMemoInfoById(id: Long) {
+        deleteMemoByIdIO(id)
+    }
 
     internal fun loadMemoInfoAndUpdate(memoInfoId: Long): MemoInfo =
         loadMemoInfoIO(memoInfoId).apply { memoInfo = this }

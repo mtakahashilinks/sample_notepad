@@ -10,7 +10,7 @@
 
     <item
         android:id="@+id/deleteMemo"
-        android:title="@string/appbar_menu_create_new_memo"
+        android:title="@string/appbar_menu_delete_memo"
         app:showAsAction="never" />
 
     <item

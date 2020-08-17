@@ -21,8 +21,20 @@
         android:queryHint="@string/search_view_hint_search_top"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-    </SearchView>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/listActionTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/description_list_action_flick_longpress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/memoSearchView" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchTopRecyclerView"
@@ -36,7 +48,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/memoSearchView"
+        app:layout_constraintTop_toBottomOf="@+id/listActionTextView"
+        app:layout_constraintVertical_bias="0.0"
         tools:listitem="@layout/search_top_container_row" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

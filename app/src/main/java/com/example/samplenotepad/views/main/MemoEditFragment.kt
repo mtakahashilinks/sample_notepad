@@ -149,7 +149,6 @@ class MemoEditFragment : Fragment() {
 
     private fun showAlertDialogToClearAll() {
         MemoAlertDialog(
-            R.string.dialog_clear_all_title,
             R.string.dialog_clear_all_message,
             R.string.dialog_clear_all_positive_button,
             R.string.dialog_clear_all_negative_button,

@@ -17,6 +17,27 @@ interface MemoInfoDao {
     suspend fun deleteMemoInfoDao(memoInfo: MemoInfo)
 
     @Query("""
+        UPDATE memoInfoTable
+        SET reminderDateTime = ""
+        WHERE memoId == :id
+    """)
+    suspend fun clearReminderDateTimeByIdDao(id: Long)
+
+    @Query("""
+        UPDATE memoInfoTable
+        SET preAlarmPosition = ""
+        WHERE memoId == :id
+    """)
+    suspend fun clearPreAlarmPositionByIdDao(id: Long)
+
+    @Query("""
+        UPDATE memoInfoTable
+        SET postAlarmPosition = ""
+        WHERE memoId == :id
+    """)
+    suspend fun clearPostAlarmPositionByIdDao(id: Long)
+
+    @Query("""
         DELETE
         FROM memoInfoTable
         WHERE memoId == :id
@@ -52,6 +73,7 @@ interface MemoInfoDao {
         WHERE memoId == :id
         """)
     suspend fun getMemoInfoByIdDao(id: Long): MemoInfo
+
 
     @Query("""
         SELECT * 

@@ -35,10 +35,9 @@ internal fun SearchMemoListAdapter.getCallbackForItemTouchHelper(
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             MemoAlertDialog(
-                R.string.dialog_search_in_category_swipe_delete_title,
-                R.string.dialog_search_in_category_swipe_delete_message,
-                R.string.dialog_search_in_category_swipe_delete_positive_button,
-                R.string.dialog_search_in_category_swipe_delete_negative_button,
+                R.string.dialog_delete_memo_message,
+                R.string.dialog_delete_memo_positive_button,
+                R.string.dialog_delete_memo_negative_button,
                 { dialog, id ->
                     this@getCallbackForItemTouchHelper.apply {
                         deleteSelectedItemFromDataSetList(viewHolder.adapterPosition)

@@ -10,10 +10,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.samplenotepad.R
-import com.example.samplenotepad.data.cancelAlarmIO
-import com.example.samplenotepad.data.clearAllReminderValueInDataBaseIO
+import com.example.samplenotepad.data.clearAllReminderStateInDataBaseIO
+import com.example.samplenotepad.data.clearReminderStateInDatabaseIO
 import com.example.samplenotepad.data.isAlarmExist
-import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.display.MemoDisplayActivity
 
@@ -50,21 +49,25 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
             alarmPosition
         )
 
-        //通知が全て終わったらデータベースのDataBaseのReminder関係の値を初期地に戻す
+        //通知が終わったらデータベースのReminder関係の値を初期化
         when (alarmType) {
             ConstValForAlarm.REMINDER_DATE_TIME ->  {
                 val intMemoInfoId = requestCodeForAlarm / 10
                 val requestCodeForPostAlarm = intMemoInfoId * 10 + ConstValForAlarm.POST_ALARM
 
-                //postAlarmがセットされていれば発火しない
-                if (requestCodeForPostAlarm.isAlarmExist(context) == null)
-                    intMemoInfoId.toLong().clearAllReminderValueInDataBaseIO()
+                //PostAlarmがsetされているかの分岐
+                when (requestCodeForPostAlarm.isAlarmExist(context) == null) {
+                    true -> intMemoInfoId.toLong().clearAllReminderStateInDataBaseIO()
+                    false -> clearReminderStateInDatabaseIO(
+                        (requestCodeForAlarm / 10).toLong(), ConstValForAlarm.REMINDER_DATE_TIME
+                    )
+                }
             }
-            ConstValForAlarm.PRE_ALARM ->
-                loadMemoInfoIO((requestCodeForAlarm / 10).toLong())
-                    .cancelAlarmIO(context, ConstValForAlarm.PRE_ALARM)
+            ConstValForAlarm.PRE_ALARM -> clearReminderStateInDatabaseIO(
+                (requestCodeForAlarm / 10).toLong(), ConstValForAlarm.PRE_ALARM
+            )
             ConstValForAlarm.POST_ALARM ->
-                (requestCodeForAlarm / 10).toLong().clearAllReminderValueInDataBaseIO()
+                (requestCodeForAlarm / 10).toLong().clearAllReminderStateInDataBaseIO()
         }
     }
 

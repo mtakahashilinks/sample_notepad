@@ -30,7 +30,6 @@ internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             MemoAlertDialog(
-                R.string.dialog_memo_template_swipe_delete_title,
                 R.string.dialog_memo_template_swipe_delete_message,
                 R.string.dialog_memo_template_swipe_delete_positive_button,
                 R.string.dialog_memo_template_swipe_delete_negative_button,

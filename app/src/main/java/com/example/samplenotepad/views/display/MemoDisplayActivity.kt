@@ -82,7 +82,7 @@ class MemoDisplayActivity : AppCompatActivity() {
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_display_manu, menu)
         return true
     }
 
@@ -94,7 +94,10 @@ class MemoDisplayActivity : AppCompatActivity() {
                 moveToMainActivity()
                 true
             }
-            R.id.deleteMemo -> {TODO()}
+            R.id.deleteMemo -> {
+                showAlertDialogForDeleteMemo()
+                true
+            }
             R.id.toSearchTop -> {
                 moveToSearchActivity(ConstValForSearch.SEARCH_TOP)
                 true
@@ -114,7 +117,6 @@ class MemoDisplayActivity : AppCompatActivity() {
 
     private fun showAlertDialogForFinishApp() {
         MemoAlertDialog(
-            R.string.dialog_finish_app_title,
             R.string.dialog_finish_app_message,
             R.string.dialog_finish_app_positive_button,
             R.string.dialog_finish_app_negative_button,
@@ -125,15 +127,23 @@ class MemoDisplayActivity : AppCompatActivity() {
             { dialog, id -> dialog.dismiss() }
         ).show(supportFragmentManager, "finish_app_dialog")
     }
+
+    private fun showAlertDialogForDeleteMemo() {
+        MemoAlertDialog(
+            R.string.dialog_delete_memo_message,
+            R.string.dialog_delete_memo_positive_button,
+            R.string.dialog_delete_memo_negative_button,
+            { dialog, id ->
+                displayViewModel.deleteMemoInfoById(displayViewModel.getMemoInfo().rowid)
+                finishAndRemoveTask()
+                moveToSearchActivity(ConstValForSearch.SEARCH_TOP)
+            },
+            { dialog, id -> dialog.dismiss() }
+        ).show(supportFragmentManager, "finish_app_dialog")
+    }
 }
 
 
 private fun finishSearchActivityIfInstanced() {
     if (MemoSearchActivity.isInstance()) MemoSearchActivity.instance.finish()
 }
-
-//val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
-//    putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-//    putExtra(Settings.EXTRA_CHANNEL_ID, myNotificationChannel.getId())
-//}
-//startActivity(intent)

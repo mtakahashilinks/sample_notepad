@@ -82,7 +82,7 @@ class MemoSearchActivity : AppCompatActivity() {
 
     //オプションメニューを作成
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.appbar_menu, menu)
+        menuInflater.inflate(R.menu.appbar_default_menu, menu)
         return true
     }
 
@@ -135,7 +135,6 @@ class MemoSearchActivity : AppCompatActivity() {
 
     private fun showAlertDialogForFinishApp() {
         MemoAlertDialog(
-            R.string.dialog_finish_app_title,
             R.string.dialog_finish_app_message,
             R.string.dialog_finish_app_positive_button,
             R.string.dialog_finish_app_negative_button,
