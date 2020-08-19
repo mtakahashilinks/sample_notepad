@@ -2,12 +2,12 @@ package com.example.samplenotepad.views.main
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.*
@@ -63,7 +63,7 @@ class MemoEditFragment : Fragment() {
 
         //メモの保存時にSnackbarを表示
         lifecycleScope.launch {
-            getShowMassageForSavedLiveData().observe(viewLifecycleOwner, Observer { typeOfFragment ->
+            getShowMassageForSavedLiveData().observe(viewLifecycleOwner, { typeOfFragment ->
                 if (typeOfFragment is EditFragment)
                     this@MemoEditFragment.showSnackbarForSavedMassageAtEditMemo()
 
@@ -85,7 +85,8 @@ class MemoEditFragment : Fragment() {
                 false -> {
                     popupWindow.apply {
                         update()
-                        showAsDropDown(templateImgBtn)
+                        showAtLocation(memoContainer, Gravity.TOP, 0, 50)
+//                        showAsDropDown(templateImgBtn)
                     }
                     true
                 }

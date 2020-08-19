@@ -1,7 +1,6 @@
 package com.example.samplenotepad.viewModels
 
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadCategoryListIO
@@ -17,8 +16,6 @@ import com.example.samplenotepad.usecases.updateText
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
 
 
 class MemoEditViewModel : ViewModel() {
@@ -107,7 +104,7 @@ class MemoEditViewModel : ViewModel() {
 
     internal fun initViewModelForExistMemo(memoId: Long): MemoInfo = runBlocking {
         val mMemoInfo = loadMemoInfoIO(memoId)
-        val memoContents = Json.parse(MemoRowInfo.serializer().list, mMemoInfo.contents)
+        val memoContents = mMemoInfo.contents.deserializeToMemoContents()
 
         memoInfo = mMemoInfo
         getMemoContentsOperationActor().send(SetMemoContents(memoContents))

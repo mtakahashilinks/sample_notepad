@@ -51,6 +51,9 @@ class SearchOnCalendarFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
+        //アプリバーのタイトルをセット
+        activity?.title = getString(R.string.appbar_title_search_with_reminder)
+
         calendarView.apply {
             setDate(Date())
             setEvents(createEventDayList())

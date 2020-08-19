@@ -1,5 +1,6 @@
 package com.example.samplenotepad.usecases.memoTemplateRecyclerView
 
+import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
@@ -9,12 +10,14 @@ import com.example.samplenotepad.entities.AdapterPosition
 import com.example.samplenotepad.viewModels.MemoEditViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.main.MemoEditFragment
+import kotlinx.android.synthetic.main.template_popup_window.view.*
 
 
 //SwipeでリストのItemを削除するためのCallback
 internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
     editFragment: MemoEditFragment,
-    editViewModel: MemoEditViewModel
+    editViewModel: MemoEditViewModel,
+    contentLayout: View
 ) =
     object : ItemTouchHelper.Callback() {
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
@@ -55,5 +58,12 @@ internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
 
             saveTemplateNameListIO(modifiedTemplateList)
             editViewModel.updateTemplateNameList { modifiedTemplateList }
+
+            //エラーメッセージが表示されていたら非表示にする(５個以上保存できないエラーメッセージの為)
+            if (contentLayout.templateNameErrorTextView.visibility == View.VISIBLE)
+                contentLayout.templateNameErrorTextView.visibility = View.GONE
+
+            if (modifiedTemplateList.isEmpty())
+                contentLayout.listActionTextView.visibility = View.GONE
         }
     }

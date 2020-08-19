@@ -133,8 +133,14 @@ class SearchResultFragment : Fragment() {
         }
         //検索ワードに合うものが無い場合に表示する
         when (dataSetForMemoList.isEmpty()) {
-            true -> noMatchResultTextView.visibility = View.VISIBLE
-            false -> noMatchResultTextView.visibility = View.GONE
+            true -> {
+                listActionTextView.visibility = View.INVISIBLE
+                noMatchResultTextView.visibility = View.VISIBLE
+            }
+            false -> {
+                listActionTextView.visibility = View.VISIBLE
+                noMatchResultTextView.visibility = View.GONE
+            }
         }
     }
 

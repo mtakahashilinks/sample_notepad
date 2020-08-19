@@ -1,5 +1,6 @@
 package com.example.samplenotepad.usecases.searchMemoListRecyclerView
 
+import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -7,6 +8,7 @@ import com.example.samplenotepad.R
 import com.example.samplenotepad.data.deleteMemoByIdIO
 import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
+import kotlinx.android.synthetic.main.fragment_search_result.*
 
 
 //SwipeでリストのItemを削除するためのCallback
@@ -62,9 +64,16 @@ internal fun SearchMemoListAdapter.getCallbackForItemTouchHelper(
                 targetMemoInfo.cancelAllAlarm()
 
                 //削除したMemoInfoをリストから除外する
-                updateDataSetForMemoList { dataSetList ->
+                val modifiedMemoList = updateDataSetForMemoList { dataSetList ->
                     dataSetList.filterNot { memoInfo -> memoInfo.rowid == targetMemoInfoId }
                 }
+
+                //表示するメモのリストが空だったらViewの表示・非表示を変更
+                if (modifiedMemoList.isEmpty())
+                    activity.apply {
+                        listActionTextView.visibility = View.GONE
+                        noMatchResultTextView.visibility = View.VISIBLE
+                    }
             }
         }
     }

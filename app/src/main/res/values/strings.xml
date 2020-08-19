@@ -47,8 +47,8 @@
     <string name="register_reminder">リマインダー登録</string>
     <string name="reminder_set_date_label">日付</string>
     <string name="reminder_set_time_label">時間</string>
-    <string name="reminder_pre_alarm_label">事前アラーム</string>
-    <string name="reminder_post_alarm_label">事後アラーム</string>
+    <string name="reminder_pre_alarm_label">事前通知</string>
+    <string name="reminder_post_alarm_label">事後通知</string>
     <string name="add_format">フォーマットに追加</string>
     <string name="save_snackbar">保存しました</string>
     <string name="dialog_confirm_save_memo_message">作業内容を保存しますか？</string>
@@ -92,10 +92,12 @@
     <string name="dialog_search_top_swipe_delete_positive_button">削除する</string>
     <string name="dialog_search_top_swipe_delete_negative_button">キャンセル</string>
     <string name="search_view_hint_search_top">メモの検索</string>
+    <string name="disable_rename_message">このカテゴリー名は変更できません</string>
 
     <!-- SearchInCategoryFragment -->
     <string name="appbar_title_search_in_category">Sample Notepad - メモ検索</string>
-    <string name="search_in_category_category_name_text">カテゴリー：「%1s」</string>
+    <string name="search_in_category_category_name_text">カテゴリー：%1s</string>
+    <string name="search_in_category_created_date_label_text">作成日時：%s</string>
     <string name="search_in_category_title_label_text">タイトル：</string>
     <string name="search_in_category_body_label_text">本文：</string>
     <string name="dialog_delete_memo_message">このメモを削除します</string>
@@ -106,11 +108,11 @@
 
     <!-- DisplayMemoFragment -->
     <string name="appbar_title_display_memo">Sample Notepad - メモの表示</string>
-    <string name="popup_window_reminder_states_title">リマインダー設定</string>
+    <string name="popup_window_reminder_states_title">リマインダー</string>
     <string name="popup_window_reminder_states_delete">削除</string>
     <string name="target_date_label">設定日時：</string>
-    <string name="pre_alarm_label">事前アラーム：</string>
-    <string name="post_alarm_label">事後アラーム：</string>
+    <string name="pre_alarm_label">事前通知：</string>
+    <string name="post_alarm_label">事後通知：</string>
     <string name="alarm_none">なし</string>
     <string name="pre_alarm_5m">5分前</string>
     <string name="pre_alarm_10m">10分前</string>
@@ -130,8 +132,8 @@
     <!-- SearchResultFragment -->
     <string name="appbar_title_search_result">Sample Notepad - 検索結果</string>
     <string name="search_view_hint_search_result">メモの検索</string>
-    <string name="search_word_text">検索ワード：「%s」</string>
-    <string name="search_date_text">日付：「%s」</string>
+    <string name="search_word_text">検索ワード：%s</string>
+    <string name="search_date_text">リマインダー設定日：%s</string>
     <string name="search_move_to_calendar">カレンダー検索</string>
     <string name="no_match_result_text">一致するメモがありませんでした</string>
 
@@ -146,10 +148,9 @@
     <string name="notification_title_miss_alarm">予定の時間(%s)が過ぎました</string>
 
     <!-- SearchWithReminderFragment -->
-    <string name="appbar_title_search_with_reminder">Sample Notepad - Reminder List</string>
+    <string name="appbar_title_search_with_reminder">Sample Notepad - リマインダー検索</string>
 
     <!-- SearchOnCalendarFragment -->
-    <string name="appbar_title_search_on_calendar">Sample Notepad - カレンダー検索</string>
     <string name="describe_event_mark_text">--- リマインダーがセットされている日</string>
 
 </resources>

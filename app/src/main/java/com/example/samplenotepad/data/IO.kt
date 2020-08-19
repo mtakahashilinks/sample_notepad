@@ -294,10 +294,10 @@ private fun MemoContents.createContentsText(): String {
 }
 
 private fun MemoContents.serializeToJson() =
-    Json.stringify(ListSerializer(MemoRowInfo.serializer()), this)
+    Json.encodeToString(ListSerializer(MemoRowInfo.serializer()), this)
 
-private fun String.deserializeToMemoContents() =
-    Json.parse(ListSerializer(MemoRowInfo.serializer()), this)
+internal fun String.deserializeToMemoContents() =
+    Json.decodeFromString(ListSerializer(MemoRowInfo.serializer()), this)
 
 internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoContents) = runBlocking {
     Log.d("saveMemoInfo", "saveMemoInfoに入った")

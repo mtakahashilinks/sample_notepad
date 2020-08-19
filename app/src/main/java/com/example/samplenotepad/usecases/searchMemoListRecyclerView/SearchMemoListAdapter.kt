@@ -5,9 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.viewModels.SearchViewModel
+import com.example.samplenotepad.views.SampleMemoApplication
 import kotlinx.android.synthetic.main.search_memo_list_row.view.*
 import kotlinx.android.synthetic.main.search_memo_list_row.view.titleBodyTextView
 
@@ -44,7 +46,10 @@ class SearchMemoListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val dataSetForMemoList = searchViewModel.getDataSetForMemoList()[position]
 
-        holder.createdDate.text = dataSetForMemoList.createdDateTime.replace('-', '/')
+        holder.createdDate.text = SampleMemoApplication.instance.resources.getString(
+            R.string.search_in_category_created_date_label_text,
+            dataSetForMemoList.createdDateTime.replace('-', '/')
+        )
         holder.title.text = dataSetForMemoList.title
         holder.memoBody.text = dataSetForMemoList.contentsForSearchByWord
 

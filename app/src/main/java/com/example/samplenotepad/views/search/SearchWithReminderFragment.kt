@@ -116,18 +116,24 @@ class SearchWithReminderFragment : Fragment() {
         val dataSetForMemoList = searchViewModel.loadAndSetDataSetForMemoListFindByWithReminder()
         listAdapter.notifyDataSetChanged()
 
-        //カレンダー検索へのボタンの表示とクリックリスナー登録
-        moveToCalendarBtn.apply {
-            visibility = View.VISIBLE
-            setOnClickListener {
-                this@SearchWithReminderFragment.requireActivity().moveToSearchByCalendar()
-            }
-        }
-
-        //リマインダー付きMemoが無い場合に表示する
+        //リマインダー付きMemoの有無によるViewの表示・非表示の分岐
         when (dataSetForMemoList.isEmpty()) {
-            true -> noMatchResultTextView.visibility = View.VISIBLE
-            false -> noMatchResultTextView.visibility = View.GONE
+            true -> {
+                listActionTextView.visibility = View.INVISIBLE
+                moveToCalendarBtn.visibility = View.GONE
+                noMatchResultTextView.visibility = View.VISIBLE
+            }
+            false -> {
+                listActionTextView.visibility = View.VISIBLE
+                noMatchResultTextView.visibility = View.GONE
+                //カレンダー検索へのボタンの表示とクリックリスナー登録
+                moveToCalendarBtn.apply {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        this@SearchWithReminderFragment.requireActivity().moveToSearchByCalendar()
+                    }
+                }
+            }
         }
     }
 

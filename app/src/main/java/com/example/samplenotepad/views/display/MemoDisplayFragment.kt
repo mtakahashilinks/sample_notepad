@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.samplenotepad.R
+import com.example.samplenotepad.data.deserializeToMemoContents
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.getMemoContentsOperationActor
 import com.example.samplenotepad.usecases.getShowMassageForSavedLiveData
@@ -69,7 +70,7 @@ class MemoDisplayFragment : Fragment() {
         }
 
         val memoInfo = displayViewModel.getMemoInfo()
-        val memoContents = Json.parse(MemoRowInfo.serializer().list, memoInfo.contents)
+        val memoContents = memoInfo.contents.deserializeToMemoContents()
 
         //
         displayViewModel.apply {

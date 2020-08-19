@@ -1,6 +1,8 @@
 package com.example.samplenotepad.usecases.memoTemplateRecyclerView
 
 import android.content.DialogInterface
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,7 +40,9 @@ class MemoTemplateAdapter(
 
         viewHolder.itemView.setOnClickListener {
             clearAll()
-            editViewModel.loadTemplateAndUpdateMemoContents(viewHolder.templateNameView.text.toString())
+            editViewModel.loadTemplateAndUpdateMemoContents(
+                viewHolder.templateNameView.text.toString()
+            )
 
             getTemplatePopupWindow(editFragment).dismissTemplatePopupWindow(editFragment)
 
@@ -54,6 +58,18 @@ class MemoTemplateAdapter(
             val layoutView = editFragment.requireActivity().layoutInflater.inflate(
                 R.layout.fragment_rename_dialog, null, false
             ).apply {
+                //textが変更されたときエラーメッセージが表示されていれば非表示にする
+                newNameEitText.addTextChangedListener(object : TextWatcher {
+                    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                    override fun afterTextChanged(p0: Editable?) {
+                        if (errorMassageTextView.visibility == View.VISIBLE)
+                            errorMassageTextView.visibility = View.GONE
+                    }
+                })
+
                 newNameEitText.requestFocus()
             }
             val targetTemplateName = editViewModel.getTemplateNameList()[viewHolder.adapterPosition]

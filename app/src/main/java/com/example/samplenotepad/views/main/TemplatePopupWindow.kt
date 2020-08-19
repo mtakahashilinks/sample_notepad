@@ -1,9 +1,12 @@
 package com.example.samplenotepad.views.main
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,7 +37,25 @@ internal fun PopupWindow.dismissTemplatePopupWindow(fragment: MemoEditFragment) 
 private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
     val layoutView = editFragment.requireActivity().layoutInflater.inflate(
         R.layout.template_popup_window, null, false
-    )
+    ).apply {
+        //textが変更されたときエラーメッセージが表示されていれば非表示にする
+        templateNameEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun afterTextChanged(p0: Editable?) {
+                if (templateNameErrorTextView.visibility == View.VISIBLE)
+                    templateNameErrorTextView.visibility = View.GONE
+            }
+        })
+
+        //listが空かどうかで、listActionの説明文の表示・非表示を切り替える
+        when (MainActivity.editViewModel.getTemplateNameList().isNotEmpty()) {
+            true -> listActionTextView.visibility = View.VISIBLE
+            false -> listActionTextView.visibility = View.GONE
+        }
+    }
 
     return PopupWindow(editFragment.context).apply {
         width = ViewGroup.LayoutParams.WRAP_CONTENT
@@ -42,9 +63,13 @@ private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
         contentView = layoutView
         isOutsideTouchable = true
         isFocusable = true
-        setBackgroundDrawable(editFragment.resources.getDrawable(
-                R.drawable.popup_background, editFragment.requireActivity().theme
-        ))
+        setBackgroundDrawable(
+            ResourcesCompat.getDrawable(
+                editFragment.resources,
+                R.drawable.popup_background,
+                editFragment.requireActivity().theme
+            )
+        )
 
         setOnDismissListener {
             clearTemplatePopupWindowFlag()
@@ -53,6 +78,9 @@ private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
     }.apply {
         setTextForTemplatePopupWindow(editFragment, layoutView)
         layoutView.templateNameEditText.requestFocus()
+
+        //dismissボタンのリスナー登録
+        layoutView.dismissImgBtn.setOnClickListener { this.dismiss() }
     }
 }
 
@@ -60,14 +88,15 @@ private fun PopupWindow.setTextForTemplatePopupWindow(editFragment: MemoEditFrag
     val editViewModel = MainActivity.editViewModel
 
     layout.apply {
-        setRecyclerViewOnPopupWindow(editFragment, editViewModel)
+        setRecyclerViewOnPopupWindow(editFragment, editViewModel, this)
         setClickListenerOnPopupWindow(editFragment, editViewModel, this@setTextForTemplatePopupWindow)
     }
 }
 
 private fun View.setRecyclerViewOnPopupWindow(
     fragment: MemoEditFragment,
-    viewModel: MemoEditViewModel
+    viewModel: MemoEditViewModel,
+    contentLayout: View
 ) {
     this.apply {
         templateRecyclerView.apply {
@@ -83,7 +112,8 @@ private fun View.setRecyclerViewOnPopupWindow(
             )
 
             //スワイプでリストItemを削除する為の処理
-            ItemTouchHelper(memoTemplateAdapter.getItemTouchHelperCallback(fragment, viewModel))
+            ItemTouchHelper(memoTemplateAdapter
+                .getItemTouchHelperCallback(fragment, viewModel, contentLayout))
                 .attachToRecyclerView(this)
         }
     }
@@ -100,16 +130,16 @@ private fun View.setClickListenerOnPopupWindow(
             val errorTextView = this.templateNameErrorTextView
 
             when {
+                viewModel.getTemplateNameList().size >= 5 -> {
+                    errorTextView.showErrorText(R.string.template_add_error_max_amount)
+                    return@setOnClickListener
+                }
                 newTemplateName.isEmpty() -> {
                     errorTextView.showErrorText(R.string.error_not_input_new_name)
                     return@setOnClickListener
                 }
                 viewModel.getTemplateNameList().contains(newTemplateName) -> {
                     errorTextView.showErrorText(R.string.error_already_has_same_name)
-                    return@setOnClickListener
-                }
-                viewModel.getTemplateNameList().size >= 5 -> {
-                    errorTextView.showErrorText(R.string.template_add_error_max_amount)
                     return@setOnClickListener
                 }
             }
