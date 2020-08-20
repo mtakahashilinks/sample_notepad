@@ -16,10 +16,10 @@ import com.example.samplenotepad.views.*
 import com.example.samplenotepad.views.moveToMainActivity
 import com.example.samplenotepad.views.moveToReminderList
 import com.example.samplenotepad.views.moveToSearchTopAndCancelAllStacks
-import kotlinx.android.synthetic.main.activity_memo_search.*
+import kotlinx.android.synthetic.main.activity_search.*
 
 
-class MemoSearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity() {
 
     companion object {
         private var isInstance = false
@@ -31,7 +31,7 @@ class MemoSearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_memo_search)
+        setContentView(R.layout.activity_search)
         setSupportActionBar(searchToolbar)
 
         instance = this.apply { isInstance = true }
@@ -65,7 +65,7 @@ class MemoSearchActivity : AppCompatActivity() {
         Log.d("場所:SearchActivity", "onDestroyが呼ばれた activity=$this")
 
         AppDatabase.apply {
-            getDatabase(this@MemoSearchActivity).close()
+            getDatabase(this@SearchActivity).close()
             clearDBInstanceFlag()
         }
 

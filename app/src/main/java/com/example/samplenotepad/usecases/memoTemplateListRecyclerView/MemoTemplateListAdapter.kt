@@ -1,5 +1,6 @@
-package com.example.samplenotepad.usecases.memoTemplateRecyclerView
+package com.example.samplenotepad.usecases.memoTemplateListRecyclerView
 
+import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,19 +14,20 @@ import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.EditExistMemo
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.example.samplenotepad.views.main.MemoEditFragment
 import com.example.samplenotepad.views.main.dismissTemplatePopupWindow
 import com.example.samplenotepad.views.main.getTemplatePopupWindow
 import kotlinx.android.synthetic.main.fragment_rename_dialog.view.*
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.android.synthetic.main.template_list_row.view.*
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 
-class MemoTemplateAdapter(
+class MemoTemplateListAdapter(
     private val editFragment: MemoEditFragment,
-    private val editViewModel: MemoEditViewModel
-) : RecyclerView.Adapter<MemoTemplateAdapter.ViewHolder>() {
+    private val mainViewModel: MainViewModel
+) : RecyclerView.Adapter<MemoTemplateListAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val templateNameView: TextView = view.memoTemplateNameTextView
@@ -33,6 +35,8 @@ class MemoTemplateAdapter(
     }
 
 
+    @SuppressLint("InflateParams")
+    @ObsoleteCoroutinesApi
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.template_list_row, parent, false)
@@ -40,7 +44,7 @@ class MemoTemplateAdapter(
 
         viewHolder.itemView.setOnClickListener {
             clearAll()
-            editViewModel.loadTemplateAndUpdateMemoContents(
+            mainViewModel.loadTemplateAndUpdateMemoContents(
                 viewHolder.templateNameView.text.toString()
             )
 
@@ -48,13 +52,13 @@ class MemoTemplateAdapter(
 
             initMemoContentsOperation(
                 editFragment,
-                editViewModel,
+                mainViewModel,
                 editFragment.memoContentsContainerLayout,
                 EditExistMemo
             )
         }
 
-        viewHolder.itemView.setOnLongClickListener { view ->
+        viewHolder.itemView.setOnLongClickListener {
             val layoutView = editFragment.requireActivity().layoutInflater.inflate(
                 R.layout.fragment_rename_dialog, null, false
             ).apply {
@@ -72,7 +76,7 @@ class MemoTemplateAdapter(
 
                 newNameEitText.requestFocus()
             }
-            val targetTemplateName = editViewModel.getTemplateNameList()[viewHolder.adapterPosition]
+            val targetTemplateName = mainViewModel.getTemplateNameList()[viewHolder.adapterPosition]
 
             layoutView.nameBeforeChangeTextView.text = String.format(
                 editFragment.resources.getString(
@@ -97,7 +101,7 @@ class MemoTemplateAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val templateName = editViewModel.getTemplateNameList()[position]
+        val templateName = mainViewModel.getTemplateNameList()[position]
 
         holder.templateNumberView.text = String.format(
             editFragment.resources.getString(R.string.template_number_view_text), position + 1
@@ -105,7 +109,7 @@ class MemoTemplateAdapter(
         holder.templateNameView.text = templateName
     }
 
-    override fun getItemCount(): Int = editViewModel.getTemplateNameList().size
+    override fun getItemCount(): Int = mainViewModel.getTemplateNameList().size
 
 
     private fun AlertDialog.setPositiveButtonAction(layoutView: View, targetTemplateName: String) =
@@ -118,14 +122,14 @@ class MemoTemplateAdapter(
                     newTemplateName.isEmpty() -> {
                         errorTextView.showErrorText(R.string.error_not_input_new_name)
                     }
-                    editViewModel.getTemplateNameList().contains(newTemplateName) -> {
+                    mainViewModel.getTemplateNameList().contains(newTemplateName) -> {
                         errorTextView.showErrorText(R.string.error_already_has_same_name)
                     }
                     else -> {
-                        editViewModel.renameItemInTemplateNameListAndTemplateFilesName(
+                        mainViewModel.renameItemInTemplateNameListAndTemplateFilesName(
                             targetTemplateName, newTemplateName
                         )
-                        this@MemoTemplateAdapter.notifyDataSetChanged()
+                        this@MemoTemplateListAdapter.notifyDataSetChanged()
                         this@setPositiveButtonAction.dismiss()
                     }
                 }

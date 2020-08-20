@@ -40,6 +40,7 @@
     <string name="contents_bullet_btn_description">ビュレットの追加と削除</string>
     <string name="contents_clear_btn_description">入力内容の全削除</string>
     <string name="contents_save_btn_description">メモの保存</string>
+    <string name="dismiss_dialog_btn_description">ダイアログを閉じる</string>
 
     <!-- MemoOptionFragment -->
     <string name="memo_title_label">タイトル</string>
@@ -57,6 +58,7 @@
     <string name="dialog_clear_all_message">作業内容をクリアします</string>
     <string name="dialog_clear_all_positive_button">YES</string>
     <string name="dialog_clear_all_negative_button">キャンセル</string>
+    <string name="category_dropdown_btn_description">カテゴリーリストの表示</string>
 
 
     <string-array name="reminder_pre_alarm_spinner">
@@ -127,6 +129,7 @@
     <string name="dialog_delete_reminder_message">リマインダーを削除します</string>
     <string name="dialog_delete_reminder_positive_button">削除する</string>
     <string name="dialog_delete_reminder_negative_button">キャンセル</string>
+    <string name="contents_reminder_state_btn_description">リマインダーの状態</string>
 
 
     <!-- SearchResultFragment -->
@@ -136,6 +139,7 @@
     <string name="search_date_text">リマインダー設定日：%s</string>
     <string name="search_move_to_calendar">カレンダー検索</string>
     <string name="no_match_result_text">一致するメモがありませんでした</string>
+    <string name="reminder_img_description">リマインダーあり</string>
 
     <!-- ReminderBroadcastReceiver -->
     <string name="channel_name">Reminder alarms</string>
@@ -152,5 +156,6 @@
 
     <!-- SearchOnCalendarFragment -->
     <string name="describe_event_mark_text">--- リマインダーがセットされている日</string>
+    <string name="move_to_calendar_btn_description">カレンダーでリマインダー検索</string>
 
 </resources>

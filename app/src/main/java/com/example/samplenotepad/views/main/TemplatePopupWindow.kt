@@ -1,5 +1,6 @@
 package com.example.samplenotepad.views.main
 
+import android.annotation.SuppressLint
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -11,9 +12,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.samplenotepad.R
-import com.example.samplenotepad.usecases.memoTemplateRecyclerView.MemoTemplateAdapter
-import com.example.samplenotepad.usecases.memoTemplateRecyclerView.getItemTouchHelperCallback
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.usecases.memoTemplateListRecyclerView.MemoTemplateListAdapter
+import com.example.samplenotepad.usecases.memoTemplateListRecyclerView.getItemTouchHelperCallback
+import com.example.samplenotepad.viewModels.MainViewModel
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
 import kotlinx.android.synthetic.main.template_popup_window.view.*
 
@@ -34,6 +35,7 @@ internal fun PopupWindow.dismissTemplatePopupWindow(fragment: MemoEditFragment) 
     fragment.setIsShowingPopupWindow(false)
 }
 
+@SuppressLint("InflateParams")
 private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
     val layoutView = editFragment.requireActivity().layoutInflater.inflate(
         R.layout.template_popup_window, null, false
@@ -51,7 +53,7 @@ private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
         })
 
         //listが空かどうかで、listActionの説明文の表示・非表示を切り替える
-        when (MainActivity.editViewModel.getTemplateNameList().isNotEmpty()) {
+        when (MainActivity.mainViewModel.getTemplateNameList().isNotEmpty()) {
             true -> listActionTextView.visibility = View.VISIBLE
             false -> listActionTextView.visibility = View.GONE
         }
@@ -85,22 +87,22 @@ private fun createPopupWindow(editFragment: MemoEditFragment): PopupWindow {
 }
 
 private fun PopupWindow.setTextForTemplatePopupWindow(editFragment: MemoEditFragment, layout: View) {
-    val editViewModel = MainActivity.editViewModel
+    val mainViewModel = MainActivity.mainViewModel
 
     layout.apply {
-        setRecyclerViewOnPopupWindow(editFragment, editViewModel, this)
-        setClickListenerOnPopupWindow(editFragment, editViewModel, this@setTextForTemplatePopupWindow)
+        setRecyclerViewOnPopupWindow(editFragment, mainViewModel, this)
+        setClickListenerOnPopupWindow(editFragment, mainViewModel, this@setTextForTemplatePopupWindow)
     }
 }
 
 private fun View.setRecyclerViewOnPopupWindow(
     fragment: MemoEditFragment,
-    viewModel: MemoEditViewModel,
+    viewModel: MainViewModel,
     contentLayout: View
 ) {
     this.apply {
         templateRecyclerView.apply {
-            val memoTemplateAdapter = MemoTemplateAdapter(fragment, viewModel)
+            val memoTemplateAdapter = MemoTemplateListAdapter(fragment, viewModel)
 
             layoutManager = LinearLayoutManager(fragment.requireContext())
             adapter = memoTemplateAdapter
@@ -121,7 +123,7 @@ private fun View.setRecyclerViewOnPopupWindow(
 
 private fun View.setClickListenerOnPopupWindow(
     fragment: MemoEditFragment,
-    viewModel: MemoEditViewModel,
+    viewModel: MainViewModel,
     popupWindow: PopupWindow
 ) {
     this.apply {

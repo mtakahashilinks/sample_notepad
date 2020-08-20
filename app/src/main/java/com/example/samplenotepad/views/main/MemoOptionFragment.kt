@@ -10,10 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.ListPopupWindow
+import androidx.appcompat.widget.SwitchCompat
 import com.example.samplenotepad.*
 import com.example.samplenotepad.entities.MemoInfo
 import com.example.samplenotepad.entities.ValuesOfOptionSetting
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.example.samplenotepad.views.DatePickerFragment
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.TimePickerFragment
@@ -44,7 +45,7 @@ class MemoOptionFragment : Fragment() {
 
 
         internal fun getOptionValuesForSave(): ValuesOfOptionSetting? =
-            MemoOptionFragment.instance()?.let { optionFragment ->
+            instance()?.let { optionFragment ->
                 val reminderSwitch = optionFragment.reminderOnOffSwitchView
                 val title = when (optionFragment.titleBodyTextView.text.isEmpty()) {
                     true -> null
@@ -65,18 +66,19 @@ class MemoOptionFragment : Fragment() {
                 )
             }
 
-        private fun MemoOptionFragment.getReminderDateTimeParams(switchView: Switch): String? =
-            when (switchView.isChecked) {
-                true -> {
-                    val reminderDate = this.reminderDateView.text.toString().replace('/', '-')
-                    val reminderTime = this.reminderTimeView.text.toString().replace(" ", "")
+        private fun MemoOptionFragment.getReminderDateTimeParams(
+            switchView: SwitchCompat
+        ): String? = when (switchView.isChecked) {
+            true -> {
+                val reminderDate = this.reminderDateView.text.toString().replace('/', '-')
+                val reminderTime = this.reminderTimeView.text.toString().replace(" ", "")
 
-                    "$reminderDate $reminderTime"
-                }
-                false -> null
+                "$reminderDate $reminderTime"
             }
+            false -> null
+        }
 
-        private fun Spinner.getPreAndPostAlarmParams(switchView: Switch): Int? =
+        private fun Spinner.getPreAndPostAlarmParams(switchView: SwitchCompat): Int? =
             when (switchView.isChecked) {
                 true -> this.selectedItemPosition
                 false -> null
@@ -84,7 +86,7 @@ class MemoOptionFragment : Fragment() {
     }
 
 
-    private lateinit var editViewModel: MemoEditViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,11 +101,11 @@ class MemoOptionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        editViewModel = MainActivity.editViewModel
-        editViewModel.getMemoInfo().initValueOfAllViewWithMemoInfo()
+        mainViewModel = MainActivity.mainViewModel
+        mainViewModel.getMemoInfo().initValueOfAllViewWithMemoInfo()
 
         //カテゴリー選択リストの処理
-        editViewModel.getCategoryList().drop(1).toTypedArray().setCategoryImageButton()
+        mainViewModel.getCategoryList().drop(1).toTypedArray().setCategoryImageButton()
 
         //リマインダー登録スイッチのON・Off切り替えによる処理
         reminderOnOffSwitchView.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -117,14 +119,14 @@ class MemoOptionFragment : Fragment() {
                 false -> changeStateForReminderSwitch(false, View.INVISIBLE)
             }
 
-            editViewModel.apply { valueChanged() }
+            mainViewModel.apply { valueChanged() }
         }
 
         //リマインダーの日付にDialogで選択した値をセットする処理
         reminderDateView.setOnClickListener {
             DatePickerFragment { year, month, day ->
                 reminderDateView.text = String.format("%04d/%02d/%02d", year, month + 1, day)
-                editViewModel.apply { valueChanged() }
+                mainViewModel.apply { valueChanged() }
             }.show(requireActivity().supportFragmentManager, "date_dialog")
         }
 
@@ -132,7 +134,7 @@ class MemoOptionFragment : Fragment() {
         reminderTimeView.setOnClickListener {
             TimePickerFragment { hour, minute ->
                 reminderTimeView.text = String.format("%02d : %02d", hour, minute)
-                editViewModel.apply { valueChanged() }
+                mainViewModel.apply { valueChanged() }
             }.show(requireActivity().supportFragmentManager, "time_dialog")
         }
 
@@ -157,7 +159,7 @@ class MemoOptionFragment : Fragment() {
             override fun onNothingSelected(p0: AdapterView<*>?) { }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                editViewModel.apply { valueChanged() }
+                mainViewModel.apply { valueChanged() }
             }
         }
     }
@@ -260,7 +262,7 @@ class MemoOptionFragment : Fragment() {
     }
 
 
-    internal fun resetValueOfAllView(viewModel: MemoEditViewModel) {
+    internal fun resetValueOfAllView(viewModel: MainViewModel) {
         titleBodyTextView.setText("")
         categoryTextView.setText("")
         viewModel.getCategoryList().drop(1).toTypedArray().setCategoryImageButton()
@@ -292,7 +294,7 @@ class MemoOptionFragment : Fragment() {
         this.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 counterView.text = formatter.format((s?.toString() ?: "0").length)
-                editViewModel.apply { valueChanged() }
+                mainViewModel.apply { valueChanged() }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}

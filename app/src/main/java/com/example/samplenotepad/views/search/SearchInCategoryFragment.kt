@@ -57,7 +57,7 @@ class SearchInCategoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchViewModel = MemoSearchActivity.searchViewModel.apply {
+        searchViewModel = SearchActivity.searchViewModel.apply {
             category = getSelectedCategory()
         }
 

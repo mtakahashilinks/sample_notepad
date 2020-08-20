@@ -39,7 +39,8 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titleLabelView"
-        tools:text="ああああああああああいいいいい" />
+        tools:text="ああああああああああいいいいい"
+        android:importantForAutofill="no" />
 
     <TextView
         android:id="@+id/categoryLabelView"
@@ -73,20 +74,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/categoryLabelView"
-        tools:text="あああああああ" />
+        tools:text="あああああああ"
+        android:importantForAutofill="no" />
 
     <ImageButton
         android:id="@+id/categoryDropDownImgBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/colorTransparent"
+        android:contentDescription="@string/category_dropdown_btn_description"
         app:layout_constraintBottom_toBottomOf="@+id/categoryTextView"
         app:layout_constraintEnd_toEndOf="@+id/categoryTextView"
         app:layout_constraintTop_toTopOf="@+id/categoryTextView"
         app:srcCompat="@drawable/ic_arrow_drop_down_black_32dp" />
 
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/reminderOnOffSwitchView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

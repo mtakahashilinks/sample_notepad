@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -16,11 +17,11 @@ import com.example.samplenotepad.*
 import com.example.samplenotepad.data.saveMemoInfoIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.entities.GetMemoContents
-import com.example.samplenotepad.viewModels.MemoDisplayViewModel
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.DisplayViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.example.samplenotepad.views.MemoEditText
 import com.example.samplenotepad.views.SampleMemoApplication
-import com.example.samplenotepad.views.display.MemoDisplayFragment
+import com.example.samplenotepad.views.display.DisplayFragment
 import com.example.samplenotepad.views.main.*
 import com.example.samplenotepad.views.main.setConstraintForFirstMemoEditText
 import com.example.samplenotepad.views.main.setConstraintForNextMemoEditTextWithNoBelow
@@ -31,9 +32,9 @@ import kotlinx.coroutines.channels.actor
 
 internal lateinit var firstMemoEditText: MemoEditText private set
 private lateinit var editFragment: MemoEditFragment
-private lateinit var displayFragment: MemoDisplayFragment
-private lateinit var editViewModel: MemoEditViewModel
-private lateinit var displayViewModel: MemoDisplayViewModel
+private lateinit var displayFragment: DisplayFragment
+private lateinit var mainViewModel: MainViewModel
+private lateinit var displayViewModel: DisplayViewModel
 private lateinit var memoContainer: ConstraintLayout
 private lateinit var operationActor: SendChannel<TypeOfMemoContentsOperation>
 private lateinit var formerMemoEditTextForExistMemo: MemoEditText //databaseから読みだした既存のメモの表示の際にのみ使う
@@ -48,6 +49,7 @@ internal fun initValueOfShowMassageForSavedLiveData() {
 
 internal fun getMemoContentsOperationActor() = operationActor
 
+@ObsoleteCoroutinesApi
 internal fun createMemoContentsOperationActor(viewModel: ViewModel) {
     operationActor = viewModel.viewModelScope.memoContentsOperationActor()
 }
@@ -57,15 +59,15 @@ internal fun initMemoContentsOperation(
     fragment: Fragment,
     viewModel: ViewModel,
     container: ConstraintLayout,
-    buildType: TypeOfBuildMemoViewOperation
+    buildType: TypeOfBuildMemoOperation
 ) = runBlocking {
     when (buildType){
         is CreateNewMemo -> {
             editFragment = fragment as MemoEditFragment
-            editViewModel = viewModel as MemoEditViewModel
+            mainViewModel = viewModel as MainViewModel
             memoContainer = container
 
-            editViewModel.apply {
+            mainViewModel.apply {
                 getMemoContentsOperationActor().send(SetMemoContents(listOf<MemoRowInfo>()))
 
                 operationActor.send(CreateFirstMemoEditText(Text(""), CreateNewMemo))
@@ -76,7 +78,7 @@ internal fun initMemoContentsOperation(
         }
         is EditExistMemo -> {
             editFragment = fragment as MemoEditFragment
-            editViewModel = viewModel as MemoEditViewModel
+            mainViewModel = viewModel as MainViewModel
             memoContainer = container
 
             val memoContentsDefer = CompletableDeferred<MemoContents>()
@@ -85,8 +87,8 @@ internal fun initMemoContentsOperation(
             createMemoRowsForExistMemo(buildType, memoContentsDefer.await())
         }
         is DisplayExistMemo -> {
-            displayFragment = fragment as MemoDisplayFragment
-            displayViewModel = viewModel as MemoDisplayViewModel
+            displayFragment = fragment as DisplayFragment
+            displayViewModel = viewModel as DisplayViewModel
             memoContainer = container
 
             val memoContentsDefer = CompletableDeferred<MemoContents>()
@@ -97,12 +99,12 @@ internal fun initMemoContentsOperation(
     }
 }
 
-internal fun closeMemoContentsExecuteActor() = operationActor.close()
+internal fun closeMemoContentsOperationActor() = operationActor.close()
 
 //ボタンがクリックされた時のcheckBox処理の入り口
 internal fun MemoEditText.checkBoxOperation() = runBlocking {
     val memoContentsDefer = CompletableDeferred<MemoContents>()
-    executeActor.send(GetMemoContents(memoContentsDefer))
+    operationActor.send(GetMemoContents(memoContentsDefer))
 
     val memoContents = memoContentsDefer.await()
     val memoRowInfo = memoContents.first { it.memoEditTextId.value == this@checkBoxOperation.id }
@@ -110,11 +112,11 @@ internal fun MemoEditText.checkBoxOperation() = runBlocking {
 
     when {
         memoRowInfo.dotId.value != null -> {
-            executeActor.send(DeleteDot(this@checkBoxOperation))
-            executeActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
+            operationActor.send(DeleteDot(this@checkBoxOperation))
+            operationActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
         }
-        checkBoxId != null -> executeActor.send(DeleteCheckBox(this@checkBoxOperation))
-        else -> executeActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
+        checkBoxId != null -> operationActor.send(DeleteCheckBox(this@checkBoxOperation))
+        else -> operationActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
     }
 }
 
@@ -122,7 +124,7 @@ internal fun MemoEditText.checkBoxOperation() = runBlocking {
 internal fun MemoEditText.dotOperation() = runBlocking {
     val memoContentsDefer = CompletableDeferred<MemoContents>()
 
-    executeActor.send(GetMemoContents(memoContentsDefer))
+    operationActor.send(GetMemoContents(memoContentsDefer))
 
     val memoContents = memoContentsDefer.await()
     val memoRowInfo = memoContents.first { it.memoEditTextId.value == this@dotOperation.id }
@@ -130,11 +132,11 @@ internal fun MemoEditText.dotOperation() = runBlocking {
 
     when {
         memoRowInfo.checkBoxId.value != null -> {
-            executeActor.send(DeleteCheckBox(this@dotOperation))
-            executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
+            operationActor.send(DeleteCheckBox(this@dotOperation))
+            operationActor.send(AddDot(this@dotOperation, CreateNewMemo))
         }
-        dotId != null -> executeActor.send(DeleteDot(this@dotOperation))
-        else -> executeActor.send(AddDot(this@dotOperation, CreateNewMemo))
+        dotId != null -> operationActor.send(DeleteDot(this@dotOperation))
+        else -> operationActor.send(AddDot(this@dotOperation, CreateNewMemo))
     }
 }
 
@@ -142,7 +144,7 @@ internal fun updateText() = runBlocking {
     val focusView = memoContainer.findFocus()
 
     if (focusView != null && focusView is MemoEditText)
-        editViewModel.viewModelScope.launch {
+        mainViewModel.viewModelScope.launch {
             operationActor.send(UpdateTextOfMemoRowInfo(focusView))
         }
 }
@@ -152,14 +154,14 @@ internal fun clearAll() = runBlocking {
 
     memoContainer.removeAllViews()
 
-    editViewModel.viewModelScope.launch {
+    mainViewModel.viewModelScope.launch {
         operationActor.send(CreateFirstMemoEditText(Text(""), CreateNewMemo))
     }.join()
 
-    editViewModel.updateSavePointOfMemoContents()
+    mainViewModel.updateSavePointOfMemoContents()
 }
 
-internal fun saveMemo(buildType: TypeOfBuildMemoViewOperation) = runBlocking {
+internal fun saveMemo(buildType: TypeOfBuildMemoOperation) = runBlocking {
     updateText() //まずmemoContentsのTextを更新する
 
     operationActor.send(SaveMemoInfo(buildType))
@@ -167,10 +169,10 @@ internal fun saveMemo(buildType: TypeOfBuildMemoViewOperation) = runBlocking {
     when (buildType) {
         is DisplayExistMemo -> {
             displayViewModel.updateSavePointOfMemoContents()
-            showMassageForSavedLiveData.postValue(DisplayFragment)
+            showMassageForSavedLiveData.postValue(com.example.samplenotepad.entities.DisplayFragment)
         }
         else -> {
-            editViewModel.apply {
+            mainViewModel.apply {
                 updateSavePointOfMemoContents()
                 clearIsChangedValueInOptionFragment()
             }
@@ -183,12 +185,12 @@ private fun saveOperation(operateType: SaveMemoInfo, memoContents: MemoContents)
     Log.d("saveOperation", "save処理に入った")
     when (operateType.buildType) {
         is DisplayExistMemo -> displayViewModel.getMemoInfo().saveMemoInfoIO(displayViewModel, memoContents)
-        else -> editViewModel.getMemoInfo().saveMemoInfoIO(editViewModel, memoContents)
+        else -> mainViewModel.getMemoInfo().saveMemoInfoIO(mainViewModel, memoContents)
     }
 }
 
 private fun createMemoRowsForExistMemo(
-    buildType: TypeOfBuildMemoViewOperation,
+    buildType: TypeOfBuildMemoOperation,
     memoContents: MemoContents
 ) = runBlocking {
     suspend fun List<MemoRowInfo>.createFirstRow(): List<MemoRowInfo> {
@@ -217,7 +219,7 @@ private fun createMemoRowsForExistMemo(
         else -> {
             memoContents.toList().createFirstRow().createNextRow()
 
-            editViewModel.apply {
+            mainViewModel.apply {
                 updateSavePointOfMemoContents()
                 clearIsChangedValueInOptionFragment()
             }
@@ -227,7 +229,7 @@ private fun createMemoRowsForExistMemo(
 
 private fun MemoEditText.addCheckBoxAndDotForExistMemo(
     memoRowInfo: MemoRowInfo,
-    buildType: TypeOfBuildMemoViewOperation,
+    buildType: TypeOfBuildMemoOperation,
     memoContents:MemoContents
 ) {
     if (memoRowInfo.checkBoxId.value != null)
@@ -268,7 +270,7 @@ private fun CoroutineScope.memoContentsOperationActor() =
             }
 
             Log.d("場所:memoContentsOperationActor3", "変更後:size=${memoContents.size} memoContents=$memoContents")
-            Log.d("場所:memoContentsOperationActor4", "executeMemoOperationが終わった operateType=$msg")
+            Log.d("場所:memoContentsOperationActor4", "memoContentsOperationActorが終わった operateType=$msg")
         }
     }
 
@@ -287,8 +289,8 @@ private fun MemoEditText.setCommonLayoutParams() {
     layoutParams = ConstraintLayout.LayoutParams(
         ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT
     )
-    background = resources.getDrawable(
-        android.R.color.transparent, SampleMemoApplication.instance.theme
+    background = ResourcesCompat.getDrawable(
+        resources, android.R.color.transparent, SampleMemoApplication.instance.theme
     )
     setPadding(4)
     isFocusable = true
@@ -298,23 +300,23 @@ private fun MemoEditText.setCommonLayoutParams() {
 }
 
 private fun createNewMemoEditText(
-    memoEditTextId: Int?, text : Text, executeType: TypeOfBuildMemoViewOperation
-): MemoEditText = when (executeType) {
+    memoEditTextId: Int?, text : Text, buildType: TypeOfBuildMemoOperation
+): MemoEditText = when (buildType) {
         is CreateNewMemo -> {
-            MemoEditText(editFragment.requireContext(), editViewModel, operationActor).apply {
+            MemoEditText(editFragment.requireContext(), mainViewModel, operationActor).apply {
                 id = View.generateViewId()
                 setCommonLayoutParams()
             }
         }
         is EditExistMemo -> {
-            MemoEditText(editFragment.requireContext(), editViewModel, operationActor).apply {
+            MemoEditText(editFragment.requireContext(), mainViewModel, operationActor).apply {
                 setCommonLayoutParams()
                 id = memoEditTextId ?: throw(NullPointerException("memoEditTextId mast be not null"))
                 setText(text.value)
             }
         }
         is DisplayExistMemo -> {
-            MemoEditText(displayFragment.requireContext(), editViewModel, operationActor).apply {
+            MemoEditText(displayFragment.requireContext(), mainViewModel, operationActor).apply {
                 setCommonLayoutParams()
                 id = memoEditTextId ?: throw(NullPointerException("memoEditTextId mast be not null"))
                 setText(text.value)
@@ -339,7 +341,7 @@ private fun createFirstMemoEditText(
 
     return when (operateType.buildType) {
         is CreateNewMemo -> {
-            editViewModel.viewModelScope
+            mainViewModel.viewModelScope
                 .launch(Dispatchers.Main) { memoContainer.setConstraintForFirstMemoEditText(newMemoEditText) }
 
             Log.d("場所:createFirstMemoEditText", "newMemoEditTextId=${newMemoEditText.id}")
@@ -476,7 +478,7 @@ private fun updateCheckBoxStateOfMemoContents(
 
 private fun MemoEditText.changeTextColorByCheckBoxState(
     checkBoxState: Boolean,
-    buildType: TypeOfBuildMemoViewOperation
+    buildType: TypeOfBuildMemoOperation
 ) {
     when {
         buildType is DisplayExistMemo && checkBoxState->
@@ -542,7 +544,7 @@ private fun createNewCheckBoxView(operateType: AddCheckBox): CheckBox {
 
         when (operateType.buildType) {
             is DisplayExistMemo -> setCheckedChangeAction(operateType, displayViewModel)
-            else -> setCheckedChangeAction(operateType, editViewModel)
+            else -> setCheckedChangeAction(operateType, mainViewModel)
         }
     }
 }

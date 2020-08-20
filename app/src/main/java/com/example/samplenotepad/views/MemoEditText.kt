@@ -1,5 +1,6 @@
 package com.example.samplenotepad.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Rect
 import android.util.Log
@@ -17,10 +18,11 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 
+@SuppressLint("ViewConstructor")
 class MemoEditText(
     context: Context,
     val viewModel: ViewModel,
-    val executeActor: SendChannel<TypeOfMemoContentsOperation>
+    val operationActor: SendChannel<TypeOfMemoContentsOperation>
 ) : AppCompatEditText(context) {
 
     //下のonCreateInputConnection()でReturnする
@@ -46,12 +48,12 @@ class MemoEditText(
 
                         when {
                             memoRowInfo.checkBoxId.value != null ->
-                                executeActor.send(DeleteCheckBox(this@MemoEditText))
+                                operationActor.send(DeleteCheckBox(this@MemoEditText))
                             memoRowInfo.dotId.value != null ->
-                                executeActor.send(DeleteDot(this@MemoEditText))
+                                operationActor.send(DeleteDot(this@MemoEditText))
                         }
 
-                        executeActor.send(DeleteMemoRow(this@MemoEditText))
+                        operationActor.send(DeleteMemoRow(this@MemoEditText))
                     }
 
                     false
@@ -68,7 +70,7 @@ class MemoEditText(
                             BufferType.NORMAL
                         )
 
-                        executeActor.send(CreateNextMemoEditText(Text(textBringToNextRow), CreateNewMemo))
+                        operationActor.send(CreateNextMemoEditText(Text(textBringToNextRow), CreateNewMemo))
                     }
 
                     false
@@ -86,7 +88,7 @@ class MemoEditText(
         super.onFocusChanged(focused, direction, previouslyFocusedRect)
         if (this.isClickable && !focused)
             viewModel.viewModelScope.launch {
-                executeActor.send(UpdateTextOfMemoRowInfo(this@MemoEditText))
+                operationActor.send(UpdateTextOfMemoRowInfo(this@MemoEditText))
             }
     }
 }

@@ -61,7 +61,7 @@ class SearchOnCalendarFragment : Fragment() {
                 val selectedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                     .format(eventDay.calendar.time)
 
-                MemoSearchActivity.searchViewModel.apply {
+                SearchActivity.searchViewModel.apply {
                     setSelectedDateOnCalendar(selectedDate)
                     setSearchWord("")
                 }
@@ -79,7 +79,7 @@ class SearchOnCalendarFragment : Fragment() {
 
     private fun createEventDayList(): List<EventDay> {
         val memoList =
-            MemoSearchActivity.searchViewModel.loadAndSetDataSetForMemoListFindByWithReminder()
+            SearchActivity.searchViewModel.loadAndSetDataSetForMemoListFindByWithReminder()
 
         return memoList.map { memoInfo ->
             EventDay(getCalendarFrom(memoInfo.baseDateTimeForAlarm), R.drawable.ic_calendar_event_8)

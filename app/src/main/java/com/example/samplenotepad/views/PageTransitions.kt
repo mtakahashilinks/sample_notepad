@@ -30,7 +30,7 @@ internal fun FragmentActivity.moveToMainActivityForEditExistMemo(memoInfoId: Lon
 }
 
 internal fun FragmentActivity.moveToSearchActivity(searchId: String) {
-    val intent = Intent(this, MemoSearchActivity::class.java).apply {
+    val intent = Intent(this, SearchActivity::class.java).apply {
         addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         putExtra(ConstValForSearch.SEARCH_ID, searchId)
     }

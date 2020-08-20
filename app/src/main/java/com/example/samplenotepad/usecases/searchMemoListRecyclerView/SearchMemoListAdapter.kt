@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.viewModels.SearchViewModel
@@ -51,7 +50,7 @@ class SearchMemoListAdapter(
             dataSetForMemoList.createdDateTime.replace('-', '/')
         )
         holder.title.text = dataSetForMemoList.title
-        holder.memoBody.text = dataSetForMemoList.contentsForSearchByWord
+        holder.memoBody.text = dataSetForMemoList.contentsForWordsSearch
 
         when (dataSetForMemoList.baseDateTimeForAlarm.isEmpty()) {
             true -> holder.isSetRemainder.visibility = View.GONE

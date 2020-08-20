@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.samplenotepad.R
@@ -15,26 +14,26 @@ import com.example.samplenotepad.usecases.getMemoContentsOperationActor
 import com.example.samplenotepad.usecases.getShowMassageForSavedLiveData
 import com.example.samplenotepad.usecases.initMemoContentsOperation
 import com.example.samplenotepad.usecases.initValueOfShowMassageForSavedLiveData
-import com.example.samplenotepad.viewModels.MemoDisplayViewModel
+import com.example.samplenotepad.viewModels.DisplayViewModel
 import com.example.samplenotepad.views.moveToMainActivityForEditExistMemo
-import com.example.samplenotepad.views.search.MemoSearchActivity
-import kotlinx.android.synthetic.main.fragment_display_memo.*
+import com.example.samplenotepad.views.search.SearchActivity
+import kotlinx.android.synthetic.main.fragment_display.*
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
 
 
-class MemoDisplayFragment : Fragment() {
+class DisplayFragment : Fragment() {
 
     companion object {
-        private var instance: MemoDisplayFragment? = null
+        private var instance: DisplayFragment? = null
 
-        internal fun instanceToAddOnActivity(): MemoDisplayFragment {
+        internal fun instanceToAddOnActivity(): DisplayFragment {
             val mInstance = instance
 
             return when (mInstance != null && !mInstance.isAdded) {
                 true -> mInstance
-                false -> MemoDisplayFragment().apply { instance = this }
+                false -> DisplayFragment()
+                    .apply { instance = this }
             }
         }
 
@@ -44,12 +43,12 @@ class MemoDisplayFragment : Fragment() {
     }
 
 
-    private lateinit var displayViewModel: MemoDisplayViewModel
+    private lateinit var displayViewModel: DisplayViewModel
     private var isShowingPopupWindow = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_display_memo, container, false)
+        return inflater.inflate(R.layout.fragment_display, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,10 +58,10 @@ class MemoDisplayFragment : Fragment() {
 
         //メモの保存時にSnackbarを表示
         lifecycleScope.launch {
-            getShowMassageForSavedLiveData().observe(viewLifecycleOwner, Observer { typeOfFragment ->
-                if (typeOfFragment is DisplayFragment
+            getShowMassageForSavedLiveData().observe(viewLifecycleOwner, { typeOfFragment ->
+                if (typeOfFragment is com.example.samplenotepad.entities.DisplayFragment
                     && reminderStatesImgBtn.visibility != View.INVISIBLE) {
-                    this@MemoDisplayFragment.showSnackbarForSavedMassageAtDisplayMemo()
+                    this@DisplayFragment.showSnackbarForSavedMassageAtDisplayMemo()
                 }
 
                 initValueOfShowMassageForSavedLiveData()
@@ -124,6 +123,7 @@ class MemoDisplayFragment : Fragment() {
         }
     }
 
+    @ObsoleteCoroutinesApi
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -147,7 +147,7 @@ class MemoDisplayFragment : Fragment() {
 
 
     private fun finishSearchActivityIfInstanced() {
-        if (MemoSearchActivity.isInstance()) MemoSearchActivity.instance.finish()
+        if (SearchActivity.isInstance()) SearchActivity.instance.finish()
     }
     internal fun setIsShowingPopupWindow(value: Boolean) {
         isShowingPopupWindow = value

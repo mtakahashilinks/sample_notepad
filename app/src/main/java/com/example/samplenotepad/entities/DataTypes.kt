@@ -19,10 +19,10 @@ object WithReminder : TypeOfSearch()
 object OnCalendar : TypeOfSearch()
 
 //MemoのViewを作成するときに新規作成なのか再編集なのか編集なし(表示のみ)なのかを判断するため
-sealed class TypeOfBuildMemoViewOperation
-object CreateNewMemo : TypeOfBuildMemoViewOperation()
-object EditExistMemo : TypeOfBuildMemoViewOperation()
-object DisplayExistMemo : TypeOfBuildMemoViewOperation()
+sealed class TypeOfBuildMemoOperation
+object CreateNewMemo : TypeOfBuildMemoOperation()
+object EditExistMemo : TypeOfBuildMemoOperation()
+object DisplayExistMemo : TypeOfBuildMemoOperation()
 
 //EditViewModelのMemoContentsの値を変更する操作で使用。どの操作なのかを判断するため。
 sealed class TypeOfMemoContentsOperation
@@ -31,12 +31,12 @@ data class UpdateTextOfMemoRowInfo(
 ) : TypeOfMemoContentsOperation() { companion object }
 data class CreateFirstMemoEditText(
     val text: Text,
-    val buildType: TypeOfBuildMemoViewOperation,
+    val buildType: TypeOfBuildMemoOperation,
     val memoRowInfo: MemoRowInfo? = null
     ) : TypeOfMemoContentsOperation() { companion object }
 data class CreateNextMemoEditText(
     val text: Text,
-    val buildType: TypeOfBuildMemoViewOperation,
+    val buildType: TypeOfBuildMemoOperation,
     val memoRowInfo: MemoRowInfo? = null
     ) : TypeOfMemoContentsOperation() { companion object }
 data class DeleteMemoRow(
@@ -44,7 +44,7 @@ data class DeleteMemoRow(
 ) : TypeOfMemoContentsOperation() { companion object }
 data class AddCheckBox(
     val memoEditText: MemoEditText,
-    val buildType: TypeOfBuildMemoViewOperation,
+    val buildType: TypeOfBuildMemoOperation,
     val checkBoxId: Int? = null,
     val checkBoxState: Boolean = false
 ) : TypeOfMemoContentsOperation() { companion object }
@@ -53,18 +53,18 @@ data class DeleteCheckBox(
 ) : TypeOfMemoContentsOperation() { companion object }
 data class ChangeCheckBoxState(
     val memoEditText: MemoEditText,
-    val buildType: TypeOfBuildMemoViewOperation
+    val buildType: TypeOfBuildMemoOperation
 ) : TypeOfMemoContentsOperation() { companion object }
 data class AddDot(
     val memoEditText: MemoEditText,
-    val buildType: TypeOfBuildMemoViewOperation,
+    val buildType: TypeOfBuildMemoOperation,
     val dotId: Int? = null
 ) : TypeOfMemoContentsOperation() { companion object }
 data class DeleteDot(
     val memoEditText: MemoEditText
 ) : TypeOfMemoContentsOperation() { companion object }
 data class SaveMemoInfo(
-    val buildType: TypeOfBuildMemoViewOperation
+    val buildType: TypeOfBuildMemoOperation
 ) : TypeOfMemoContentsOperation()
 data class SetMemoContents(
     val memoContents: MemoContents
@@ -74,17 +74,17 @@ data class GetMemoContents(
 ) : TypeOfMemoContentsOperation() { companion object }
 
 
-sealed class ValueTypeOfMemoRowInfo
+sealed class TypeOfMemoRowInfoValue
 @Serializable
-data class MemoEditTextId(val value: Int) : ValueTypeOfMemoRowInfo() { companion object }
+data class MemoEditTextId(val value: Int) : TypeOfMemoRowInfoValue() { companion object }
 @Serializable
-data class Text(val value: String) : ValueTypeOfMemoRowInfo() { companion object }
+data class Text(val value: String) : TypeOfMemoRowInfoValue() { companion object }
 @Serializable
-data class CheckBoxId(val value: Int?) : ValueTypeOfMemoRowInfo() { companion object }
+data class CheckBoxId(val value: Int?) : TypeOfMemoRowInfoValue() { companion object }
 @Serializable
-data class CheckBoxState(val value: Boolean) : ValueTypeOfMemoRowInfo() { companion object }
+data class CheckBoxState(val value: Boolean) : TypeOfMemoRowInfoValue() { companion object }
 @Serializable
-data class DotId(val value: Int?) : ValueTypeOfMemoRowInfo() { companion object }
+data class DotId(val value: Int?) : TypeOfMemoRowInfoValue() { companion object }
 
 //メモの中の各行(View)の情報
 @Serializable

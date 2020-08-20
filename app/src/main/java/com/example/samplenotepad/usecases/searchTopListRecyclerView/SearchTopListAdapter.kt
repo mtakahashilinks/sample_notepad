@@ -1,5 +1,6 @@
 package com.example.samplenotepad.usecases.searchTopListRecyclerView
 
+import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,7 @@ import com.example.samplenotepad.viewModels.SearchViewModel
 import com.example.samplenotepad.views.moveToSearchInCategory
 import com.example.samplenotepad.views.search.SearchTopFragment
 import kotlinx.android.synthetic.main.fragment_rename_dialog.view.*
-import kotlinx.android.synthetic.main.search_top_container_row.view.*
+import kotlinx.android.synthetic.main.search_top_list_row.view.*
 
 
 class SearchTopListAdapter(
@@ -26,9 +27,10 @@ class SearchTopListAdapter(
     }
 
 
+    @SuppressLint("InflateParams")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.search_top_container_row, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.search_top_list_row, parent, false)
         val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
@@ -39,7 +41,7 @@ class SearchTopListAdapter(
             fragment.requireActivity().moveToSearchInCategory()
         }
 
-        viewHolder.itemView.setOnLongClickListener { view ->
+        viewHolder.itemView.setOnLongClickListener {
             when (viewHolder.adapterPosition) {
                 0 -> false
                 else -> {

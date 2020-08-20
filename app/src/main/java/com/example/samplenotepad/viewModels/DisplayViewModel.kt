@@ -14,7 +14,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 
 
-class MemoDisplayViewModel : ViewModel() {
+class DisplayViewModel : ViewModel() {
 
     private var memoInfo = MemoInfo(-1, "", "", "", "", "", "", "", -1, -1)
     private var savePointOfMemoContents = listOf<MemoRowInfo>()

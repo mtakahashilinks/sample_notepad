@@ -1,19 +1,21 @@
 package com.example.samplenotepad.views.display
 
+import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.MemoAlertDialog
-import kotlinx.android.synthetic.main.fragment_display_memo.*
-import kotlinx.android.synthetic.main.reminder_states_popup_window.view.*
+import kotlinx.android.synthetic.main.fragment_display.*
+import kotlinx.android.synthetic.main.reminder_state_popup_window.view.*
 
 
 private var popupWindow: PopupWindow? = null
 
-internal fun getReminderStatesPopupWindow(displayFragment: MemoDisplayFragment): PopupWindow =
+internal fun getReminderStatesPopupWindow(displayFragment: DisplayFragment): PopupWindow =
     popupWindow
         ?: createPopupWindow(displayFragment).apply { if (popupWindow == null) popupWindow = this }
 
@@ -21,15 +23,16 @@ internal fun clearReminderStatesPopupWindowFlag() {
     popupWindow = null
 }
 
-internal fun PopupWindow.dismissReminderStatesPopupWindow(displayFragment: MemoDisplayFragment) {
+internal fun PopupWindow.dismissReminderStatesPopupWindow(displayFragment: DisplayFragment) {
     this.dismiss()
     clearReminderStatesPopupWindowFlag()
     displayFragment.setIsShowingPopupWindow(false)
 }
 
-private fun createPopupWindow(displayFragment: MemoDisplayFragment): PopupWindow {
+@SuppressLint("InflateParams")
+private fun createPopupWindow(displayFragment: DisplayFragment): PopupWindow {
     val layoutView = displayFragment.requireActivity().layoutInflater.inflate(
-        R.layout.reminder_states_popup_window, null, false
+        R.layout.reminder_state_popup_window, null, false
     ).apply {
         setTextForReminderPopupWindow()
 
@@ -44,8 +47,10 @@ private fun createPopupWindow(displayFragment: MemoDisplayFragment): PopupWindow
         height = ViewGroup.LayoutParams.WRAP_CONTENT
         contentView = layoutView
         setBackgroundDrawable(
-            displayFragment.resources.getDrawable(
-                R.drawable.popup_background, displayFragment.requireActivity().theme
+            ResourcesCompat.getDrawable(
+                displayFragment.resources,
+                R.drawable.popup_background,
+                displayFragment.requireActivity().theme
             )
         )
         isOutsideTouchable = true
@@ -95,7 +100,7 @@ private fun TextView.setReminderDateTimeTextView(reminderDateTimeList: List<Stri
     this.text = reminderDateTime
 }
 
-private fun MemoDisplayFragment.showAlertDialogForDeleteReminder() {
+private fun DisplayFragment.showAlertDialogForDeleteReminder() {
     MemoAlertDialog(
         R.string.dialog_delete_reminder_message,
         R.string.dialog_delete_reminder_positive_button,

@@ -12,29 +12,29 @@ import com.example.samplenotepad.R
 import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.ConstValForMemo
 import com.example.samplenotepad.entities.ConstValForSearch
-import com.example.samplenotepad.viewModels.MemoDisplayViewModel
+import com.example.samplenotepad.viewModels.DisplayViewModel
 import com.example.samplenotepad.views.*
 import com.example.samplenotepad.views.moveToMainActivity
 import com.example.samplenotepad.views.moveToSearchActivity
-import com.example.samplenotepad.views.search.MemoSearchActivity
-import kotlinx.android.synthetic.main.activity_memo_display.*
+import com.example.samplenotepad.views.search.SearchActivity
+import kotlinx.android.synthetic.main.activity_display.*
 
 class MemoDisplayActivity : AppCompatActivity() {
 
     companion object {
         lateinit var instanceOfActivity: Activity private set
-        lateinit var displayViewModel: MemoDisplayViewModel private set
+        lateinit var displayViewModel: DisplayViewModel private set
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_memo_display)
+        setContentView(R.layout.activity_display)
         setSupportActionBar(displayToolbar)
 
         instanceOfActivity = this
 
-        displayViewModel = ViewModelProvider(this).get(MemoDisplayViewModel::class.java)
+        displayViewModel = ViewModelProvider(this).get(DisplayViewModel::class.java)
 
         displayViewModel.createNewMemoContentsExecuteActor()
 
@@ -44,7 +44,7 @@ class MemoDisplayActivity : AppCompatActivity() {
             )
 
             supportFragmentManager.beginTransaction()
-                .replace(R.id.displayContainer, MemoDisplayFragment.instanceToAddOnActivity())
+                .replace(R.id.displayContainer, DisplayFragment.instanceToAddOnActivity())
                 .commit()
         }
     }
@@ -145,5 +145,5 @@ class MemoDisplayActivity : AppCompatActivity() {
 
 
 private fun finishSearchActivityIfInstanced() {
-    if (MemoSearchActivity.isInstance()) MemoSearchActivity.instance.finish()
+    if (SearchActivity.isInstance()) SearchActivity.instance.finish()
 }

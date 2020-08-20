@@ -61,7 +61,7 @@ class SearchResultFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("場所:SearchResultFragment", "onViewCreatedが呼ばれた")
 
-        searchViewModel = MemoSearchActivity.searchViewModel
+        searchViewModel = SearchActivity.searchViewModel
 
         listAdapter = SearchMemoListAdapter(searchViewModel) { memoInfoId ->
             requireActivity().moveToDisplayActivity(memoInfoId)

@@ -53,7 +53,7 @@ class SearchTopFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("場所:SearchTopFragment", "onViewCreatedが呼ばれた fragment=${this@SearchTopFragment.id}")
 
-        searchViewModel = MemoSearchActivity.searchViewModel
+        searchViewModel = SearchActivity.searchViewModel
 
         listAdapter = SearchTopListAdapter(this@SearchTopFragment, searchViewModel)
 

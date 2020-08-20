@@ -14,8 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.samplenotepad.*
 import com.example.samplenotepad.data.AppDatabase
 import com.example.samplenotepad.entities.*
-import com.example.samplenotepad.viewModels.MemoEditViewModel
-import com.example.samplenotepad.viewModels.MemoOptionViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
@@ -28,13 +27,12 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         lateinit var mainActivity: MainActivity private set
-        lateinit var editViewModel: MemoEditViewModel private set
-        lateinit var optionViewModel: MemoOptionViewModel private set
+        lateinit var mainViewModel: MainViewModel private set
     }
 
 
     //PagerにセットするAdapter
-    private inner class MemoPagerAdapter(
+    private class MemoPagerAdapter(
         fragment: FragmentActivity
     ) : FragmentStateAdapter(fragment) {
         override fun getItemCount(): Int = 2
@@ -55,15 +53,14 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(mainToolbar)
 
         mainActivity = this
-        editViewModel = ViewModelProvider(this).get(MemoEditViewModel::class.java)
-        optionViewModel = ViewModelProvider(this).get(MemoOptionViewModel::class.java)
+        mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
         val existMemoId = intent.getLongExtra(ConstValForMemo.MEMO_Id, -1L)
 
-        editViewModel.createNewMemoContentsExecuteActor()
+        mainViewModel.createNewMemoContentsExecuteActor()
 
         if (existMemoId != -1L)
-            editViewModel.initViewModelForExistMemo(existMemoId)
+            mainViewModel.initViewModelForExistMemo(existMemoId)
 
         //Pagerの設定
         memoPager.apply {
@@ -139,13 +136,13 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun createNewMemo() =
-        when (editViewModel.isSaved()) {
+        when (mainViewModel.isSaved()) {
             true -> {
-                editViewModel.resetViewsAndStatesForCreateNewMemo()
+                mainViewModel.resetViewsAndStatesForCreateNewMemo()
                 true
             }
             false -> {
-                showAlertDialogIfSaveMemo { editViewModel.resetViewsAndStatesForCreateNewMemo() }
+                showAlertDialogIfSaveMemo { mainViewModel.resetViewsAndStatesForCreateNewMemo() }
                 true
             }
         }
@@ -161,7 +158,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     private fun checkIfNeedToShowDialogForOptionMenu(action: () -> Unit) =
-        when (editViewModel.isSaved()) {
+        when (mainViewModel.isSaved()) {
             true -> {
                 action()
                 true

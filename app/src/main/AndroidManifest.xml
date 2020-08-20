@@ -18,7 +18,7 @@
         tools:ignore="LockedOrientationActivity">
 
         <receiver
-            android:name=".usecases.AlarmResetAtBootSystemReceiver"
+            android:name=".usecases.AlarmResetAtSystemBootReceiver"
             android:enabled="true"
             android:exported="true"
             android:directBootAware="true">
@@ -47,7 +47,7 @@
         </activity>
 
         <activity
-            android:name=".views.search.MemoSearchActivity"
+            android:name=".views.search.SearchActivity"
             android:launchMode="singleTop"
             android:screenOrientation="sensorPortrait">
         </activity>

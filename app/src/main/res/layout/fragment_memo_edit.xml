@@ -27,7 +27,7 @@
         android:paddingEnd="10dp"
         android:paddingBottom="10dp"
         app:layout_anchorGravity="start"
-        app:srcCompat="@drawable/ic_menu_black_24dp" />
+        app:srcCompat="@drawable/ic_baseline_template_24" />
 
 
     <ImageButton
@@ -68,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:layout_marginEnd="80dp"
+        android:layout_marginEnd="50dp"
         android:background="@drawable/memo_btn_state"
         android:contentDescription="@string/contents_clear_btn_description"
         android:elevation="8dp"
@@ -94,7 +94,7 @@
         android:paddingTop="6dp"
         android:paddingEnd="6dp"
         android:paddingBottom="6dp"
-        android:src="@drawable/ic_add_circle_outline_black_32dp" />
+        android:src="@drawable/ic_baseline_save_32" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

@@ -18,7 +18,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 
 
-class MemoEditViewModel : ViewModel() {
+class MainViewModel : ViewModel() {
 
     private var memoInfo: MemoInfo? = null
     private var savePointOfMemoContents = listOf<MemoRowInfo>()
@@ -97,7 +97,7 @@ class MemoEditViewModel : ViewModel() {
 
     internal fun createNewMemoContentsExecuteActor() = createMemoContentsOperationActor(this)
 
-    internal fun initEditViewModel() {
+    internal fun initMainViewModel() {
         loadAndSetCategoryList()
         loadAndSetTemplateNameList()
     }
@@ -123,6 +123,6 @@ class MemoEditViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        Log.d("場所:MemoEditViewModel", "onClearedが呼ばれた viewModel=$this")
+        Log.d("場所:MemoMainViewModel", "onClearedが呼ばれた viewModel=$this")
     }
 }

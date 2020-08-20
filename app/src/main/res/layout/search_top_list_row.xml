@@ -14,7 +14,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/categoryNameTextView"
         app:layout_constraintTop_toTopOf="@+id/categoryNameTextView"
-        app:srcCompat="@drawable/ic_folder_black_24dp" />
+        app:srcCompat="@drawable/ic_folder_black_24dp"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/categoryNameTextView"

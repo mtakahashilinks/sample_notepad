@@ -88,7 +88,7 @@ interface MemoInfoDao {
         """
         SELECT * 
         FROM memoInfoTable 
-        WHERE title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord
+        WHERE title LIKE :searchWord OR category LIKE :searchWord OR contentsForWordsSearch LIKE :searchWord
         ORDER BY createdDateTime DESC
         """
     )
@@ -98,7 +98,7 @@ interface MemoInfoDao {
         """
         SELECT * 
         FROM memoInfoTable 
-        WHERE category LIKE :category AND (title LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        WHERE category LIKE :category AND (title LIKE :searchWord OR contentsForWordsSearch LIKE :searchWord)
         ORDER BY createdDateTime DESC
         """
     )
@@ -121,7 +121,7 @@ interface MemoInfoDao {
         """
         SELECT * 
         FROM memoInfoTable 
-        WHERE baseDateTimeForAlarm != "" AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        WHERE baseDateTimeForAlarm != "" AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForWordsSearch LIKE :searchWord)
         ORDER BY createdDateTime DESC
         """
     )
@@ -131,7 +131,7 @@ interface MemoInfoDao {
         """
         SELECT * 
         FROM memoInfoTable 
-        WHERE baseDateTimeForAlarm LIKE :date AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForSearchByWord LIKE :searchWord)
+        WHERE baseDateTimeForAlarm LIKE :date AND (title LIKE :searchWord OR category LIKE :searchWord OR contentsForWordsSearch LIKE :searchWord)
         ORDER BY createdDateTime DESC
         """
     )

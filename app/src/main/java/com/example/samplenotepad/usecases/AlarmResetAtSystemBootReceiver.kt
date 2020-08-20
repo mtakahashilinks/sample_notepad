@@ -1,5 +1,6 @@
 package com.example.samplenotepad.usecases
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -20,8 +21,9 @@ import com.example.samplenotepad.views.display.MemoDisplayActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AlarmResetAtBootSystemReceiver : BroadcastReceiver() {
+class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
 
+    @SuppressLint("UnsafeProtectedBroadcastReceiver")
     override fun onReceive(context: Context, intent: Intent) {
         loadMemoInfoListWithReminderIO().onEach { memoInfo ->
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())

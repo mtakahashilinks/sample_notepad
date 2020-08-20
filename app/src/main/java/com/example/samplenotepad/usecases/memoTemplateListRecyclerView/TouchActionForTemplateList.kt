@@ -1,4 +1,4 @@
-package com.example.samplenotepad.usecases.memoTemplateRecyclerView
+package com.example.samplenotepad.usecases.memoTemplateListRecyclerView
 
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -7,16 +7,16 @@ import com.example.samplenotepad.R
 import com.example.samplenotepad.data.deleteTemplateIO
 import com.example.samplenotepad.data.saveTemplateNameListIO
 import com.example.samplenotepad.entities.AdapterPosition
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.main.MemoEditFragment
 import kotlinx.android.synthetic.main.template_popup_window.view.*
 
 
 //SwipeでリストのItemを削除するためのCallback
-internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
+internal fun MemoTemplateListAdapter.getItemTouchHelperCallback(
     editFragment: MemoEditFragment,
-    editViewModel: MemoEditViewModel,
+    mainViewModel: MainViewModel,
     contentLayout: View
 ) =
     object : ItemTouchHelper.Callback() {
@@ -49,7 +49,7 @@ internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
 
 
         private fun AdapterPosition.deleteTemplateFileAndUpdateNameList() {
-            val templateNameList = editViewModel.getTemplateNameList()
+            val templateNameList = mainViewModel.getTemplateNameList()
             val targetTemplateName = templateNameList[this]
             val modifiedTemplateList = templateNameList.take(this)
                 .plus(templateNameList.drop(this + 1))
@@ -57,7 +57,7 @@ internal fun MemoTemplateAdapter.getItemTouchHelperCallback(
             deleteTemplateIO(targetTemplateName)
 
             saveTemplateNameListIO(modifiedTemplateList)
-            editViewModel.updateTemplateNameList { modifiedTemplateList }
+            mainViewModel.updateTemplateNameList { modifiedTemplateList }
 
             //エラーメッセージが表示されていたら非表示にする(５個以上保存できないエラーメッセージの為)
             if (contentLayout.templateNameErrorTextView.visibility == View.VISIBLE)

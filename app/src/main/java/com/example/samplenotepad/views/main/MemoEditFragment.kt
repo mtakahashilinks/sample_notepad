@@ -14,10 +14,11 @@ import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.usecases.clearAll
 import com.example.samplenotepad.usecases.initMemoContentsOperation
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.example.samplenotepad.views.MemoAlertDialog
 import com.example.samplenotepad.views.MemoEditText
 import kotlinx.android.synthetic.main.fragment_memo_edit.*
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 
 
@@ -41,7 +42,7 @@ class MemoEditFragment : Fragment() {
     }
 
 
-    private lateinit var editViewModel: MemoEditViewModel
+    private lateinit var mainViewModel: MainViewModel
     private lateinit var memoContainer: ConstraintLayout
     private var isShowingPopupWindow = false
 
@@ -58,7 +59,7 @@ class MemoEditFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        editViewModel = MainActivity.editViewModel
+        mainViewModel = MainActivity.mainViewModel
         memoContainer = memoContentsContainerLayout
 
         //メモの保存時にSnackbarを表示
@@ -71,7 +72,7 @@ class MemoEditFragment : Fragment() {
             })
         }
 
-        editViewModel.initEditViewModel()
+        mainViewModel.initMainViewModel()
 
         //メモテキスト編集に使うイメージボタンのクリックリスナー群
         templateImgBtn.setOnClickListener {
@@ -86,7 +87,6 @@ class MemoEditFragment : Fragment() {
                     popupWindow.apply {
                         update()
                         showAtLocation(memoContainer, Gravity.TOP, 0, 50)
-//                        showAsDropDown(templateImgBtn)
                     }
                     true
                 }
@@ -118,12 +118,15 @@ class MemoEditFragment : Fragment() {
         }
     }
 
+    @ObsoleteCoroutinesApi
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        when (editViewModel.getMemoInfo()) {
-            null -> initMemoContentsOperation(this, editViewModel, memoContainer, CreateNewMemo)
-            else -> initMemoContentsOperation(this, editViewModel, memoContainer, EditExistMemo)
+        when (mainViewModel.getMemoInfo()) {
+            null -> initMemoContentsOperation(this,
+                mainViewModel, memoContainer, CreateNewMemo)
+            else -> initMemoContentsOperation(this,
+                mainViewModel, memoContainer, EditExistMemo)
         }
     }
 

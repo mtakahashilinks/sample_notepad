@@ -9,8 +9,8 @@ import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.R
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.usecases.ReminderNotificationReceiver
-import com.example.samplenotepad.viewModels.MemoDisplayViewModel
-import com.example.samplenotepad.viewModels.MemoEditViewModel
+import com.example.samplenotepad.viewModels.DisplayViewModel
+import com.example.samplenotepad.viewModels.MainViewModel
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.*
@@ -209,7 +209,7 @@ internal fun MemoInfo.getRequestCodeForAlarm(alarmType: Int): Int =
     this.rowid.toInt() * 10 + alarmType
 
 private fun Calendar.getPreAlarmCalendar(position: Int): Calendar = when (position) {
-    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1);TODO("-5に戻す") }
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -5) }
     ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, -10) }
     ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, -30) }
     ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, -1) }
@@ -217,7 +217,7 @@ private fun Calendar.getPreAlarmCalendar(position: Int): Calendar = when (positi
 }
 
 private fun Calendar.getPostAlarmCalendar(position: Int) = when (position) {
-    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 1);TODO("5に戻す") }
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 5) }
     ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, 10) }
     ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, 30) }
     ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -255,8 +255,8 @@ private fun MemoInfo.updateMemoInfoInViewModel(
     viewModel: ViewModel,
     memoId: Long?
 ) = when (viewModel) {
-        is MemoEditViewModel -> viewModel.updateMemoInfo { memoId?.let { this.copy(rowid = it) } ?: this }
-        is MemoDisplayViewModel -> viewModel.updateMemoInfo { this }
+        is MainViewModel -> viewModel.updateMemoInfo { memoId?.let { this.copy(rowid = it) } ?: this }
+        is DisplayViewModel -> viewModel.updateMemoInfo { this }
         else -> null
     }
 
@@ -307,7 +307,7 @@ internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoCo
     val contentsTextForSearch = async(Dispatchers.Default) { memoContents.createContentsText() }
 
     val newMemoInfo = when (viewModel) {
-        is MemoEditViewModel -> {
+        is MainViewModel -> {
             val optionValues = MemoOptionFragment.getOptionValuesForSave()
 
             this@saveMemoInfoIO.createNewMemoInfo(

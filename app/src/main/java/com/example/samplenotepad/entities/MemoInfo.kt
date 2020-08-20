@@ -15,7 +15,7 @@ data class MemoInfo(
     val title: String,
     val category: String,
     val contents: String, //MemoContentsをシリアライズしたもの
-    val contentsForSearchByWord: String, //中身の検索用(MemoContentsの全てのTextを繋げてシリアライズしたもの)
+    val contentsForWordsSearch: String, //中身の検索用(MemoContentsの全てのTextを繋げてシリアライズしたもの)
     val baseDateTimeForAlarm: String, //"yyyy-MM-dd HH:mm" pre,postAlarmの基準日時。また、この値が空以外ならReminderはセットされている
     val reminderDateTime: String, //"yyyy-MM-dd HH:mm"
     val preAlarmPosition: Int, //スピナーのposition
