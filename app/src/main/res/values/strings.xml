@@ -4,8 +4,8 @@
     <!-- AppBarOptionMenu -->
     <string name="appbar_menu_create_new_memo">新規メモの作成</string>
     <string name="appbar_menu_delete_memo">このメモを削除</string>
-    <string name="appbar_menu_to_search_top">検索TOPへ</string>
-    <string name="appbar_menu_to_reminder_list">リマインダーリスト</string>
+    <string name="appbar_menu_to_search_top">メモ検索</string>
+    <string name="appbar_menu_to_reminder_list">リマインダー検索</string>
     <string name="appbar_menu_finish_app">アプリを終了する</string>
 
     <!-- ListActionDescription -->
@@ -133,7 +133,7 @@
 
 
     <!-- SearchResultFragment -->
-    <string name="appbar_title_search_result">Sample Notepad - 検索結果</string>
+    <string name="appbar_title_search_result">Sample Notepad - メモ検索</string>
     <string name="search_view_hint_search_result">メモの検索</string>
     <string name="search_word_text">検索ワード：%s</string>
     <string name="search_date_text">リマインダー設定日：%s</string>
@@ -145,11 +145,11 @@
     <string name="channel_name">Reminder alarms</string>
     <string name="channel_description">Make sound</string>
     <string name="notification_title_target">予定の時間になりました</string>
-    <string name="notification_title_pre_post">[%1s] 予定の%2sです</string>
+    <string name="notification_title_pre_post">%1s：予定の%2sです</string>
     <string name="notification_text">タイトル：%s</string>
 
     <!-- AlarmResetAtBootSystemReceiver -->
-    <string name="notification_title_miss_alarm">予定の時間(%s)が過ぎました</string>
+    <string name="notification_title_miss_alarm">予定の時間［%s］が過ぎました</string>
 
     <!-- SearchWithReminderFragment -->
     <string name="appbar_title_search_with_reminder">Sample Notepad - リマインダー検索</string>

@@ -67,13 +67,17 @@ internal fun initMemoContentsOperation(
             mainViewModel = viewModel as MainViewModel
             memoContainer = container
 
+            //まずcontainerに他のメモが残っていれば削除する
+            if (container.childCount != 0) container.removeAllViews()
+
+            operationActor.apply {
+                send(SetMemoContents(listOf<MemoRowInfo>()))
+                send(CreateFirstMemoEditText(Text(""), CreateNewMemo))
+            }
+
             mainViewModel.apply {
-                getMemoContentsOperationActor().send(SetMemoContents(listOf<MemoRowInfo>()))
-
-                operationActor.send(CreateFirstMemoEditText(Text(""), CreateNewMemo))
-
                 updateSavePointOfMemoContents()
-                clearIsChangedValueInOptionFragment()
+                clearIsChangedStatesFlagInOptionFragment()
             }
         }
         is EditExistMemo -> {
@@ -84,12 +88,18 @@ internal fun initMemoContentsOperation(
             val memoContentsDefer = CompletableDeferred<MemoContents>()
             operationActor.send(GetMemoContents(memoContentsDefer))
 
+            //まずcontainerに他のメモが残っていれば削除する
+            if (container.childCount != 0) container.removeAllViews()
+
             createMemoRowsForExistMemo(buildType, memoContentsDefer.await())
         }
         is DisplayExistMemo -> {
             displayFragment = fragment as DisplayFragment
             displayViewModel = viewModel as DisplayViewModel
             memoContainer = container
+
+            //まずcontainerに他のメモが残っていれば削除する
+            if (container.childCount != 0) container.removeAllViews()
 
             val memoContentsDefer = CompletableDeferred<MemoContents>()
             operationActor.send(GetMemoContents(memoContentsDefer))
@@ -112,8 +122,10 @@ internal fun MemoEditText.checkBoxOperation() = runBlocking {
 
     when {
         memoRowInfo.dotId.value != null -> {
-            operationActor.send(DeleteDot(this@checkBoxOperation))
-            operationActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
+            operationActor.apply {
+                send(DeleteDot(this@checkBoxOperation))
+                send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
+            }
         }
         checkBoxId != null -> operationActor.send(DeleteCheckBox(this@checkBoxOperation))
         else -> operationActor.send(AddCheckBox(this@checkBoxOperation, CreateNewMemo))
@@ -132,8 +144,10 @@ internal fun MemoEditText.dotOperation() = runBlocking {
 
     when {
         memoRowInfo.checkBoxId.value != null -> {
-            operationActor.send(DeleteCheckBox(this@dotOperation))
-            operationActor.send(AddDot(this@dotOperation, CreateNewMemo))
+            operationActor.apply {
+                send(DeleteCheckBox(this@dotOperation))
+                send(AddDot(this@dotOperation, CreateNewMemo))
+            }
         }
         dotId != null -> operationActor.send(DeleteDot(this@dotOperation))
         else -> operationActor.send(AddDot(this@dotOperation, CreateNewMemo))
@@ -174,7 +188,7 @@ internal fun saveMemo(buildType: TypeOfBuildMemoOperation) = runBlocking {
         else -> {
             mainViewModel.apply {
                 updateSavePointOfMemoContents()
-                clearIsChangedValueInOptionFragment()
+                clearIsChangedStatesFlagInOptionFragment()
             }
             showMassageForSavedLiveData.postValue(EditFragment)
         }
@@ -221,7 +235,7 @@ private fun createMemoRowsForExistMemo(
 
             mainViewModel.apply {
                 updateSavePointOfMemoContents()
-                clearIsChangedValueInOptionFragment()
+                clearIsChangedStatesFlagInOptionFragment()
             }
         }
     }

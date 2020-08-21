@@ -23,12 +23,12 @@
         android:contentDescription="@string/contents_reminder_state_btn_description"
         android:elevation="8dp"
         android:paddingStart="10dp"
-        android:paddingTop="10dp"
+        android:paddingTop="3dp"
         android:paddingEnd="10dp"
         android:paddingBottom="10dp"
         android:visibility="gone"
         app:layout_anchorGravity="start"
-        app:srcCompat="@drawable/ic_alarm_black_24dp" />
+        app:srcCompat="@drawable/ic_bell_38dp" />
 
     <ImageButton
         android:id="@+id/displayToEditImgBtn"

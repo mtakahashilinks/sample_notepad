@@ -43,7 +43,6 @@ class MemoTemplateListAdapter(
         val viewHolder = ViewHolder(view)
 
         viewHolder.itemView.setOnClickListener {
-            clearAll()
             mainViewModel.loadTemplateAndUpdateMemoContents(
                 viewHolder.templateNameView.text.toString()
             )

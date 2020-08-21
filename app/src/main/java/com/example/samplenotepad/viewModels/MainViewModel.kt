@@ -22,7 +22,7 @@ class MainViewModel : ViewModel() {
 
     private var memoInfo: MemoInfo? = null
     private var savePointOfMemoContents = listOf<MemoRowInfo>()
-    private var isChangedValueInOptionFragment = false
+    private var isChangedStateInOptionFragment = false
     private var categoryList = listOf<String>()
     private var templateNameList = listOf<String>()
 
@@ -46,12 +46,12 @@ class MainViewModel : ViewModel() {
         getMemoContentsOperationActor().send(GetMemoContents(memoContentsDefer))
 
         return@runBlocking memoContentsDefer.await() == savePointOfMemoContents
-                && !isChangedValueInOptionFragment
+                && !isChangedStateInOptionFragment
     }
 
-    internal fun MemoOptionFragment.valueChanged() { isChangedValueInOptionFragment = true }
+    internal fun MemoOptionFragment.valueChanged() { isChangedStateInOptionFragment = true }
 
-    internal fun clearIsChangedValueInOptionFragment() { isChangedValueInOptionFragment = false }
+    internal fun clearIsChangedStatesFlagInOptionFragment() { isChangedStateInOptionFragment = false }
 
 
     internal fun getCategoryList() = categoryList
@@ -112,12 +112,12 @@ class MainViewModel : ViewModel() {
         return@runBlocking mMemoInfo
     }
 
-    internal fun resetViewsAndStatesForCreateNewMemo() {
+    internal fun initStatesForCreateNewMemo() {
         clearAll()
         memoInfo = null
         loadAndSetCategoryList()
 
-        MemoOptionFragment.instance()?.resetValueOfAllView(this)
+        MemoOptionFragment.instance()?.initAllStatesInOptionFragment(this)
     }
 
 

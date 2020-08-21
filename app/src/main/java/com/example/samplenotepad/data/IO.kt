@@ -308,7 +308,7 @@ internal fun MemoInfo?.saveMemoInfoIO(viewModel: ViewModel, memoContents: MemoCo
 
     val newMemoInfo = when (viewModel) {
         is MainViewModel -> {
-            val optionValues = MemoOptionFragment.getOptionValuesForSave()
+            val optionValues = MemoOptionFragment.getOptionSettingsStates()
 
             this@saveMemoInfoIO.createNewMemoInfo(
                 optionValues?.title,

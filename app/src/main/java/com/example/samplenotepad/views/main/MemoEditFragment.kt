@@ -109,13 +109,9 @@ class MemoEditFragment : Fragment() {
             }
         }
 
-        clearAllImgBtn.setOnClickListener {
-            showAlertDialogToClearAll()
-        }
+        clearAllImgBtn.setOnClickListener { showAlertDialogToClearAll() }
 
-        saveImgBtn.setOnClickListener {
-            saveMemo(CreateNewMemo)
-        }
+        saveImgBtn.setOnClickListener { saveMemo(CreateNewMemo) }
     }
 
     @ObsoleteCoroutinesApi

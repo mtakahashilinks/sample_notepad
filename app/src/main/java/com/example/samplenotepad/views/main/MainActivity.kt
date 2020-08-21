@@ -138,11 +138,11 @@ class MainActivity : AppCompatActivity() {
     private fun createNewMemo() =
         when (mainViewModel.isSaved()) {
             true -> {
-                mainViewModel.resetViewsAndStatesForCreateNewMemo()
+                mainViewModel.initStatesForCreateNewMemo()
                 true
             }
             false -> {
-                showAlertDialogIfSaveMemo { mainViewModel.resetViewsAndStatesForCreateNewMemo() }
+                showAlertDialogIfSaveMemo { mainViewModel.initStatesForCreateNewMemo() }
                 true
             }
         }

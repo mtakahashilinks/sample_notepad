@@ -97,7 +97,7 @@ data class MemoRowInfo(
 ) { companion object }
 
 //メモの保存時にOption設定の値を渡すのに使用
-data class ValuesOfOptionSetting(
+data class StatesOfOptionSetting(
     val title: String?,
     val category: String?,
     val baseDateTimeForAlarm: String?,
