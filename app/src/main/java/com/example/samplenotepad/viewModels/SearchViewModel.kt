@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadDataSetForMemoListByCategoryIO
-import com.example.samplenotepad.data.renameCategoryIO
+import com.example.samplenotepad.data.renameCategoryInDatabaseIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.SampleMemoApplication
 import com.example.samplenotepad.usecases.createMemoContentsOperationActor
@@ -27,7 +27,7 @@ class SearchViewModel : ViewModel() {
         newValue: (List<DataSetForCategoryList>) -> List<DataSetForCategoryList>
     ) = newValue(dataSetForCategoryList).apply { dataSetForCategoryList = this }
 
-    internal fun renameItemInDataSetForCategoryListAndUpdateDatabase(
+    internal fun updateDataSetForCategoryListAndDatabaseForRename(
         oldCategoryName: String,
         newCategoryName: String
     ) {
@@ -36,7 +36,7 @@ class SearchViewModel : ViewModel() {
             else it
         } }
 
-        renameCategoryIO(oldCategoryName, newCategoryName)
+        renameCategoryInDatabaseIO(oldCategoryName, newCategoryName)
     }
 
     internal fun loadAndSetDataSetForCategoryList() {

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -94,16 +95,17 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
                 ConstValForAlarm.REMINDER_DATE_TIME -> context.resources.getString(R.string.notification_title_target)
                 ConstValForAlarm.PRE_ALARM -> context.resources.getString(
                     R.string.notification_title_pre_post,
-                    context.resources.getString(R.string.reminder_pre_alarm_label),
-                    context.getTitleForPreAlarm(alarmPosition))
+                    context.getTitleForPreAlarm(alarmPosition)
+                )
                 else -> context.resources.getString(
                     R.string.notification_title_pre_post,
-                    context.resources.getString(R.string.reminder_post_alarm_label),
-                    context.getTitleForPostAlarm(alarmPosition))
+                    context.getTitleForPostAlarm(alarmPosition)
+                )
             }
 
             priority = NotificationCompat.PRIORITY_MAX
-            setSmallIcon(R.drawable.ic_alarm_black_24dp)
+            color = Color.BLUE
+            setSmallIcon(R.drawable.ic_notification_small)
             setContentTitle(notifyTitle)
             setContentText(context.resources.getString(R.string.notification_text, notifyText))
             setContentIntent(notifyPendingIntent)

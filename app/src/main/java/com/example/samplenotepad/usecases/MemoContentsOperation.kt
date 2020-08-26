@@ -257,7 +257,6 @@ private fun MemoEditText.addCheckBoxAndDotForExistMemo(
 }
 
 
-//近い将来、代替えのAPIに切り替わるらしい
 @ObsoleteCoroutinesApi
 private fun CoroutineScope.memoContentsOperationActor() =
     actor<TypeOfMemoContentsOperation> {

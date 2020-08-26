@@ -43,7 +43,16 @@ class SearchTopListAdapter(
 
         viewHolder.itemView.setOnLongClickListener {
             when (viewHolder.adapterPosition) {
-                0 -> false
+                0 -> {
+                    AlertDialog.Builder(fragment.requireContext()).apply {
+                        setMessage(R.string.dialog_rename_default_category_message)
+                        setPositiveButton(
+                            R.string.dialog_rename_default_category_positive_button, null
+                        )
+                    }.show().setPositiveButtonActionForDefaultCategory()
+
+                    true
+                }
                 else -> {
                     val layoutView = fragment.requireActivity().layoutInflater.inflate(
                         R.layout.fragment_rename_dialog, null, false
@@ -89,6 +98,11 @@ class SearchTopListAdapter(
     override fun getItemCount(): Int = searchViewModel.getDataSetForCategoryList().size
 
 
+    private fun AlertDialog.setPositiveButtonActionForDefaultCategory() =
+        this.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            this@setPositiveButtonActionForDefaultCategory.dismiss()
+        }
+
     private fun AlertDialog.setPositiveButtonAction(
         layoutView: View,
         targetCategoryName: String
@@ -102,16 +116,17 @@ class SearchTopListAdapter(
                     newCategoryName.isEmpty() -> {
                         errorTextView.showErrorText(R.string.error_not_input_new_name)
                     }
-                    searchViewModel.getDataSetForCategoryList().any { it.name == newCategoryName } -> {
+                    searchViewModel.getDataSetForCategoryList()
+                        .any { it.name == newCategoryName } -> {
                         errorTextView.showErrorText(R.string.error_already_has_same_name)
                     }
                     else -> {
-                        searchViewModel.renameItemInDataSetForCategoryListAndUpdateDatabase(
+                        searchViewModel.updateDataSetForCategoryListAndDatabaseForRename(
                             targetCategoryName, newCategoryName
                         )
 
                         this@SearchTopListAdapter.notifyDataSetChanged()
-                        this@setPositiveButtonAction.cancel()
+                        this@setPositiveButtonAction.dismiss()
                     }
                 }
             }

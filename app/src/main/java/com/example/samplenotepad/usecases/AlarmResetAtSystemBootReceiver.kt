@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,11 +35,11 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
                     1 -> memoInfo.resetAlarm(context, ConstValForAlarm.REMINDER_DATE_TIME)
                     else -> {
                         memoInfo.modifyMemoInfoForReminderDateTime(context).apply {
+                            sendNotification(context)
+
                             updateMemoInfoAndCancelAlarmIO(
                                 context, ConstValForAlarm.REMINDER_DATE_TIME
                             )
-
-                            sendNotification(context)
                         }
                     }
                 }
@@ -46,6 +47,7 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
 
             if (memoInfo.preAlarmPosition != 0) {
                 val preAlarmDate = memoInfo.getPrePostAlarmDateTime(ConstValForAlarm.PRE_ALARM)
+
                 when (preAlarmDate.compareTo(currentDate)) {
                     1 -> memoInfo.resetAlarm(context, ConstValForAlarm.PRE_ALARM)
                     else -> memoInfo.copy(preAlarmPosition = 0)
@@ -55,6 +57,7 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
 
             if (memoInfo.postAlarmPosition != 0) {
                 val postAlarmDate = memoInfo.getPrePostAlarmDateTime(ConstValForAlarm.POST_ALARM)
+
                 when (postAlarmDate.compareTo(currentDate)) {
                     1 -> memoInfo.resetAlarm(context, ConstValForAlarm.POST_ALARM)
                     else -> memoInfo.copy(baseDateTimeForAlarm = "", postAlarmPosition = 0)
@@ -110,7 +113,8 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
             )
 
             priority = NotificationCompat.PRIORITY_MAX
-            setSmallIcon(R.drawable.ic_alarm_black_24dp)
+            color = Color.BLUE
+            setSmallIcon(R.drawable.ic_notification_small)
             setContentTitle(notifyTitle)
             setContentText(context.resources.getString(
                 R.string.notification_text, this@buildNotification.title

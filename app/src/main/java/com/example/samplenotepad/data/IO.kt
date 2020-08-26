@@ -109,12 +109,12 @@ internal fun MemoInfo.resetAlarm(context:Context, reminderType: Int) {
         }
         ConstValForAlarm.PRE_ALARM -> {
             getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
-                .getPreAlarmCalendar(this.preAlarmPosition)
+                .adjustForPreAlarm(this.preAlarmPosition)
                 .registerAlarm(context, requestCode, this.title, this.preAlarmPosition)
         }
         else -> {
             getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
-                .getPostAlarmCalendar(this.postAlarmPosition)
+                .adjustForPostAlarm(this.postAlarmPosition)
                 .registerAlarm(context, requestCode, this.title, this.postAlarmPosition)
         }
     }
@@ -158,7 +158,7 @@ private fun MemoInfo.setAlarm(context: Context) {
     when (this.preAlarmPosition != 0) {
         true -> {
             val preAlarmTimeCalendar = getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
-                .getPreAlarmCalendar(this.preAlarmPosition)
+                .adjustForPreAlarm(this.preAlarmPosition)
 
             preAlarmTimeCalendar.registerAlarm(
                 context,
@@ -174,7 +174,7 @@ private fun MemoInfo.setAlarm(context: Context) {
     when (this.postAlarmPosition != 0) {
         true -> {
             val postAlarmTimeCalendar = getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
-                .getPostAlarmCalendar(this.postAlarmPosition)
+                .adjustForPostAlarm(this.postAlarmPosition)
 
             postAlarmTimeCalendar.registerAlarm(
                 context,
@@ -198,26 +198,26 @@ internal fun MemoInfo.getPrePostAlarmDateTime(alarmType: Int): Date =
     when (alarmType) {
         ConstValForAlarm.PRE_ALARM ->
             getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
-                .getPreAlarmCalendar(this.preAlarmPosition).time
+                .adjustForPreAlarm(this.preAlarmPosition).time
         ConstValForAlarm.POST_ALARM ->
             getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
-                .getPostAlarmCalendar(this.postAlarmPosition).time
+                .adjustForPostAlarm(this.postAlarmPosition).time
         else -> Date()
     }
 
 internal fun MemoInfo.getRequestCodeForAlarm(alarmType: Int): Int =
     this.rowid.toInt() * 10 + alarmType
 
-private fun Calendar.getPreAlarmCalendar(position: Int): Calendar = when (position) {
-    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -5) }
+private fun Calendar.adjustForPreAlarm(position: Int): Calendar = when (position) {
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, -1) }
     ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, -10) }
     ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, -30) }
     ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, -1) }
     else -> this.apply { add(Calendar.DATE, -1) }
 }
 
-private fun Calendar.getPostAlarmCalendar(position: Int) = when (position) {
-    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 5) }
+private fun Calendar.adjustForPostAlarm(position: Int) = when (position) {
+    ConstValForAlarm.PRE_POST_ALARM_5M -> this.apply { add(Calendar.MINUTE, 1) }
     ConstValForAlarm.PRE_POST_ALARM_10M -> this.apply { add(Calendar.MINUTE, 10) }
     ConstValForAlarm.PRE_POST_ALARM_30M -> this.apply { add(Calendar.MINUTE, 30) }
     ConstValForAlarm.PRE_POST_ALARM_1H -> this.apply { add(Calendar.HOUR_OF_DAY, 1) }
@@ -521,7 +521,7 @@ internal fun loadDataSetForMemoListByCategoryIO(
     }
 }
 
-internal fun renameCategoryIO(oldCategoryName: String, newCategoryName: String) = runBlocking {
+internal fun renameCategoryInDatabaseIO(oldCategoryName: String, newCategoryName: String) = runBlocking {
     val memoInfoDao = AppDatabase.getDatabase(SampleMemoApplication.instance).memoInfoDao()
 
     launch(Dispatchers.IO) { memoInfoDao.updateCategoryDao(oldCategoryName, newCategoryName) }

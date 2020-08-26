@@ -23,12 +23,12 @@
         android:contentDescription="@string/contents_reminder_state_btn_description"
         android:elevation="8dp"
         android:paddingStart="10dp"
-        android:paddingTop="3dp"
+        android:paddingTop="10dp"
         android:paddingEnd="10dp"
         android:paddingBottom="10dp"
         android:visibility="gone"
         app:layout_anchorGravity="start"
-        app:srcCompat="@drawable/ic_bell_38dp" />
+        app:srcCompat="@drawable/ic_reminder_24dp" />
 
     <ImageButton
         android:id="@+id/displayToEditImgBtn"
@@ -57,11 +57,11 @@
         android:background="@drawable/memo_btn_state"
         android:contentDescription="@string/contents_save_btn_description"
         android:elevation="8dp"
-        android:paddingStart="6dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="6dp"
-        android:paddingBottom="6dp"
-        android:src="@drawable/ic_baseline_save_32" />
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:src="@drawable/ic_baseline_save_28" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

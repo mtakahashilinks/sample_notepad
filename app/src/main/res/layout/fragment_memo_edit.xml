@@ -27,7 +27,7 @@
         android:paddingEnd="10dp"
         android:paddingBottom="10dp"
         app:layout_anchorGravity="start"
-        app:srcCompat="@drawable/ic_baseline_template_24" />
+        app:srcCompat="@drawable/ic_template_24dp" />
 
 
     <ImageButton
@@ -90,11 +90,11 @@
         android:background="@drawable/memo_btn_state"
         android:contentDescription="@string/contents_save_btn_description"
         android:elevation="8dp"
-        android:paddingStart="6dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="6dp"
-        android:paddingBottom="6dp"
-        android:src="@drawable/ic_baseline_save_32" />
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp"
+        android:src="@drawable/ic_baseline_save_28" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

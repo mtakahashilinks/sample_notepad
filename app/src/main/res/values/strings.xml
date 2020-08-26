@@ -12,6 +12,49 @@
     <string name="description_list_action_flick">フリック(右)で削除できます</string>
     <string name="description_list_action_flick_longpress">フリック(右)で削除　長押しで名前の変更ができます</string>
 
+    <!-- Dialogs -->
+    <string name="dialog_template_name_edit_text_hint">追加するテンプレート名を入力</string>
+    <string name="dialog_template_swipe_delete_message">このテンプレートを削除します</string>
+    <string name="dialog_template_swipe_delete_positive_button">削除する</string>
+    <string name="dialog_template_swipe_delete_negative_button">キャンセル</string>
+
+    <string name="dialog_rename_template_title">テンプテート名の変更</string>
+    <string name="dialog_rename_category_title">カテゴリー名の変更</string>
+    <string name="dialog_rename_name_before_change">変更前：「%s」</string>
+    <string name="dialog_rename_edit_text_hint">新しい名前を入力</string>
+    <string name="dialog_rename_new_name_label">新しい名前：</string>
+    <string name="dialog_rename_positive_button">変更する</string>
+    <string name="dialog_rename_negative_button">キャンセル</string>
+    <string name="dialog_rename_default_category_message">このカテゴリー名は変更できません</string>
+    <string name="dialog_rename_default_category_positive_button">OK</string>
+
+    <string name="dialog_confirm_save_memo_message">作業内容を保存しますか？</string>
+    <string name="dialog_confirm_save_memo_positive_button">保存する</string>
+    <string name="dialog_confirm_save_memo_negative_button">保存しない</string>
+
+    <string name="dialog_clear_all_message">作業内容をクリアします</string>
+    <string name="dialog_clear_all_positive_button">YES</string>
+    <string name="dialog_clear_all_negative_button">キャンセル</string>
+
+    <string name="dialog_finish_app_message">アプリを終了します</string>
+    <string name="dialog_finish_app_positive_button">終了する</string>
+    <string name="dialog_finish_app_negative_button">キャンセル</string>
+
+    <string name="dialog_search_top_swipe_delete_others_message">このカテゴリー内を空にします</string>
+    <string name="dialog_search_top_swipe_delete_others_positive_button">空にする</string>
+    <string name="dialog_search_top_swipe_delete_others_negative_button">キャンセル</string>
+    <string name="dialog_search_top_swipe_delete_message">このカテゴリーを削除します。カテゴリー内のメモも削除されます。</string>
+    <string name="dialog_search_top_swipe_delete_positive_button">削除する</string>
+    <string name="dialog_search_top_swipe_delete_negative_button">キャンセル</string>
+
+    <string name="dialog_delete_memo_message">このメモを削除します</string>
+    <string name="dialog_delete_memo_positive_button">削除する</string>
+    <string name="dialog_delete_memo_negative_button">キャンセル</string>
+
+    <string name="dialog_delete_reminder_message">リマインダーを削除します</string>
+    <string name="dialog_delete_reminder_positive_button">削除する</string>
+    <string name="dialog_delete_reminder_negative_button">キャンセル</string>
+
     <!-- MemoEditFragment -->
     <string name="appbar_title_for_edit_fragment">Sample Notepad - メモ作成</string>
     <string name="tab_title_for_edit_fragment">メモ本文</string>
@@ -22,19 +65,8 @@
     <string name="error_not_input_new_name">テンプレート名を入力してください</string>
     <string name="error_already_has_same_name">その名前はすでに存在しています</string>
     <string name="template_list_title">テンプレートリスト</string>
-    <string name="dialog_template_name_edit_text_hint">追加するテンプレート名を入力</string>
-    <string name="dialog_memo_template_swipe_delete_message">このテンプレートを削除します</string>
-    <string name="dialog_memo_template_swipe_delete_positive_button">削除する</string>
-    <string name="dialog_memo_template_swipe_delete_negative_button">キャンセル</string>
     <string name="template_number_view_text">%s.</string>
     <string name="add_template_to_list">追加</string>
-    <string name="dialog_rename_template_title">テンプテート名の変更</string>
-    <string name="dialog_rename_category_title">カテゴリー名の変更</string>
-    <string name="dialog_rename_name_before_change">変更前：「%s」</string>
-    <string name="dialog_rename_edit_text_hint">新しい名前を入力</string>
-    <string name="dialog_rename_new_name_label">新しい名前：</string>
-    <string name="dialog_rename_positive_button">変更する</string>
-    <string name="dialog_rename_negative_button">キャンセル</string>
     <string name="contents_menu_btn_description">メニュー</string>
     <string name="contents_checkbox_btn_description">チェックボックスの追加と削除</string>
     <string name="contents_bullet_btn_description">ビュレットの追加と削除</string>
@@ -52,12 +84,6 @@
     <string name="reminder_post_alarm_label">事後通知</string>
     <string name="add_format">フォーマットに追加</string>
     <string name="save_snackbar">保存しました</string>
-    <string name="dialog_confirm_save_memo_message">作業内容を保存しますか？</string>
-    <string name="dialog_confirm_save_memo_positive_button">保存する</string>
-    <string name="dialog_confirm_save_memo_negative_button">保存しない</string>
-    <string name="dialog_clear_all_message">作業内容をクリアします</string>
-    <string name="dialog_clear_all_positive_button">YES</string>
-    <string name="dialog_clear_all_negative_button">キャンセル</string>
     <string name="category_dropdown_btn_description">カテゴリーリストの表示</string>
 
 
@@ -80,19 +106,9 @@
     </string-array>
 
     <!-- SearchActivity -->
-    <string name="dialog_finish_app_message">アプリを終了します</string>
-    <string name="dialog_finish_app_positive_button">終了する</string>
-    <string name="dialog_finish_app_negative_button">キャンセル</string>
-
 
     <!-- SearchTopFragment -->
     <string name="appbar_title_search_top">Sample Notepad - メモ検索</string>
-    <string name="dialog_search_top_swipe_delete_others_message">このカテゴリー内を空にします</string>
-    <string name="dialog_search_top_swipe_delete_others_positive_button">空にする</string>
-    <string name="dialog_search_top_swipe_delete_others_negative_button">キャンセル</string>
-    <string name="dialog_search_top_swipe_delete_message">このカテゴリーを削除します。カテゴリー内のメモも削除されます。</string>
-    <string name="dialog_search_top_swipe_delete_positive_button">削除する</string>
-    <string name="dialog_search_top_swipe_delete_negative_button">キャンセル</string>
     <string name="search_view_hint_search_top">メモの検索</string>
     <string name="disable_rename_message">このカテゴリー名は変更できません</string>
 
@@ -102,11 +118,24 @@
     <string name="search_in_category_created_date_label_text">作成日時：%s</string>
     <string name="search_in_category_title_label_text">タイトル：</string>
     <string name="search_in_category_body_label_text">本文：</string>
-    <string name="dialog_delete_memo_message">このメモを削除します</string>
-    <string name="dialog_delete_memo_positive_button">削除する</string>
-    <string name="dialog_delete_memo_negative_button">キャンセル</string>
-
     <string name="contents_edit_btn_description">メモの編集</string>
+
+    <!-- SearchResultFragment -->
+    <string name="appbar_title_search_result">Sample Notepad - メモ検索</string>
+    <string name="search_view_hint_search_result">メモの検索</string>
+    <string name="search_word_text">検索ワード：%s</string>
+    <string name="search_date_text">リマインダー設定日：%s</string>
+    <string name="search_move_to_calendar">カレンダー検索</string>
+    <string name="no_match_result_text">一致するメモがありませんでした</string>
+    <string name="reminder_img_description">リマインダーあり</string>
+
+    <!-- SearchWithReminderFragment -->
+    <string name="appbar_title_search_with_reminder">Sample Notepad - リマインダー検索</string>
+
+    <!-- SearchOnCalendarFragment -->
+    <string name="describe_event_mark_text">--- リマインダーがセットされている日</string>
+    <string name="move_to_calendar_btn_description">カレンダーでリマインダー検索</string>
+
 
     <!-- DisplayMemoFragment -->
     <string name="appbar_title_display_memo">Sample Notepad - メモの表示</string>
@@ -126,36 +155,17 @@
     <string name="post_alarm_30m">30分後</string>
     <string name="post_alarm_1h">1時間後</string>
     <string name="post_alarm_24h">24時間後</string>
-    <string name="dialog_delete_reminder_message">リマインダーを削除します</string>
-    <string name="dialog_delete_reminder_positive_button">削除する</string>
-    <string name="dialog_delete_reminder_negative_button">キャンセル</string>
     <string name="contents_reminder_state_btn_description">リマインダーの状態</string>
 
-
-    <!-- SearchResultFragment -->
-    <string name="appbar_title_search_result">Sample Notepad - メモ検索</string>
-    <string name="search_view_hint_search_result">メモの検索</string>
-    <string name="search_word_text">検索ワード：%s</string>
-    <string name="search_date_text">リマインダー設定日：%s</string>
-    <string name="search_move_to_calendar">カレンダー検索</string>
-    <string name="no_match_result_text">一致するメモがありませんでした</string>
-    <string name="reminder_img_description">リマインダーあり</string>
 
     <!-- ReminderBroadcastReceiver -->
     <string name="channel_name">Reminder alarms</string>
     <string name="channel_description">Make sound</string>
-    <string name="notification_title_target">予定の時間になりました</string>
-    <string name="notification_title_pre_post">%1s：予定の%2sです</string>
-    <string name="notification_text">タイトル：%s</string>
+    <string name="notification_title_target">リマインダーの設定時刻になりました</string>
+    <string name="notification_title_pre_post">リマインダー設定時刻の%sです</string>
+    <string name="notification_text">MEMOタイトル：%s</string>
 
     <!-- AlarmResetAtBootSystemReceiver -->
-    <string name="notification_title_miss_alarm">予定の時間［%s］が過ぎました</string>
-
-    <!-- SearchWithReminderFragment -->
-    <string name="appbar_title_search_with_reminder">Sample Notepad - リマインダー検索</string>
-
-    <!-- SearchOnCalendarFragment -->
-    <string name="describe_event_mark_text">--- リマインダーがセットされている日</string>
-    <string name="move_to_calendar_btn_description">カレンダーでリマインダー検索</string>
+    <string name="notification_title_miss_alarm">リマインダー設定時刻［%s］が過ぎました</string>
 
 </resources>
