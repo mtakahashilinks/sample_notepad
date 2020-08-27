@@ -270,10 +270,7 @@ class MemoOptionFragment : Fragment() {
         setCurrentDateTimeToReminderDateTime()
         preAlarmSpinnerView.setSelection(0)
         postAlarmSpinnerView.setSelection(0)
-        reminderOnOffSwitchView.apply {
-            isChecked = false
-            isEnabled = false
-        }
+        reminderOnOffSwitchView.isChecked = false
     }
 
     //ReminderのReminderDateTimeに現在時刻をSetする

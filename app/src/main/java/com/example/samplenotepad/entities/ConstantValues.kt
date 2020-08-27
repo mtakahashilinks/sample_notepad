@@ -1,5 +1,9 @@
 package com.example.samplenotepad.entities
 
+object ConstValForLaunch {
+    const val LAUNCH_SOURCE = "LAUNCH_SOURCE"
+    const val FROM_NOTIFICATION = "FROM_NOTIFICATION"
+}
 
 object ConstValForMemo {
     const val MEMO_Id = "MEMO_ID"
@@ -9,8 +13,6 @@ object ConstValForMemo {
 
 object ConstValForAlarm {
     const val REQUEST_CODE = "request_code_for_alarm"
-    const val MEMO_TITLE = "memo_title_for_alarm"
-    const val ALARM_POSITION = "alarm_position"
     const val REMINDER_DATE_TIME = 1
     const val PRE_ALARM = 2
     const val POST_ALARM = 3

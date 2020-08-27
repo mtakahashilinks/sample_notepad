@@ -51,7 +51,7 @@ internal fun getMemoContentsOperationActor() = operationActor
 
 @ObsoleteCoroutinesApi
 internal fun createMemoContentsOperationActor(viewModel: ViewModel) {
-    operationActor = viewModel.viewModelScope.memoContentsOperationActor()
+    viewModel.viewModelScope.apply { operationActor = memoContentsOperationActor(Job()) }
 }
 
 @ObsoleteCoroutinesApi
@@ -108,8 +108,6 @@ internal fun initMemoContentsOperation(
         }
     }
 }
-
-internal fun closeMemoContentsOperationActor() = operationActor.close()
 
 //ボタンがクリックされた時のcheckBox処理の入り口
 internal fun MemoEditText.checkBoxOperation() = runBlocking {
@@ -258,8 +256,8 @@ private fun MemoEditText.addCheckBoxAndDotForExistMemo(
 
 
 @ObsoleteCoroutinesApi
-private fun CoroutineScope.memoContentsOperationActor() =
-    actor<TypeOfMemoContentsOperation> {
+private fun CoroutineScope.memoContentsOperationActor(job: Job) =
+    actor<TypeOfMemoContentsOperation>(context = job) {
         var memoContents = listOf<MemoRowInfo>()
 
         for (msg in channel) {

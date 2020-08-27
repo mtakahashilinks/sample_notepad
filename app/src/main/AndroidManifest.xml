@@ -14,11 +14,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="LockedOrientationActivity"
-        android:allowBackup="true">
+        tools:ignore="LockedOrientationActivity">
 
         <receiver
             android:name=".usecases.AlarmResetAtSystemBootReceiver"
+            android:process=":remote"
             android:enabled="true"
             android:exported="false"
             android:directBootAware="true">
@@ -31,6 +31,7 @@
 
         <receiver
             android:name=".usecases.ReminderNotificationReceiver"
+            android:process=":remote"
             android:enabled="true"
             android:exported="false">
         </receiver>
@@ -54,9 +55,8 @@
 
         <activity
             android:name=".views.display.MemoDisplayActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleTask"
-            android:taskAffinity="">
+            android:launchMode="singleTop"
+            android:screenOrientation="sensorPortrait">
         </activity>
     </application>
 </manifest>

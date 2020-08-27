@@ -15,6 +15,7 @@ import com.example.samplenotepad.usecases.getMemoContentsOperationActor
 import com.example.samplenotepad.usecases.updateText
 import com.example.samplenotepad.views.main.MemoOptionFragment
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.runBlocking
 
 
@@ -95,6 +96,7 @@ class MainViewModel : ViewModel() {
         updateTemplateNameList { loadTemplateNameListIO() }
 
 
+    @ObsoleteCoroutinesApi
     internal fun createNewMemoContentsExecuteActor() = createMemoContentsOperationActor(this)
 
     internal fun initMainViewModel() {

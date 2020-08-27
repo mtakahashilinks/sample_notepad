@@ -161,11 +161,12 @@
     <!-- ReminderBroadcastReceiver -->
     <string name="channel_name">Reminder alarms</string>
     <string name="channel_description">Make sound</string>
-    <string name="notification_title_target">リマインダーの設定時刻になりました</string>
-    <string name="notification_title_pre_post">リマインダー設定時刻の%sです</string>
-    <string name="notification_text">MEMOタイトル：%s</string>
+    <string name="notification_subtitle">リマインダー</string>
+    <string name="notification_title_target">設定時刻［%s］になりました</string>
+    <string name="notification_title_pre_post">設定時刻の%sです</string>
+    <string name="notification_text">MEMO：%s</string>
 
     <!-- AlarmResetAtBootSystemReceiver -->
-    <string name="notification_title_miss_alarm">リマインダー設定時刻［%s］が過ぎました</string>
+    <string name="notification_title_miss_alarm">設定時刻［%s］が過ぎました</string>
 
 </resources>

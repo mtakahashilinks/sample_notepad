@@ -14,16 +14,16 @@ import com.example.samplenotepad.R
 import com.example.samplenotepad.data.clearAllReminderStateInDataBaseIO
 import com.example.samplenotepad.data.clearReminderStateInDatabaseIO
 import com.example.samplenotepad.data.isAlarmExist
+import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.entities.*
-import com.example.samplenotepad.views.display.MemoDisplayActivity
+import com.example.samplenotepad.views.main.MainActivity
 
 class ReminderNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val requestCodeForAlarm = intent.getIntExtra(ConstValForAlarm.REQUEST_CODE, -1)
-        val memoTitle = intent.getStringExtra(ConstValForAlarm.MEMO_TITLE)
-            ?: context.resources.getString(R.string.memo_title_default_value)
-        val alarmPosition = intent.getIntExtra(ConstValForAlarm.ALARM_POSITION, -1)
+        val memoInfoId = (requestCodeForAlarm / 10).toLong()
+        val memoInfo = loadMemoInfoIO(memoInfoId)
         val alarmType = requestCodeForAlarm % 10
         val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -41,49 +41,39 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(mChannel)
         }
 
-        buildNotification(
-            context,
-            requestCodeForAlarm / 10,
-            requestCodeForAlarm,
-            memoTitle,
-            alarmType,
-            alarmPosition
-        )
+        memoInfo.buildNotification(context, requestCodeForAlarm, alarmType)
 
         //通知が終わったらデータベースのReminder関係の値を初期化
         when (alarmType) {
             ConstValForAlarm.REMINDER_DATE_TIME ->  {
-                val intMemoInfoId = requestCodeForAlarm / 10
-                val requestCodeForPostAlarm = intMemoInfoId * 10 + ConstValForAlarm.POST_ALARM
+                val requestCodeForPostAlarm = memoInfoId.toInt() * 10 + ConstValForAlarm.POST_ALARM
 
                 //PostAlarmがsetされているかの分岐
                 when (requestCodeForPostAlarm.isAlarmExist(context) == null) {
-                    true -> intMemoInfoId.toLong().clearAllReminderStateInDataBaseIO()
+                    true -> memoInfoId.clearAllReminderStateInDataBaseIO()
                     false -> clearReminderStateInDatabaseIO(
-                        (requestCodeForAlarm / 10).toLong(), ConstValForAlarm.REMINDER_DATE_TIME
+                        memoInfoId, ConstValForAlarm.REMINDER_DATE_TIME
                     )
                 }
             }
             ConstValForAlarm.PRE_ALARM -> clearReminderStateInDatabaseIO(
-                (requestCodeForAlarm / 10).toLong(), ConstValForAlarm.PRE_ALARM
+                memoInfoId, ConstValForAlarm.PRE_ALARM
             )
             ConstValForAlarm.POST_ALARM ->
-                (requestCodeForAlarm / 10).toLong().clearAllReminderStateInDataBaseIO()
+                memoInfoId.clearAllReminderStateInDataBaseIO()
         }
     }
 
 
-    private fun buildNotification(
+    private fun MemoInfo.buildNotification(
         context: Context,
-        memoId: Int,
         notificationId: Int,
-        notifyText: String,
-        alarmType: Int,
-        alarmPosition: Int
+        alarmType: Int
     ) {
-        val notifyIntent = Intent(context, MemoDisplayActivity::class.java).apply {
+        val notifyIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra(ConstValForMemo.MEMO_Id, memoId.toLong())
+            putExtra(ConstValForMemo.MEMO_Id, rowid)
+            putExtra(ConstValForLaunch.LAUNCH_SOURCE, ConstValForLaunch.FROM_NOTIFICATION)
         }
         val notifyPendingIntent = PendingIntent.getActivity(
             context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
@@ -92,14 +82,16 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
         //SDKのVersionが25以下の場合はチャンネルIDは無視される
         val builder = NotificationCompat.Builder(context, ConstValForAlarm.CHANNEL_ID).apply {
             val notifyTitle = when (alarmType) {
-                ConstValForAlarm.REMINDER_DATE_TIME -> context.resources.getString(R.string.notification_title_target)
+                ConstValForAlarm.REMINDER_DATE_TIME -> context.resources.getString(
+                    R.string.notification_title_target, reminderDateTime.replace('-', '/')
+                )
                 ConstValForAlarm.PRE_ALARM -> context.resources.getString(
                     R.string.notification_title_pre_post,
-                    context.getTitleForPreAlarm(alarmPosition)
+                    context.getTitleForPreAlarm(this@buildNotification.preAlarmPosition)
                 )
                 else -> context.resources.getString(
                     R.string.notification_title_pre_post,
-                    context.getTitleForPostAlarm(alarmPosition)
+                    context.getTitleForPostAlarm(this@buildNotification.postAlarmPosition)
                 )
             }
 
@@ -107,7 +99,11 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
             color = Color.BLUE
             setSmallIcon(R.drawable.ic_notification_small)
             setContentTitle(notifyTitle)
-            setContentText(context.resources.getString(R.string.notification_text, notifyText))
+            setContentText(context.resources.getString(
+                R.string.notification_text, this@buildNotification.title
+            ))
+            setSubText(context.resources.getString(R.string.notification_subtitle))
+            setWhen(System.currentTimeMillis())
             setContentIntent(notifyPendingIntent)
             setAutoCancel(true)
         }

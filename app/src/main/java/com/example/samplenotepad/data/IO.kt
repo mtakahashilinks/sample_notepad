@@ -104,34 +104,26 @@ internal fun MemoInfo.resetAlarm(context:Context, reminderType: Int) {
 
     when (reminderType) {
         ConstValForAlarm.REMINDER_DATE_TIME -> {
-            getReminderDateTimeCalendar(this.reminderDateTime)
-                .registerAlarm(context, requestCode, this.title)
+            getReminderDateTimeCalendar(this.reminderDateTime).registerAlarm(context, requestCode)
         }
         ConstValForAlarm.PRE_ALARM -> {
             getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
                 .adjustForPreAlarm(this.preAlarmPosition)
-                .registerAlarm(context, requestCode, this.title, this.preAlarmPosition)
+                .registerAlarm(context, requestCode)
         }
         else -> {
             getReminderDateTimeCalendar(this.baseDateTimeForAlarm)
                 .adjustForPostAlarm(this.postAlarmPosition)
-                .registerAlarm(context, requestCode, this.title, this.postAlarmPosition)
+                .registerAlarm(context, requestCode)
         }
     }
 }
 
 //Alarmを登録する
-private fun Calendar.registerAlarm(
-    context: Context,
-    requestCode: Int,
-    memoTitle: String,
-    alarmPosition: Int = -1
-) {
+private fun Calendar.registerAlarm(context: Context, requestCode: Int) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     val intent = Intent(context, ReminderNotificationReceiver::class.java).apply {
         putExtra(ConstValForAlarm.REQUEST_CODE, requestCode)
-        putExtra(ConstValForAlarm.MEMO_TITLE, memoTitle)
-        putExtra(ConstValForAlarm.ALARM_POSITION, alarmPosition)
     }
     val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, 0)
 
@@ -147,9 +139,7 @@ private fun MemoInfo.setAlarm(context: Context) {
     when (this.reminderDateTime.isNotEmpty()) {
        true ->
            getReminderDateTimeCalendar(this.reminderDateTime).registerAlarm(
-               context,
-               this.getRequestCodeForAlarm(ConstValForAlarm.REMINDER_DATE_TIME),
-               this.title
+               context, this.getRequestCodeForAlarm(ConstValForAlarm.REMINDER_DATE_TIME)
            )
        false -> this.cancelAlarm(context, ConstValForAlarm.REMINDER_DATE_TIME)
    }
@@ -161,10 +151,7 @@ private fun MemoInfo.setAlarm(context: Context) {
                 .adjustForPreAlarm(this.preAlarmPosition)
 
             preAlarmTimeCalendar.registerAlarm(
-                context,
-                this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM),
-                this.title,
-                this.preAlarmPosition
+                context, this.getRequestCodeForAlarm(ConstValForAlarm.PRE_ALARM)
             )
         }
         false -> this.cancelAlarm(context, ConstValForAlarm.PRE_ALARM)
@@ -177,10 +164,7 @@ private fun MemoInfo.setAlarm(context: Context) {
                 .adjustForPostAlarm(this.postAlarmPosition)
 
             postAlarmTimeCalendar.registerAlarm(
-                context,
-                this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM),
-                this.title,
-                this.postAlarmPosition
+                context, this.getRequestCodeForAlarm(ConstValForAlarm.POST_ALARM)
             )
         }
         false -> this.cancelAlarm(context, ConstValForAlarm.POST_ALARM)

@@ -20,7 +20,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.Exception
 import com.example.samplenotepad.usecases.*
 import com.example.samplenotepad.views.MemoAlertDialog
+import com.example.samplenotepad.views.moveToDisplayActivity
 import com.example.samplenotepad.views.moveToSearchActivity
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 
 
 class MainActivity : AppCompatActivity() {
@@ -47,42 +49,54 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    @ObsoleteCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(mainToolbar)
 
-        mainActivity = this
-        mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        //Launcherからの起動か通知からの起動かの分岐
+        when (intent.getStringExtra(ConstValForLaunch.LAUNCH_SOURCE)) {
+            ConstValForLaunch.FROM_NOTIFICATION -> {
+                moveToDisplayActivity(intent.getLongExtra(ConstValForMemo.MEMO_Id, -1))
+                finish()
+            }
+            null -> {
+                mainActivity = this
+                mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
-        val existMemoId = intent.getLongExtra(ConstValForMemo.MEMO_Id, -1L)
+                val existMemoId = intent.getLongExtra(ConstValForMemo.MEMO_Id, -1L)
 
-        mainViewModel.createNewMemoContentsExecuteActor()
+                mainViewModel.createNewMemoContentsExecuteActor()
 
-        if (existMemoId != -1L)
-            mainViewModel.initViewModelForExistMemo(existMemoId)
+                if (existMemoId != -1L)
+                    mainViewModel.initViewModelForExistMemo(existMemoId)
 
-        //Pagerの設定
-        memoPager.apply {
-            adapter = MemoPagerAdapter(this@MainActivity)
+                //Pagerの設定
+                memoPager.apply {
+                    adapter = MemoPagerAdapter(this@MainActivity)
 
-            memoPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
+                    memoPager.registerOnPageChangeCallback(object :
+                        ViewPager2.OnPageChangeCallback() {
+                        override fun onPageSelected(position: Int) {
+                            when (position) {
+                                0 -> super.onPageSelected(position)
+                                else -> super.onPageSelected(position)
+                            }
+                        }
+                    })
+                }
+
+                //TabLayoutの設定
+                TabLayoutMediator(memoTabLayout, memoPager) { tab, position ->
                     when (position) {
-                        0 -> super.onPageSelected(position)
-                        else -> super.onPageSelected(position)
+                        0 -> tab.text = getText(R.string.tab_title_for_edit_fragment)
+                        1 -> tab.text = getText(R.string.tab_title_for_option_fragment)
                     }
                 }
-            })
-        }
-
-        //TabLayoutの設定
-        TabLayoutMediator(memoTabLayout, memoPager) { tab, position ->
-            when (position) {
-                0 -> tab.text = getText(R.string.tab_title_for_edit_fragment)
-                1 -> tab.text = getText(R.string.tab_title_for_option_fragment)
+                    .attach()
             }
-        }.attach()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {

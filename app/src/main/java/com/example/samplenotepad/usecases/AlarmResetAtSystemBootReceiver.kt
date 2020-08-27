@@ -16,9 +16,10 @@ import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadMemoInfoListWithReminderIO
 import com.example.samplenotepad.data.resetAlarm
 import com.example.samplenotepad.entities.ConstValForAlarm
+import com.example.samplenotepad.entities.ConstValForLaunch
 import com.example.samplenotepad.entities.ConstValForMemo
 import com.example.samplenotepad.entities.MemoInfo
-import com.example.samplenotepad.views.display.MemoDisplayActivity
+import com.example.samplenotepad.views.main.MainActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,12 +35,19 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
                 when (formatter.parse(memoInfo.reminderDateTime)?.compareTo(currentDate)) {
                     1 -> memoInfo.resetAlarm(context, ConstValForAlarm.REMINDER_DATE_TIME)
                     else -> {
-                        memoInfo.modifyMemoInfoForReminderDateTime(context).apply {
-                            sendNotification(context)
-
-                            updateMemoInfoAndCancelAlarmIO(
-                                context, ConstValForAlarm.REMINDER_DATE_TIME
+                        memoInfo.apply {
+                            sendNotification(
+                                context,
+                                getRequestCodeForAlarm(ConstValForAlarm.REMINDER_DATE_TIME),
+                                rowid,
+                                title,
+                                reminderDateTime
                             )
+
+                            modifyMemoInfoForReminderDateTime(context)
+                                .updateMemoInfoAndCancelAlarmIO(
+                                    context, ConstValForAlarm.REMINDER_DATE_TIME
+                                )
                         }
                     }
                 }
@@ -76,10 +84,15 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun MemoInfo.sendNotification(context: Context) {
+    private fun sendNotification(
+        context: Context,
+        requestCode: Int,
+        memoId: Long,
+        memoTitle: String,
+        reminderDateTime: String
+    ) {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val requestCode = this.getRequestCodeForAlarm(ConstValForAlarm.REMINDER_DATE_TIME)
 
         //SDKのVersionが26以上の場合は通知チャンネルが必要
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -92,14 +105,21 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(mChannel)
         }
 
-        buildNotification(context, requestCode)
+        buildNotification(context, requestCode, memoId, memoTitle, reminderDateTime)
     }
 
 
-    private fun MemoInfo.buildNotification(context: Context, notificationId: Int) {
-        val notifyIntent = Intent(context, MemoDisplayActivity::class.java).apply {
+    private fun buildNotification(
+        context: Context,
+        notificationId: Int,
+        memoId: Long,
+        memoTitle: String,
+        reminderDateTime: String
+    ) {
+        val notifyIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra(ConstValForMemo.MEMO_Id, this@buildNotification.rowid)
+            putExtra(ConstValForMemo.MEMO_Id, memoId)
+            putExtra(ConstValForLaunch.LAUNCH_SOURCE, ConstValForLaunch.FROM_NOTIFICATION)
         }
         val notifyPendingIntent = PendingIntent.getActivity(
             context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
@@ -109,16 +129,15 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, ConstValForAlarm.CHANNEL_ID).apply {
             val notifyTitle = context.resources.getString(
                 R.string.notification_title_miss_alarm,
-                this@buildNotification.baseDateTimeForAlarm.replace('-', '/')
+                reminderDateTime.replace('-', '/')
             )
 
             priority = NotificationCompat.PRIORITY_MAX
             color = Color.BLUE
             setSmallIcon(R.drawable.ic_notification_small)
             setContentTitle(notifyTitle)
-            setContentText(context.resources.getString(
-                R.string.notification_text, this@buildNotification.title
-            ))
+            setContentText(context.resources.getString(R.string.notification_text, memoTitle))
+            setSubText(context.resources.getString(R.string.notification_subtitle))
             setContentIntent(notifyPendingIntent)
             setAutoCancel(true)
         }
