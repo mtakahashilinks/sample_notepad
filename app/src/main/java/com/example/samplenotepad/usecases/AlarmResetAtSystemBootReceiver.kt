@@ -19,6 +19,7 @@ import com.example.samplenotepad.entities.ConstValForAlarm
 import com.example.samplenotepad.entities.ConstValForLaunch
 import com.example.samplenotepad.entities.ConstValForMemo
 import com.example.samplenotepad.entities.MemoInfo
+import com.example.samplenotepad.views.display.MemoDisplayActivity
 import com.example.samplenotepad.views.main.MainActivity
 import java.text.SimpleDateFormat
 import java.util.*
@@ -116,10 +117,9 @@ class AlarmResetAtSystemBootReceiver : BroadcastReceiver() {
         memoTitle: String,
         reminderDateTime: String
     ) {
-        val notifyIntent = Intent(context, MainActivity::class.java).apply {
+        val notifyIntent = Intent(context, MemoDisplayActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra(ConstValForMemo.MEMO_Id, memoId)
-            putExtra(ConstValForLaunch.LAUNCH_SOURCE, ConstValForLaunch.FROM_NOTIFICATION)
         }
         val notifyPendingIntent = PendingIntent.getActivity(
             context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT

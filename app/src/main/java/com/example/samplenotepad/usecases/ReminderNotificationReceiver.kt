@@ -16,6 +16,7 @@ import com.example.samplenotepad.data.clearReminderStateInDatabaseIO
 import com.example.samplenotepad.data.isAlarmExist
 import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.entities.*
+import com.example.samplenotepad.views.display.MemoDisplayActivity
 import com.example.samplenotepad.views.main.MainActivity
 
 class ReminderNotificationReceiver : BroadcastReceiver() {
@@ -70,10 +71,9 @@ class ReminderNotificationReceiver : BroadcastReceiver() {
         notificationId: Int,
         alarmType: Int
     ) {
-        val notifyIntent = Intent(context, MainActivity::class.java).apply {
+        val notifyIntent = Intent(context, MemoDisplayActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra(ConstValForMemo.MEMO_Id, rowid)
-            putExtra(ConstValForLaunch.LAUNCH_SOURCE, ConstValForLaunch.FROM_NOTIFICATION)
         }
         val notifyPendingIntent = PendingIntent.getActivity(
             context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT
