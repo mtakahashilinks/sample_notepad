@@ -327,7 +327,7 @@ private fun createNewMemoEditText(
             }
         }
         is DisplayExistMemo -> {
-            MemoEditText(displayFragment.requireContext(), mainViewModel, operationActor).apply {
+            MemoEditText(displayFragment.requireContext(), displayViewModel, operationActor).apply {
                 setCommonLayoutParams()
                 id = memoEditTextId ?: throw(NullPointerException("memoEditTextId mast be not null"))
                 setText(text.value)
