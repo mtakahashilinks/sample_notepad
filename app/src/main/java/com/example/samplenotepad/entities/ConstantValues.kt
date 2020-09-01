@@ -1,9 +1,5 @@
 package com.example.samplenotepad.entities
 
-object ConstValForLaunch {
-    const val LAUNCH_SOURCE = "LAUNCH_SOURCE"
-    const val FROM_NOTIFICATION = "FROM_NOTIFICATION"
-}
 
 object ConstValForMemo {
     const val MEMO_Id = "MEMO_ID"

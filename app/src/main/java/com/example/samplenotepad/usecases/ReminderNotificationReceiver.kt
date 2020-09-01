@@ -17,7 +17,6 @@ import com.example.samplenotepad.data.isAlarmExist
 import com.example.samplenotepad.data.loadMemoInfoIO
 import com.example.samplenotepad.entities.*
 import com.example.samplenotepad.views.display.MemoDisplayActivity
-import com.example.samplenotepad.views.main.MainActivity
 
 class ReminderNotificationReceiver : BroadcastReceiver() {
 

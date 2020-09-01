@@ -75,11 +75,16 @@ class MemoEditText(
 
                     false
                 }
-                else -> super.sendKeyEvent(event)
+                else -> {
+                    Log.d("場所:MemoEditText#sendKeyEvent", "elseに入った")
+                    super.sendKeyEvent(event)
+                }
             }
     }
 
     override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
+        Log.d("場所:MemoEditText", "onCreateInputConnectionが呼ばれた")
+
         return MemoInputConnection(super.onCreateInputConnection(outAttrs), true)
     }
 

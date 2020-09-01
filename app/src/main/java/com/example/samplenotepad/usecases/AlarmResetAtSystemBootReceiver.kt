@@ -16,11 +16,9 @@ import com.example.samplenotepad.data.*
 import com.example.samplenotepad.data.loadMemoInfoListWithReminderIO
 import com.example.samplenotepad.data.resetAlarm
 import com.example.samplenotepad.entities.ConstValForAlarm
-import com.example.samplenotepad.entities.ConstValForLaunch
 import com.example.samplenotepad.entities.ConstValForMemo
 import com.example.samplenotepad.entities.MemoInfo
 import com.example.samplenotepad.views.display.MemoDisplayActivity
-import com.example.samplenotepad.views.main.MainActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
