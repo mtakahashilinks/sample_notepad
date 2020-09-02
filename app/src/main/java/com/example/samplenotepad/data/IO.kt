@@ -335,12 +335,23 @@ internal fun saveTemplateNameListIO(templateNameList: List<String>) = runBlockin
     }
 }
 
+internal fun deleteTemplateNameListIO() = runBlocking {
+    launch(Dispatchers.IO) {
+        val file = SampleMemoApplication.instance
+            .getFileStreamPath(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
+
+        file.delete()
+    }
+}
+
 internal fun loadTemplateNameListIO(): List<String> = runBlocking {
-    val file = SampleMemoApplication.instance.getFileStreamPath(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
+    val file =
+        SampleMemoApplication.instance.getFileStreamPath(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
 
     withContext(Dispatchers.IO) {
         when (file.exists()) {
-            true -> SampleMemoApplication.instance.openFileInput(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
+            true -> SampleMemoApplication.instance
+                .openFileInput(ConstValForMemo.TEMPLATE_NAME_LIST_FILE)
                 .bufferedReader().readLine().split(",")
             false -> listOf<String>()
         }

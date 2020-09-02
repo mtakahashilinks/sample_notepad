@@ -10,6 +10,7 @@ import android.view.MenuItem
 import androidx.lifecycle.ViewModelProvider
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.AppDatabase
+import com.example.samplenotepad.entities.ConstValForDisplay
 import com.example.samplenotepad.entities.ConstValForMemo
 import com.example.samplenotepad.entities.ConstValForSearch
 import com.example.samplenotepad.viewModels.DisplayViewModel
@@ -52,6 +53,15 @@ class MemoDisplayActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.d("場所:DisplayActivity", "onNewIntentが呼ばれた")
+
+        if (intent != null) {
+            displayViewModel.loadMemoInfoAndUpdate(intent.getLongExtra(ConstValForMemo.MEMO_Id, -1))
+
+            supportFragmentManager.beginTransaction()
+                .addToBackStack(ConstValForDisplay.DISPLAY)
+                .replace(R.id.displayContainer, DisplayFragment())
+                .commit()
+        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {

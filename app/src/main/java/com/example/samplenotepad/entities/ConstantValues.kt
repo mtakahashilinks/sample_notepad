@@ -26,3 +26,7 @@ object ConstValForSearch {
     const val REMINDER_LIST = "reminder_list"
     const val SEARCH_BY_CALENDAR = "search_by_calendar"
 }
+
+object ConstValForDisplay {
+    const val DISPLAY = "display"
+}

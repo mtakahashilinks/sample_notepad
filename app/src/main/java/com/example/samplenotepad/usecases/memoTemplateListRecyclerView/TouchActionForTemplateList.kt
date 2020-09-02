@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.samplenotepad.R
 import com.example.samplenotepad.data.deleteTemplateIO
+import com.example.samplenotepad.data.deleteTemplateNameListIO
 import com.example.samplenotepad.data.saveTemplateNameListIO
 import com.example.samplenotepad.entities.AdapterPosition
 import com.example.samplenotepad.viewModels.MainViewModel
@@ -51,12 +52,16 @@ internal fun MemoTemplateListAdapter.getItemTouchHelperCallback(
         private fun AdapterPosition.deleteTemplateFileAndUpdateNameList() {
             val templateNameList = mainViewModel.getTemplateNameList()
             val targetTemplateName = templateNameList[this]
-            val modifiedTemplateList = templateNameList.take(this)
-                .plus(templateNameList.drop(this + 1))
+            val modifiedTemplateList = templateNameList.filterIndexed { index, s -> index != this }
+                //.take(this).plus(templateNameList.drop(this + 1))
 
             deleteTemplateIO(targetTemplateName)
 
-            saveTemplateNameListIO(modifiedTemplateList)
+            when (modifiedTemplateList.isEmpty()) {
+                true -> deleteTemplateNameListIO()
+                false -> saveTemplateNameListIO(modifiedTemplateList)
+            }
+
             mainViewModel.updateTemplateNameList { modifiedTemplateList }
 
             //エラーメッセージが表示されていたら非表示にする(５個以上保存できないエラーメッセージの為)

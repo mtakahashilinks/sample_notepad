@@ -113,8 +113,7 @@ class SearchActivity : AppCompatActivity() {
     //searchIdによって遷移先のFragmentを選択
     private fun Intent.attachFragmentBySearchId() {
         when (this.getStringExtra(ConstValForSearch.SEARCH_ID)) {
-            ConstValForSearch.SEARCH_TOP ->
-                moveToSearchTopAndCancelAllStacks()
+            ConstValForSearch.SEARCH_TOP -> moveToSearchTopAndCancelAllStacks()
             ConstValForSearch.REMINDER_LIST -> {
                 supportFragmentManager.apply {
                     moveToSearchTopAndCancelAllStacks()
