@@ -53,7 +53,6 @@ internal fun MemoTemplateListAdapter.getItemTouchHelperCallback(
             val templateNameList = mainViewModel.getTemplateNameList()
             val targetTemplateName = templateNameList[this]
             val modifiedTemplateList = templateNameList.filterIndexed { index, s -> index != this }
-                //.take(this).plus(templateNameList.drop(this + 1))
 
             deleteTemplateIO(targetTemplateName)
 
